@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.Azure;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -16,12 +17,14 @@ var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("mig
     .WaitFor(db);
 
 // Add Azure Blob Storage
-var blobs = builder.AddConnectionString("blobs");
+var storage = builder.AddAzureStorage("storage")
+                     .RunAsEmulator()
+                     .AddBlobs("blobs");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
-    .WithReference(blobs)
+    .WithReference(storage)
     .WithReference(signalR)
     .WithExternalHttpEndpoints()
     .WaitFor(signalR)
