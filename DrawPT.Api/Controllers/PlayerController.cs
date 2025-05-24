@@ -1,4 +1,4 @@
-﻿using DrawPT.Api.Models;
+﻿using DrawPT.Data.Models;
 using DrawPT.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 

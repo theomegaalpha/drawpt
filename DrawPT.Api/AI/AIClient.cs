@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
-using DrawPT.Api.Models;
+using DrawPT.Data.Models;
 
 namespace DrawPT.Api.AI
 {

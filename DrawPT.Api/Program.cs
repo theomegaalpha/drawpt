@@ -2,7 +2,7 @@ using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
 using DrawPT.Api.Engine;
 using DrawPT.Api.Hubs;
-using DrawPT.Api.Models;
+using DrawPT.Data.Models;
 using DrawPT.Api.Services;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

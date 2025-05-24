@@ -1,5 +1,5 @@
 ﻿using DrawPT.Api.Cache;
-using DrawPT.Api.Repositories.Models;
+using DrawPT.Data.Repositories.Reference;
 namespace DrawPT.Api.Services
 {
     public class RandomService

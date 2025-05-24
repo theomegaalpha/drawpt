@@ -1,4 +1,4 @@
-﻿using DrawPT.Api.Models;
+﻿using DrawPT.Data.Models;
 using DrawPT.Data.Repositories;
 using System.Collections.Concurrent;
 
@@ -21,7 +21,6 @@ namespace DrawPT.Api.Cache
         {
             Adjectives = _repository.GetAllAdjectives();
             Nouns = _repository.GetAllNouns();
-            ItemTypes = _repository.GetAllItemTypes();
             var themes = _repository.GetAllThemes();
             foreach (var theme in themes)
             {

@@ -1,10 +1,11 @@
 ﻿using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
 using DrawPT.Api.Hubs;
-using DrawPT.Api.Models;
-using DrawPT.Api.Repositories;
-using DrawPT.Api.Repositories.Models;
 using DrawPT.Api.Services;
+using DrawPT.Data.Models;
+using DrawPT.Data.Repositories;
+using DrawPT.Data.Repositories.Game;
+using DrawPT.Data.Repositories.Reference;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
