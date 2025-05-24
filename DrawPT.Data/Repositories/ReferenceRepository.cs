@@ -35,4 +35,5 @@ namespace DrawPT.Data.Repositories
             return [.. _context.Nouns.Select(a => a.Noun)];
         }
     }
+
 }
