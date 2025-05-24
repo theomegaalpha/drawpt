@@ -1,0 +1,19 @@
+export const avatarColors = [
+  'red-600',
+  'orange-600',
+  'amber-600',
+  'yellow-600',
+  'lime-600',
+  'green-600',
+  'emerald-600',
+  'teal-600',
+  'cyan-600',
+  'sky-600',
+  'blue-600',
+  'indigo-600',
+  'violet-600',
+  'purple-600',
+  'fuchsia-600',
+  'pink-600',
+  'rose-600'
+]
