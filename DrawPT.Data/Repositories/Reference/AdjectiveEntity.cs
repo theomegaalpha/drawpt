@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DrawPT.Api.Repositories.Models
+namespace DrawPT.Data.Repositories.Reference
 {
     [Keyless]
     [Table("Adjectives", Schema = "ref")]

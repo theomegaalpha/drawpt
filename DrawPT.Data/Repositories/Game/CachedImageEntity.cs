@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DrawPT.Api.Repositories.Models
+namespace DrawPT.Data.Repositories.Game
 {
     [Table("CachedImages", Schema = "game")]
     public class CachedImageEntity

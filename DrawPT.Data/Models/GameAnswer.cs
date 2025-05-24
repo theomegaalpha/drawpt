@@ -1,6 +1,4 @@
-﻿using Microsoft.Identity.Client;
-
-namespace DrawPT.Api.Models
+﻿namespace DrawPT.Data.Models
 {
     public class GameAnswerBase
     {

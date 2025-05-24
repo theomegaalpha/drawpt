@@ -1,8 +1,7 @@
-﻿using DrawPT.Api.Models;
-using DrawPT.Api.Repositories.Models;
+﻿using DrawPT.Data.Repositories.Reference;
 using Microsoft.EntityFrameworkCore;
 
-namespace DrawPT.Api.Repositories
+namespace DrawPT.Data.Repositories
 {
     public class ReferenceDbContext : DbContext
     {
@@ -11,7 +10,6 @@ namespace DrawPT.Api.Repositories
         public DbSet<ThemeEntity> Themes { get; set; }
         public DbSet<AdjectiveEntity> Adjectives { get; set; }
         public DbSet<NounEntity> Nouns { get; set; }
-        public DbSet<ItemTypeEntity> ItemTypes { get; set; }
     }
 
     public class ReferenceRepository
@@ -36,24 +34,6 @@ namespace DrawPT.Api.Repositories
         public List<string> GetAllNouns()
         {
             return [.. _context.Nouns.Select(a => a.Noun)];
-        }
-
-        public List<ItemType> GetAllItemTypes()
-        {
-            return [.. _context.ItemTypes.Select(ConvertToModelItemType)];
-        }
-
-        public static ItemType ConvertToModelItemType(ItemTypeEntity entity)
-        {
-            return new ItemType
-            {
-                // Assuming both models have the same properties
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description,
-                Cost = entity.Cost,
-                IsTargetable = entity.IsTargetable
-            };
         }
     }
 }

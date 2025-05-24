@@ -1,7 +1,7 @@
-﻿using DrawPT.Api.Repositories.Models;
+﻿using DrawPT.Data.Repositories.Game;
 using Microsoft.EntityFrameworkCore;
 
-namespace DrawPT.Api.Repositories
+namespace DrawPT.Data.Repositories
 {
     public class ImageDbContext : DbContext
     {

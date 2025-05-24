@@ -1,4 +1,4 @@
-﻿namespace DrawPT.Api.Models
+﻿namespace DrawPT.Data.Models
 {
     public class GameOptions
     {
