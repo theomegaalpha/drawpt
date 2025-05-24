@@ -1,11 +1,20 @@
 ﻿var builder = DistributedApplication.CreateBuilder(args);
 
-var weatherApi = builder.AddProject<Projects.DrawPT_MinimalApi>("weatherapi")
+// Add SQL Server container
+var sqlServer = builder.AddSqlServer("sqldb");
+
+// Add Azure Blob Storage
+var blobs = builder.AddConnectionString("blobs");
+
+// Add DrawPT.Api project to Aspire setup
+var api = builder.AddProject<Projects.DrawPT_Api>("api")
+    .WithReference(sqlServer)
+    .WithReference(blobs)
     .WithExternalHttpEndpoints();
 
 builder.AddNpmApp("vue", "../DrawPT.Vue")
-    .WithReference(weatherApi)
-    .WaitFor(weatherApi)
+    .WithReference(api)
+    .WaitFor(api)
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();

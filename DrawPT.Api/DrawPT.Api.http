@@ -1,0 +1,6 @@
+@DrawPT.Api_HostAddress = http://localhost:8080
+
+GET {{DrawPT.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

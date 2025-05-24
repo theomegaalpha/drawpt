@@ -11,11 +11,13 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.3.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DrawPT.MinimalApi\DrawPT.MinimalApi.csproj" />
+    <ProjectReference Include="..\DrawPT.Api\DrawPT.Api.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
