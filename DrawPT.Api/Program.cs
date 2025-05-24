@@ -6,7 +6,6 @@ using DrawPT.Data.Models;
 using DrawPT.Api.Services;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,13 +23,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDistributedMemoryCache();
 
 builder.AddSqlServerClient(connectionName: "database");
-builder.Services.AddDbContext<ImageDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("database")),
-    contextLifetime: ServiceLifetime.Transient,
-    optionsLifetime: ServiceLifetime.Transient);
-builder.Services.AddDbContext<ReferenceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("database")),
-    ServiceLifetime.Singleton);
+builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
+builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
 
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
@@ -56,16 +50,20 @@ builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
+// Build ReferenceCache at startup
+using (var scope = app.Services.CreateScope())
+{
+    var referenceRepository = scope.ServiceProvider.GetRequiredService<ReferenceRepository>();
+    var referenceCache = app.Services.GetRequiredService<ReferenceCache>();
+    referenceCache.BuildCache(referenceRepository);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// get Reference Cache and build it
-var referenceCache = app.Services.GetRequiredService<ReferenceCache>();
-referenceCache.BuildCache();
 
 // Setup CORS policy
 var allowedOrigins = builder.Configuration.GetValue<string>("CORS:AllowedOrigins");

@@ -1,15 +1,14 @@
-﻿using DrawPT.Data.Repositories.Reference;
+﻿using DrawPT.Data.Repositories.Game;
+using DrawPT.Data.Repositories.Reference;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrawPT.Data.Repositories
 {
-    public class ReferenceDbContext : DbContext
+    public class ReferenceDbContext(DbContextOptions options) : DbContext(options)
     {
-        public ReferenceDbContext(DbContextOptions<ReferenceDbContext> options) : base(options) { }
-
-        public DbSet<ThemeEntity> Themes { get; set; }
-        public DbSet<AdjectiveEntity> Adjectives { get; set; }
-        public DbSet<NounEntity> Nouns { get; set; }
+        public DbSet<ThemeEntity> Themes => Set<ThemeEntity>();
+        public DbSet<AdjectiveEntity> Adjectives => Set<AdjectiveEntity>();
+        public DbSet<NounEntity> Nouns => Set<NounEntity>();
     }
 
     public class ReferenceRepository

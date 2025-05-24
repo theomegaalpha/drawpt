@@ -1,4 +1,4 @@
-﻿var builder = DistributedApplication.CreateBuilder(args);
+var builder = DistributedApplication.CreateBuilder(args);
 
 // Add SQL Server container
 var sql = builder.AddSqlServer("sql")
@@ -6,20 +6,19 @@ var sql = builder.AddSqlServer("sql")
 
 var db = sql.AddDatabase("database");
 
-// Add Azure Blob Storage
-var blobs = builder.AddConnectionString("blobs");
-
-// Add DrawPT.Database project to run migrations/seeding
-var databaseSeeder = builder.AddProject<Projects.DrawPT_Database>("dbseed")
+var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
     .WaitFor(db);
+
+// Add Azure Blob Storage
+var blobs = builder.AddConnectionString("blobs");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("api")
     .WithReference(db)
     .WithReference(blobs)
     .WithExternalHttpEndpoints()
-    .WaitFor(databaseSeeder);
+    .WaitForCompletion(migrationService);
 
 builder.AddNpmApp("vue", "../DrawPT.Vue")
     .WithReference(api)

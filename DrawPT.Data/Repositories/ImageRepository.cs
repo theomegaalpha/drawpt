@@ -3,11 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrawPT.Data.Repositories
 {
-    public class ImageDbContext : DbContext
+    public class ImageDbContext(DbContextOptions options) : DbContext(options)
     {
-        public ImageDbContext(DbContextOptions<ImageDbContext> options) : base(options) { }
-
-        public DbSet<CachedImageEntity> CachedImages { get; set; }
+        public DbSet<CachedImageEntity> CachedImages => Set<CachedImageEntity>();
     }
 
     public class ImageRepository

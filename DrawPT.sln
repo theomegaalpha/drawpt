@@ -6,8 +6,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrawPT.AppHost", "DrawPT.Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrawPT.ServiceDefaults", "DrawPT.ServiceDefaults\DrawPT.ServiceDefaults.csproj", "{76B8A969-CF08-41C2-AF8B-F594107BE0C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrawPT.MinimalApi", "DrawPT.MinimalApi\DrawPT.MinimalApi.csproj", "{94BA356D-2B9D-45C3-9481-847E35B38318}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A10C462A-7C47-4D8C-BE2B-34A160BF8F76}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
@@ -18,6 +16,8 @@ EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DrawPT.Database", "DrawPT.Database\DrawPT.Database.sqlproj", "{7E8B4299-D182-48F0-BB1E-B746777D4C36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawPT.Data", "DrawPT.Data\DrawPT.Data.csproj", "{4D128A98-BBE7-4421-9F20-0B94ABBAEACD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawPT.MigrationService", "DrawPT.MigrationService\DrawPT.MigrationService.csproj", "{9FEDDE0B-3D59-5293-A9B8-4CC7538C2341}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +33,6 @@ Global
 		{76B8A969-CF08-41C2-AF8B-F594107BE0C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76B8A969-CF08-41C2-AF8B-F594107BE0C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76B8A969-CF08-41C2-AF8B-F594107BE0C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94BA356D-2B9D-45C3-9481-847E35B38318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94BA356D-2B9D-45C3-9481-847E35B38318}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94BA356D-2B9D-45C3-9481-847E35B38318}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94BA356D-2B9D-45C3-9481-847E35B38318}.Release|Any CPU.Build.0 = Release|Any CPU
 		{87E1FABA-A831-08BD-CD07-C18AE3AD22A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{87E1FABA-A831-08BD-CD07-C18AE3AD22A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87E1FABA-A831-08BD-CD07-C18AE3AD22A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,6 +47,10 @@ Global
 		{4D128A98-BBE7-4421-9F20-0B94ABBAEACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D128A98-BBE7-4421-9F20-0B94ABBAEACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D128A98-BBE7-4421-9F20-0B94ABBAEACD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FEDDE0B-3D59-5293-A9B8-4CC7538C2341}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FEDDE0B-3D59-5293-A9B8-4CC7538C2341}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FEDDE0B-3D59-5293-A9B8-4CC7538C2341}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FEDDE0B-3D59-5293-A9B8-4CC7538C2341}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,18 +6,12 @@ namespace DrawPT.Api.Cache
 {
     public class ReferenceCache
     {
-        private readonly ReferenceRepository _repository;
         public List<string> Adjectives { get; set; }
         public List<string> Nouns { get; set; }
         public List<ItemType> ItemTypes { get; set; }
         public ConcurrentDictionary<Guid, string> Themes { get; set; } = new();
 
-        public ReferenceCache(ReferenceRepository referenceRepository)
-        {
-            _repository = referenceRepository;
-        }
-
-        public void BuildCache()
+        public void BuildCache(ReferenceRepository _repository)
         {
             Adjectives = _repository.GetAllAdjectives();
             Nouns = _repository.GetAllNouns();

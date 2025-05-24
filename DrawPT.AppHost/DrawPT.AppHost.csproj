@@ -19,7 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DrawPT.Api\DrawPT.Api.csproj" />
-    <ProjectReference Include="..\DrawPT.Database\DrawPT.Database.sqlproj" />
+    <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
+    <ProjectReference Include="..\DrawPT.MigrationService\DrawPT.MigrationService.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
