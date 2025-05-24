@@ -6,6 +6,7 @@ using DrawPT.Data.Models;
 using DrawPT.Api.Services;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Azure.SignalR;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,8 +40,9 @@ builder.Services.AddOptions<GameOptions>()
 
 builder.Services.AddTransient<Game>();
 
-// Add SignalR
-builder.Services.AddSignalR();
+// Add SignalR with CORS
+builder.Services.AddSignalR()
+    .AddAzureSignalR(builder.Configuration.GetConnectionString("signalr"));
 
 // Add health checks
 builder.Services.AddHealthChecks();
@@ -84,7 +86,8 @@ else
 {
     app.UseCors(x => x.AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowAnyOrigin());
+                    .AllowAnyOrigin()
+                    .AllowCredentials());
 }
 
 app.UseHttpsRedirection();
@@ -94,7 +97,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hubs
-app.MapHub<GameHub>("/gameHub");
+app.MapHub<GameHub>("/gamehub");
 
 // Use health checks
 app.UseHealthChecks("/health");

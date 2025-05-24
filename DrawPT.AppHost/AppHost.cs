@@ -1,3 +1,5 @@
+using Aspire.Hosting.Azure;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add SQL Server container
@@ -5,6 +7,9 @@ var sql = builder.AddSqlServer("sql")
                  .WithLifetime(ContainerLifetime.Persistent);
 
 var db = sql.AddDatabase("database");
+
+var signalR = builder.AddAzureSignalR("signalr", AzureSignalRServiceMode.Serverless)
+                     .RunAsEmulator();
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -17,7 +22,9 @@ var blobs = builder.AddConnectionString("blobs");
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
     .WithReference(blobs)
+    .WithReference(signalR)
     .WithExternalHttpEndpoints()
+    .WaitFor(signalR)
     .WaitForCompletion(migrationService);
 
 builder.AddNpmApp("vue", "../DrawPT.Vue")

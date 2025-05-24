@@ -22,6 +22,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
         secure: false
+      },
+      '/gamehub': {
+        target: process.env.services__drawptapi__https__0 || process.env.services__drawptapi__http__0,
+        changeOrigin: true,
+        ws: true,
+        secure: false
       }
     }
   }

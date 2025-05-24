@@ -11,10 +11,9 @@ const { updateGameResults } = useScoreboardStore()
 const { player: you, updateConnectionId } = usePlayerStore()
 const { room, startGame, addPlayer, removePlayer } = useRoomStore()
 const { addGameNotification } = useNotificationStore()
-const { VITE_HUB_URL } = import.meta.env
 
 onMounted(async () => {
-  service.startConnection(VITE_HUB_URL).then(async () => {
+  service.startConnection('gamehub').then(async () => {
     service.invoke('joinGame', room.code, you.id)
 
     service.on('playerJoined', (player: Player) => {
