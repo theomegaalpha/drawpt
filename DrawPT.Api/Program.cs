@@ -23,12 +23,13 @@ builder.Services.AddSwaggerGen();
 // TODO: Add Redis distributed cache
 builder.Services.AddDistributedMemoryCache();
 
+builder.AddSqlServerClient(connectionName: "database");
 builder.Services.AddDbContext<ImageDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetValue<string>("SqlConnectionString")),
+    options.UseSqlServer(builder.Configuration.GetConnectionString("database")),
     contextLifetime: ServiceLifetime.Transient,
     optionsLifetime: ServiceLifetime.Transient);
 builder.Services.AddDbContext<ReferenceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetValue<string>("SqlConnectionString")),
+    options.UseSqlServer(builder.Configuration.GetConnectionString("database")),
     ServiceLifetime.Singleton);
 
 builder.Services.AddTransient<StorageService>();
