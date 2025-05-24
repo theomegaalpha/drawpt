@@ -14,7 +14,7 @@ var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("mig
 var blobs = builder.AddConnectionString("blobs");
 
 // Add DrawPT.Api project to Aspire setup
-var api = builder.AddProject<Projects.DrawPT_Api>("api")
+var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
     .WithReference(blobs)
     .WithExternalHttpEndpoints()
