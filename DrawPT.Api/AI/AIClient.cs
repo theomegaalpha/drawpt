@@ -1,15 +1,13 @@
-﻿using System.Text;
+﻿using DrawPT.Data.Models;
+using OpenAI;
+using OpenAI.Chat;
 using System.Text.Json;
-using DrawPT.Data.Models;
 
 namespace DrawPT.Api.AI
 {
     public class AIClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _openAITextEndpoint;
-        private readonly string _openAIImageEndpoint;
-        private readonly string _openApiKey;
+        private readonly OpenAIClient _aiClient;
 
         string _imagePrompt = @"You are a very creative player of a game that's trying to use AI to generate a digital art picture.
             Given a theme, please generate a short and unique prompt about anything you want that would produce a cool picture.
@@ -24,47 +22,23 @@ namespace DrawPT.Api.AI
             Ensure the returned result is an array of JSON objects even if only one answer is provided.
             Now, the original phrase is: ";
 
-        public AIClient(IConfiguration configuration)
+        public AIClient(OpenAIClient aiClient)
         {
-            _openAITextEndpoint = configuration["Azure:OpenAI:TextEndpoint"];
-            _openAIImageEndpoint = configuration["Azure:OpenAI:ImageEndpoint"];
-            _openApiKey = configuration["Azure:OpenAI:ApiKey"];
-            _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_openApiKey}");
+            _aiClient = aiClient;
         }
 
         public async Task<string> GenerateAssessmentAsync(string originalPrompt, List<GameAnswer> answers)
         {
-            var options = new JsonSerializerOptions
+            var messages = new List<ChatMessage>
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                new SystemChatMessage(_assessmentPrompt + originalPrompt),
+                new UserChatMessage(JsonSerializer.Serialize(answers))
             };
-            var stringAnswers = JsonSerializer.Serialize(answers);
-            var requestData = new
-            {
-                model = "gpt-4o",
-                messages = new Message[]
-                {
-                    new Message{ Role = "system", Content = _assessmentPrompt + originalPrompt },
-                    new Message{ Role = "user", Content = stringAnswers }
-                },
-                max_tokens = 1000
-            };
+            var response = await _aiClient.GetChatClient("o4-mini").CompleteChatAsync(messages);
 
-            var content = new StringContent(JsonSerializer.Serialize(requestData, options), Encoding.UTF8, "application/json");
+            Console.WriteLine($"Response: {response.GetRawResponse()}");
 
-            var response = await _httpClient.PostAsync(_openAITextEndpoint, content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<OpenAICompletionResponse>(responseContent, options);
-                return result.Choices[0].Message.Content;
-            }
-            else
-            {
-                throw new Exception($"Failed to generate text completion. Status code: {response.StatusCode}");
-            }
+            return "test";
         }
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
@@ -112,66 +86,26 @@ namespace DrawPT.Api.AI
 
         private async Task<string> GenerateImagePromptAsync(string theme)
         {
-            var requestData = new
+            var messages = new List<ChatMessage>
             {
-                model = "gpt-4o",
-                messages = new[]
-                {
-                    new { role = "system", content = _imagePrompt },
-                    new { role = "user", content = theme }
-                },
-                max_tokens = 100
+                new SystemChatMessage(_imagePrompt),
+                new UserChatMessage(theme)
             };
+            var response = await _aiClient.GetChatClient("o4-mini").CompleteChatAsync(messages);
 
-            var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+            Console.WriteLine($"Response: {response.GetRawResponse()}");
 
-            var response = await _httpClient.PostAsync(_openAITextEndpoint, content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
-                var result = JsonSerializer.Deserialize<OpenAICompletionResponse>(responseContent, options);
-                return result.Choices[0].Message.Content;
-            }
-            else
-            {
-                throw new Exception($"Failed to generate text completion. Status code: {response.StatusCode}");
-            }
+            return "test";
         }
 
         // create a GenerateImageAsync method here
         private async Task<string> GenerateImageAsync(string prompt)
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-            var requestData = new OpenAIImageRequest()
-            {
-                Model = "dall-e-3",
-                Prompt = prompt,
-                N = 1,
-                Size = "1024x1024"
-            };
+            var response = await _aiClient.GetImageClient("dall-e-3")
+                .GenerateImageAsync(prompt);
 
-            var content = new StringContent(JsonSerializer.Serialize(requestData, options), Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(_openAIImageEndpoint, content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<OpenAIImageResponse>(responseContent, options);
-                return result.Data[0].Url;
-            }
-            else
-            {
-                throw new Exception($"Failed to generate image. Status code: {response.StatusCode}");
-            }
+            // Fix for CS8603: Ensure a non-null value is returned
+            return response?.Value?.ToString() ?? string.Empty;
         }
     }
 }

@@ -39,6 +39,10 @@ namespace DrawPT.Api.Services
             List<ThemeEntity> themes = new();
             Random random = new();
             var themeKeys = _referenceCache.Themes.Keys.ToList();
+            
+            // If there are fewer themes than requested, adjust the count
+            count = Math.Min(count, themeKeys.Count);
+            
             for (int i = 0; i < count; i++)
             {
                 int index = random.Next(themeKeys.Count);
