@@ -38,7 +38,7 @@ builder.Services.AddSingleton<GameCollection>();
 builder.Services.AddOptions<GameOptions>()
                 .BindConfiguration("Game");
 
-builder.Services.AddTransient<Game>();
+builder.Services.AddScoped<Game>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()

@@ -9,8 +9,9 @@ var sql = builder.AddSqlServer("sql")
 
 var db = sql.AddDatabase("database");
 
-var signalR = builder.AddAzureSignalR("signalr", AzureSignalRServiceMode.Serverless)
-                     .RunAsEmulator();
+var signalr = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureSignalR("signalr")
+    : builder.AddConnectionString("signalr");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -25,9 +26,10 @@ var storage = builder.AddAzureStorage("storage")
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
     .WithReference(storage)
-    .WithReference(signalR)
+    .WithReference(signalr)
     .WithExternalHttpEndpoints()
-    .WaitFor(signalR)
+    .WaitFor(signalr)
+    .WaitFor(db)
     .WaitForCompletion(migrationService);
 
 builder.AddNpmApp("vue", "../DrawPT.Vue")
