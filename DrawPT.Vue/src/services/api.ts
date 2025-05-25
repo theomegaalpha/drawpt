@@ -10,7 +10,7 @@ const Api = {
       }
     }
 
-    const response = await fetch(`api/player`)
+    const response = await fetch(`/api/player`)
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
@@ -27,7 +27,7 @@ const Api = {
   },
   updatePlayer: async (player: Player): Promise<void> => {
     window.localStorage.removeItem('storedPlayer')
-    fetch(`api/player`, {
+    fetch(`/api/player`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ const Api = {
       })
   },
   createRoom: async (): Promise<string> => {
-    const response = await fetch(`api/room`)
+    const response = await fetch(`/api/room`)
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
@@ -55,7 +55,7 @@ const Api = {
     return response.text()
   },
   checkRoom: async (roomCode: string): Promise<boolean> => {
-    const response = await fetch(`api/room/${roomCode}`)
+    const response = await fetch(`/api/room/${roomCode}`)
 
     if (!response.ok) {
       console.error(response.status, response.statusText)

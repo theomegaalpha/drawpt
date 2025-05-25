@@ -31,10 +31,11 @@ builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
 builder.Services.AddTransient<AIClient>();
-builder.Services.AddTransient<CacheService>();
 builder.Services.AddTransient<RandomService>();
+builder.Services.AddSingleton<CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
 builder.Services.AddSingleton<GameCollection>();
+builder.Services.AddSingleton<IGameFactory, GameFactory>();
 builder.Services.AddOptions<GameOptions>()
                 .BindConfiguration("Game");
 

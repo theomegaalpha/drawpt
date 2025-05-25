@@ -8,15 +8,15 @@ namespace DrawPT.Api.Engine
     public class GameCollection
     {
         private readonly CacheService _cacheService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IGameFactory _gameFactory;
         // TODO: pull this out cacheService to be scalable
         public readonly ConcurrentDictionary<string, Game> _activeGames = new();
         // The key into the per connection dictionary used to look up the current game;
         private static readonly object _gameKey = new();
 
-        public GameCollection(IServiceProvider serviceProvider, CacheService cacheService)
+        public GameCollection(IGameFactory gameFactory, CacheService cacheService)
         {
-            _serviceProvider = serviceProvider;
+            _gameFactory = gameFactory;
             _cacheService = cacheService;
         }
 
@@ -28,9 +28,7 @@ namespace DrawPT.Api.Engine
 
             if (!_activeGames.TryGetValue(roomCode, out var game))
             {
-                game = _serviceProvider.GetRequiredService<Game>();
-                game.RoomCode = roomCode;
-                game.SetGroupName();
+                game = _gameFactory.CreateGame(roomCode);
                 if (_activeGames.TryAdd(roomCode, game))
                 {
                     // Remove the game when it completes

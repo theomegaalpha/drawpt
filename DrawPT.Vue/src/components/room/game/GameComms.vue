@@ -13,7 +13,7 @@ const { room, startGame, addPlayer, removePlayer } = useRoomStore()
 const { addGameNotification } = useNotificationStore()
 
 onMounted(async () => {
-  service.startConnection('gamehub').then(async () => {
+  service.startConnection('/gamehub').then(async () => {
     service.invoke('joinGame', room.code, you.id)
 
     service.on('playerJoined', (player: Player) => {
