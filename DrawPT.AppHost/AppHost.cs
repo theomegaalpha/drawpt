@@ -40,6 +40,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
+    .WithReference(signalr)
     .WaitFor(api)
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
