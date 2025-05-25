@@ -37,7 +37,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WaitFor(db)
     .WaitForCompletion(migrationService);
 
-builder.AddNpmApp("vue", "../DrawPT.Vue")
+builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(env: "PORT")
