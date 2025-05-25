@@ -9,10 +9,10 @@ var sql = builder.AddSqlServer("sql")
 
 var db = sql.AddDatabase("database");
 
-/*var signalr = builder.ExecutionContext.IsPublishMode
+var signalr = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSignalR("signalr")
-    : builder.AddConnectionString("signalr");*/
-var signalr = builder.AddConnectionString("signalr");
+    : builder.AddConnectionString("signalr");
+//var signalr = builder.AddConnectionString("signalr");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
