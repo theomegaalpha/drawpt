@@ -34,17 +34,50 @@ namespace DrawPT.Api.AI
                 new SystemChatMessage(_assessmentPrompt + originalPrompt),
                 new UserChatMessage(JsonSerializer.Serialize(answers))
             };
-            var response = await _aiClient.GetChatClient("o4-mini").CompleteChatAsync(messages);
+            var chatClient = _aiClient.GetChatClient("gpt-4.1-nano");
 
-            Console.WriteLine($"Response: {response.GetRawResponse()}");
 
-            return "test";
+            try
+            {
+                var options = new ChatCompletionOptions
+                {
+                    Temperature = (float)1,
+                    MaxOutputTokenCount = 800,
+
+                    TopP = (float)1,
+                    FrequencyPenalty = (float)0,
+                    PresencePenalty = (float)0
+                };
+
+                ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
+
+                // Print the response
+                if (completion != null)
+                {
+                    if (completion.Content.Count == 0)
+                    {
+                        Console.WriteLine("No content in response.");
+                        return string.Empty;
+                    }
+                    return completion?.Content[0].Text.ToString() ?? "";
+                }
+                else
+                {
+                    Console.WriteLine("No response received.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+            return "false";
         }
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            var imageUrl = await GenerateImageAsync(prompt);
+            //var imageUrl = await GenerateImageAsync(prompt);
+            var imageUrl = "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp";
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[1],
@@ -91,11 +124,42 @@ namespace DrawPT.Api.AI
                 new SystemChatMessage(_imagePrompt),
                 new UserChatMessage(theme)
             };
-            var response = await _aiClient.GetChatClient("o4-mini").CompleteChatAsync(messages);
+            var chatClient = _aiClient.GetChatClient("gpt-4.1-nano");
 
-            Console.WriteLine($"Response: {response.GetRawResponse()}");
+            try
+            {
+                var options = new ChatCompletionOptions
+                {
+                    Temperature = (float)1,
+                    MaxOutputTokenCount = 800,
 
-            return "test";
+                    TopP = (float)1,
+                    FrequencyPenalty = (float)0,
+                    PresencePenalty = (float)0
+                };
+
+                ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
+
+                // Print the response
+                if (completion != null)
+                {
+                    if (completion.Content.Count == 0)
+                    {
+                        Console.WriteLine("No content in response.");
+                        return string.Empty;
+                    }
+                    return completion?.Content[0].Text.ToString() ?? "";
+                }
+                else
+                {
+                    Console.WriteLine("No response received.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+            return "false";
         }
 
         // create a GenerateImageAsync method here
