@@ -1,13 +1,16 @@
 ﻿using DrawPT.Data.Models;
 using OpenAI;
 using OpenAI.Chat;
+using OpenAI.Images;
+using System.ClientModel;
 using System.Text.Json;
 
 namespace DrawPT.Api.AI
 {
     public class AIClient
     {
-        private readonly OpenAIClient _aiClient;
+        private readonly ChatClient _chatClient;
+        private readonly ImageClient _imageClient;
 
         string _imagePrompt = @"You are a very creative player of a game that's trying to use AI to generate a digital art picture.
             Given a theme, please generate a short and unique prompt about anything you want that would produce a cool picture.
@@ -22,9 +25,10 @@ namespace DrawPT.Api.AI
             Ensure the returned result is an array of JSON objects even if only one answer is provided.
             Now, the original phrase is: ";
 
-        public AIClient(OpenAIClient aiClient)
+        public AIClient(OpenAIClient aiClient, IConfiguration configuration)
         {
-            _aiClient = aiClient;
+            _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel") ?? "gpt-4.1-nano");
+            _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel") ?? "dall-e-3");
         }
 
         public async Task<string> GenerateAssessmentAsync(string originalPrompt, List<GameAnswer> answers)
@@ -34,8 +38,6 @@ namespace DrawPT.Api.AI
                 new SystemChatMessage(_assessmentPrompt + originalPrompt),
                 new UserChatMessage(JsonSerializer.Serialize(answers))
             };
-            var chatClient = _aiClient.GetChatClient("gpt-4.1-nano");
-
 
             try
             {
@@ -49,7 +51,7 @@ namespace DrawPT.Api.AI
                     PresencePenalty = (float)0
                 };
 
-                ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
+                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
 
                 // Print the response
                 if (completion != null)
@@ -76,8 +78,7 @@ namespace DrawPT.Api.AI
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            //var imageUrl = await GenerateImageAsync(prompt);
-            var imageUrl = "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp";
+            var imageUrl = await GenerateImageAsync(prompt);
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[1],
@@ -124,7 +125,6 @@ namespace DrawPT.Api.AI
                 new SystemChatMessage(_imagePrompt),
                 new UserChatMessage(theme)
             };
-            var chatClient = _aiClient.GetChatClient("gpt-4.1-nano");
 
             try
             {
@@ -138,7 +138,7 @@ namespace DrawPT.Api.AI
                     PresencePenalty = (float)0
                 };
 
-                ChatCompletion completion = await chatClient.CompleteChatAsync(messages, options);
+                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
 
                 // Print the response
                 if (completion != null)
@@ -165,11 +165,17 @@ namespace DrawPT.Api.AI
         // create a GenerateImageAsync method here
         private async Task<string> GenerateImageAsync(string prompt)
         {
-            var response = await _aiClient.GetImageClient("dall-e-3")
-                .GenerateImageAsync(prompt);
+            ClientResult<GeneratedImage> imageResult = await _imageClient.GenerateImageAsync(prompt, new()
+            {
+                Quality = GeneratedImageQuality.Standard,
+                Size = GeneratedImageSize.W1024xH1024,
+                Style = GeneratedImageStyle.Vivid,
+                ResponseFormat = GeneratedImageFormat.Uri
+            });
 
-            // Fix for CS8603: Ensure a non-null value is returned
-            return response?.Value?.ToString() ?? string.Empty;
+            GeneratedImage image = imageResult.Value;
+            Console.WriteLine($"Image URL: {image.ImageUri}");
+            return image.ImageUri.ToString() ?? string.Empty;
         }
     }
 }
