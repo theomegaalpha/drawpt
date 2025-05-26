@@ -1,8 +1,0 @@
-﻿CREATE TABLE [ref].[ItemTypes]
-(
-	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(), 
-    [Name] NVARCHAR(255) NOT NULL, 
-    [Description] NVARCHAR(MAX) NULL, 
-    [Cost] INT NOT NULL DEFAULT 1, 
-    [IsTargetable] BIT NOT NULL DEFAULT 0
-)

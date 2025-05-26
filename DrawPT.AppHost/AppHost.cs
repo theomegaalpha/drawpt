@@ -23,9 +23,10 @@ var storage = builder.AddAzureStorage("storage")
                      .RunAsEmulator()
                      .AddBlobs("blobs");
 
-var openai = builder.ExecutionContext.IsPublishMode
-    ? builder.AddAzureOpenAI("openai")
-    : builder.AddConnectionString("openai");
+//var openai = builder.ExecutionContext.IsPublishMode
+//    ? builder.AddAzureOpenAI("openai")
+//    : builder.AddConnectionString("openai");
+var openai = builder.AddConnectionString("openai");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
