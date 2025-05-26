@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import api from '@/services/api'
 import { computed, onMounted, ref } from 'vue'
-import { useMsal } from '@/auth/useMsal'
 import { useRouter } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
+import { useAuthStore } from '@/stores/auth'
 import StandardInput from '../common/StandardInput.vue' // Corrected import path
 
-const { accounts } = useMsal()
 const { clearRoom, updateRoomCode } = useRoomStore()
 const roomCode = ref('')
 const guess = ref('')
@@ -20,7 +19,10 @@ const submitGuess = () => {
   }
 }
 
-const isAuthenticated = computed(() => accounts.value.length > 0)
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => {
+  return !!authStore.user
+})
 
 const router = useRouter()
 const joinRoom = (code: string) => {
@@ -106,9 +108,10 @@ onMounted(() => {
                 Coming soon!
               </div>
             </div>
-            <div v-if="isAuthenticated" class="relative">
+            <div class="relative">
               <button
                 class="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-offset-zinc-800"
+                v-disabled="!isAuthenticated"
                 @click="createRoom()"
               >
                 Create Room

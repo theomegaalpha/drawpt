@@ -16,7 +16,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@azure/msal-browser": "^3.11.1",
     "@microsoft/signalr": "^8.0.0",
     "@supabase/supabase-js": "^2.49.8",
     "pinia": "^2.3.1",

@@ -1,18 +1,16 @@
-import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { type AccountInfo } from '@azure/msal-browser'
+import { ref } from 'vue'
+import type { User } from '@supabase/supabase-js'
 
 export const useAccountStore = defineStore('account', () => {
-  const account = ref({} as AccountInfo)
-  function updateAccount(accountData: AccountInfo) {
-    account.value = accountData
+  const user = ref<User | null>(null)
+
+  const setUser = (newUser: User | null) => {
+    user.value = newUser
   }
 
-  function logout() {
-    account.value = {} as AccountInfo
+  return {
+    user,
+    setUser
   }
-
-  const isAuthenticated = computed(() => account.value !== null && account.value !== undefined)
-
-  return { updateAccount, logout, account, isAuthenticated }
 })

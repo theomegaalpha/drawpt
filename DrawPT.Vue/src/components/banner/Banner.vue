@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useMsal } from '@/auth/useMsal'
-import { loginRequest } from '@/authConfig'
-const { accounts, instance } = useMsal()
-const loginRedirect = () => {
-  instance.loginRedirect(loginRequest)
-}
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => {
-  return accounts.value.length > 0
+  return !!authStore.user
 })
 
-const logout = () => {
-  instance.logoutRedirect()
+const handleLogin = () => {
+  router.push('/login')
+}
+
+const handleSignUp = () => {
+  router.push('/register')
+}
+
+const handleLogout = async () => {
+  await authStore.signOut()
+  router.push('/')
 }
 </script>
 
@@ -27,20 +35,21 @@ const logout = () => {
         <button
           v-if="isAuthenticated"
           class="flex-item rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 shadow hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
-          @click="logout"
+          @click="handleLogout"
         >
           Logout
         </button>
         <button
           v-else
           class="flex-item rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 shadow hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
-          @click="loginRedirect"
+          @click="handleLogin"
         >
           Login
         </button>
         <button
           v-if="!isAuthenticated"
           class="flex-item rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 shadow hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+          @click="handleSignUp"
         >
           Sign Up
         </button>

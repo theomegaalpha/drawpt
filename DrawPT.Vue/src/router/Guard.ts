@@ -1,65 +1,15 @@
-import { type RouteLocationNormalized, type Router } from 'vue-router'
-import { msalInstance, loginRequest } from '../authConfig'
-import {
-  InteractionType,
-  PublicClientApplication,
-  type PopupRequest,
-  type RedirectRequest
-} from '@azure/msal-browser'
+import { useAuthStore } from '@/stores/auth'
 
-export function registerGuard(router: Router) {
-  router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    if (to.meta.requiresAuth) {
-      const request = {
-        ...loginRequest,
-        redirectStartPage: to.fullPath
-      }
-      const shouldProceed = await isAuthenticated(msalInstance, InteractionType.Redirect, request)
-      return shouldProceed || '/failed'
+export const registerGuard = (router: any) => {
+  router.beforeEach(async (to: any, from: any, next: any) => {
+    const authStore = useAuthStore()
+    const requiresAuth = to.matched.some((record: any) => record.meta.requiresAuth)
+    const isAuthenticated = !!authStore.user
+
+    if (requiresAuth && !isAuthenticated) {
+      next('/login')
+    } else {
+      next()
     }
-
-    return true
   })
-}
-
-export async function isAuthenticated(
-  instance: PublicClientApplication,
-  interactionType: InteractionType,
-  loginRequest: PopupRequest | RedirectRequest
-): Promise<boolean> {
-  // If your application uses redirects for interaction, handleRedirectPromise must be called and awaited on each page load before determining if a user is signed in or not
-  return instance
-    .handleRedirectPromise()
-    .then(() => {
-      const accounts = instance.getAllAccounts()
-      if (accounts.length > 0) {
-        return true
-      }
-
-      // User is not signed in and attempting to access protected route. Sign them in.
-      if (interactionType === InteractionType.Popup) {
-        return instance
-          .loginPopup(loginRequest)
-          .then(() => {
-            return true
-          })
-          .catch(() => {
-            return false
-          })
-      } else if (interactionType === InteractionType.Redirect) {
-        return instance
-          .loginRedirect(loginRequest)
-          .then(() => {
-            return true
-          })
-          .catch(() => {
-            return false
-          })
-      }
-
-      return false
-    })
-    .catch(() => {
-      return false
-    })
 }
