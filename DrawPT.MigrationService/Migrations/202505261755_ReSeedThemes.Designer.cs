@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrawPT.MigrationService.Migrations
 {
     [DbContext(typeof(ReferenceDbContext))]
-    [Migration("202505241240_SeedAdjectives")]
-    partial class SeedAdjectives
+    [Migration("202505261755_ReSeedThemes")]
+    partial class ReSeedThemes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,14 +25,19 @@ namespace DrawPT.MigrationService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DrawPT.Data.Repositories.Reference.AdjectiveEntity", b =>
+            modelBuilder.Entity("DrawPT.Data.Repositories.Reference.ThemeEntity", b =>
             {
-                b.Property<string>("Adjective")
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("Name")
+                    .IsRequired()
                     .HasColumnType("nvarchar(255)");
 
-                b.HasKey("Adjective");
+                b.HasKey("Id");
 
-                b.ToTable("Adjectives", "ref");
+                b.ToTable("Themes", "ref");
             });
 #pragma warning restore 612, 618
         }
