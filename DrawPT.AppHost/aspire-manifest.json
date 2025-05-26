@@ -23,7 +23,7 @@
         }
       }
     },
-    "vue": {
+    "drawptui": {
       "type": "dockerfile.v0",
       "path": "../DrawPT.Vue/Dockerfile",
       "context": "../DrawPT.Vue",

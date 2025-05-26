@@ -39,9 +39,14 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WaitFor(db)
     .WaitForCompletion(migrationService);
 
+var supabaseUrl = builder.AddParameter("supabase-url");
+var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
+
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
     .WaitFor(api)
+    .WithEnvironment("VITE_SUPABASE_URL", supabaseUrl)
+    .WithEnvironment("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
