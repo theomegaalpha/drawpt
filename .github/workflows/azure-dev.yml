@@ -24,6 +24,8 @@ jobs:
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
       AZURE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
+      VITE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
