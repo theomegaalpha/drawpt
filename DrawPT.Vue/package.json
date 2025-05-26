@@ -18,7 +18,8 @@
   "dependencies": {
     "@azure/msal-browser": "^3.11.1",
     "@microsoft/signalr": "^8.0.0",
-    "pinia": "^2.1.7",
+    "@supabase/supabase-js": "^2.49.8",
+    "pinia": "^2.3.1",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
