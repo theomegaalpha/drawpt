@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using DrawPT.Api.Services;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,81 +8,80 @@ namespace DrawPT.Api.AI
     public class GeminiRequestPayload
     {
         [JsonPropertyName("contents")]
-        public List<ContentPart> Contents { get; set; }
+        public List<ContentPart> Contents { get; set; } = new();
 
         [JsonPropertyName("generationConfig")]
-        public GenerationConfiguration GenerationConfig { get; set; }
+        public GenerationConfiguration GenerationConfig { get; set; } = new();
     }
 
     public class ContentPart
     {
         [JsonPropertyName("parts")]
-        public List<TextPart> Parts { get; set; }
+        public List<TextPart> Parts { get; set; } = new();
     }
 
     public class TextPart
     {
         [JsonPropertyName("text")]
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
     }
 
     public class GenerationConfiguration
     {
         [JsonPropertyName("responseModalities")]
-        public List<string> ResponseModalities { get; set; }
+        public List<string> ResponseModalities { get; set; } = new();
     }
 
     // Define response body DTOs (simplified, based on common Gemini API structure for images)
     public class GeminiImageResponse
     {
         [JsonPropertyName("candidates")]
-        public List<Candidate> Candidates { get; set; }
+        public List<Candidate> Candidates { get; set; } = new();
     }
 
     public class Candidate
     {
         [JsonPropertyName("content")]
-        public ContentData Content { get; set; }
+        public ContentData? Content { get; set; } // Marked as nullable
     }
 
     public class ContentData
     {
         [JsonPropertyName("parts")]
-        public List<PartData> Parts { get; set; }
+        public List<PartData> Parts { get; set; } = new();
     }
 
     public class PartData
     {
         [JsonPropertyName("inlineData")]
-        public InlineData InlineData { get; set; }
+        public InlineData? InlineData { get; set; } // Marked as nullable
 
         [JsonPropertyName("text")]
-        public string Text { get; set; } // For any text part that might also be returned
+        public string? Text { get; set; } // For any text part that might also be returned, marked as nullable
     }
 
     public class InlineData
     {
         [JsonPropertyName("mimeType")]
-        public string MimeType { get; set; }
+        public string MimeType { get; set; } = string.Empty;
 
         [JsonPropertyName("data")]
-        public string Data { get; set; } // This is the base64 image string
+        public string Data { get; set; } = string.Empty; // This is the base64 image string
     }
 
     public class GeminiImageGenerator
     {
-        // It's recommended to manage HttpClient instances carefully.
-        // For simplicity, a static instance is used here, but in a larger application (like ASP.NET Core),
-        // you would typically use IHttpClientFactory to create and manage HttpClient instances.
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string apiEndpoint;
+        private readonly StorageService _storageService;
 
-        public GeminiImageGenerator(IConfiguration configuration)
+        public GeminiImageGenerator(IConfiguration configuration, StorageService storageService)
         {
-            apiEndpoint = configuration.GetValue<string>("ConnectionStrings:gemini") ?? "";
+            apiEndpoint = configuration.GetValue<string>("ConnectionStrings:gemini") ?? throw new InvalidOperationException("Gemini API endpoint not configured.");
+            _storageService = storageService;
         }
 
-        public async Task GenerateAndSaveImageAsync(string prompt)
+        public async Task<string?> GenerateAndSaveImageAsync(string prompt)
         {
             if (string.IsNullOrEmpty(prompt))
             {
@@ -91,41 +91,39 @@ namespace DrawPT.Api.AI
             var requestPayload = new GeminiRequestPayload
             {
                 Contents = new List<ContentPart>
-            {
-                new ContentPart
                 {
-                    Parts = new List<TextPart>
+                    new ContentPart
                     {
-                        new TextPart { Text = prompt }
+                        Parts = new List<TextPart>
+                        {
+                            new TextPart { Text = prompt }
+                        }
                     }
-                }
-            },
+                },
                 GenerationConfig = new GenerationConfiguration
                 {
-                    ResponseModalities = [ "TEXT", "IMAGE" ]
+                    ResponseModalities = new List<string> { "TEXT", "IMAGE" }
                 }
             };
 
-            var jsonRequest = JsonSerializer.Serialize(requestPayload, new JsonSerializerOptions { }); // Add options if needed
+            var jsonRequest = JsonSerializer.Serialize(requestPayload);
             var httpContent = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
             try
             {
                 HttpResponseMessage response = await httpClient.PostAsync(apiEndpoint, httpContent);
-
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    // Log or handle the error response
                     Console.WriteLine($"API Error: {response.StatusCode}");
                     Console.WriteLine($"Response: {responseBody}");
-                    response.EnsureSuccessStatusCode(); // This will throw an exception
+                    response.EnsureSuccessStatusCode();
                 }
 
                 var geminiResponse = JsonSerializer.Deserialize<GeminiImageResponse>(responseBody);
 
-                string base64Image = null;
+                string? base64Image = null; // Changed to nullable string
                 if (geminiResponse?.Candidates != null)
                 {
                     foreach (var candidate in geminiResponse.Candidates)
@@ -150,24 +148,38 @@ namespace DrawPT.Api.AI
                 {
                     Console.WriteLine("Could not find image data in the API response.");
                     Console.WriteLine($"Full response for debugging: {responseBody}");
-                    return;
+                    return null;
                 }
 
                 byte[] imageBytes = Convert.FromBase64String(base64Image);
+                string blobName = $"gemini-image-{Guid.NewGuid()}.png";
+                string? imageUrl = await _storageService.UploadImageAsync(imageBytes, blobName);
+
+                if (imageUrl != null)
+                {
+                    Console.WriteLine($"Image successfully generated and uploaded to: {imageUrl}");
+                    return imageUrl;
+                }
+                else
+                {
+                    Console.WriteLine("Failed to upload image to blob storage.");
+                    return null;
+                }
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine($"Request error: {e.Message}");
-                // Further error details if needed, e.g., e.StatusCode
+                return null;
             }
             catch (JsonException e)
             {
                 Console.WriteLine($"JSON parsing error: {e.Message}");
-                // Potentially log the responseBody here if it caused the JSON error
+                return null;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"An unexpected error occurred: {e.Message}");
+                return null;
             }
         }
     }

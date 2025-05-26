@@ -27,6 +27,7 @@ builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
 builder.AddAzureOpenAIClient(connectionName: "openai");
+builder.AddAzureBlobClient("blobs");
 
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();

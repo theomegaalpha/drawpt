@@ -184,8 +184,7 @@ namespace DrawPT.Api.AI
 
         private async Task<string> GenerateImageRestfullyAsync(string prompt)
         {
-            await _geminiImageGenerator.GenerateAndSaveImageAsync(prompt);
-            return "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp";
+            return await _geminiImageGenerator.GenerateAndSaveImageAsync(prompt);
         }
     }
 }
