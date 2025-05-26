@@ -9,6 +9,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import service from '@/services/signalRService'
+import { useSpeechRecognition } from '@/composables/useSpeechRecognition' // Added import
 
 import type { GameAnswerBase } from '@/models/gameModels'
 
@@ -28,6 +29,27 @@ const timeoutPerQuestion = 40000
 const questionTimeout = ref<NodeJS.Timeout>()
 const timeoutForTheme = 20000
 const themeTimeout = ref<NodeJS.Timeout>()
+
+// Speech Recognition integration
+const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
+
+watch(transcribedText, (newText) => {
+  if (newText) {
+    guessInput.value += newText
+  }
+})
+
+const handleRecordButtonMouseDown = () => {
+  if (!isListening.value) {
+    toggleListening()
+  }
+}
+
+const handleRecordButtonMouseUp = () => {
+  if (isListening.value) {
+    toggleListening()
+  }
+}
 
 async function askForTheme(): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -182,6 +204,13 @@ const submitGuess = async (value: string) => {
           @click="submitGuess(guessInput)"
         >
           Submit
+        </button>
+        <button
+          class="ml-2 rounded border border-green-700 bg-green-500 px-4 py-2 hover:bg-green-700"
+          @mousedown="handleRecordButtonMouseDown"
+          @mouseup="handleRecordButtonMouseUp"
+        >
+          🎤
         </button>
       </div>
     </div>
