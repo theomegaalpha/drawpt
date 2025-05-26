@@ -3,20 +3,39 @@ import Avatar from '@/components/common/Avatar.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
 import service from '@/services/signalRService'
+import { ref } from 'vue' // Import ref
 
 const { player } = usePlayerStore()
 const { room } = useRoomStore()
+const isCopied = ref(false) // Reactive variable for feedback
+
 const startGame = async () => {
   var gameStarted = await service.invoke('startGame')
   if (!gameStarted) {
     console.error('Game could not be started')
   }
 }
+
+const copyRoomCodeToClipboard = () => {
+  if (room && room.code) {
+    navigator.clipboard
+      .writeText(room.code)
+      .then(() => {
+        isCopied.value = true
+        setTimeout(() => {
+          isCopied.value = false
+        }, 3000)
+      })
+      .catch((err) => {
+        console.error('Failed to copy room code: ', err)
+      })
+  }
+}
 </script>
 
 <template>
   <main
-    class="grid h-[100vh] w-[100vw] grid-cols-1 items-center justify-center gap-3 space-x-4 p-10 md:grid-cols-2"
+    class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 space-x-4 bg-gradient-to-br from-indigo-50 to-purple-100 p-10 md:grid-cols-2 dark:from-zinc-900 dark:to-purple-900"
   >
     <div class="col-span-1 p-10 text-center">
       <h1 class="mb-5 text-4xl font-bold">DrawPT</h1>
@@ -30,9 +49,11 @@ const startGame = async () => {
         Start Game
       </button>
       <h2
-        class="mx-auto w-fit cursor-default rounded-xl bg-zinc-800/10 px-4 py-2 text-2xl font-bold text-blue-400 dark:bg-white/10 dark:text-blue-300"
+        @click="copyRoomCodeToClipboard"
+        class="mx-auto w-fit cursor-pointer rounded-xl bg-zinc-800/10 px-4 py-2 text-2xl font-bold text-blue-400 transition-all hover:bg-zinc-800/20 dark:bg-white/10 dark:text-blue-300 dark:hover:bg-white/20"
+        :class="{ 'font-semibold text-green-500 dark:text-green-400': isCopied }"
       >
-        {{ room.code }}
+        {{ isCopied ? 'Copied!' : room.code }}
       </h2>
     </div>
     <div class="col-span-1 px-5 md:px-20 xl:px-32">
