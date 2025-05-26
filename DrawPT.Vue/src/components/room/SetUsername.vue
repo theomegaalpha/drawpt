@@ -3,6 +3,7 @@ import Avatar from '../common/Avatar.vue'
 import { ref, onMounted } from 'vue'
 import Api from '@/services/api'
 import { usePlayerStore } from '@/stores/player'
+import StandardInput from '../common/StandardInput.vue'
 const { player, updatePlayer, randomizeColor } = usePlayerStore()
 const username = ref(player.username)
 const updateUsername = () => {
@@ -29,11 +30,7 @@ onMounted(() => {
         class="flex flex-row items-center rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-zinc-600 dark:bg-zinc-700"
       >
         <Avatar :username="player.username" :color="player.color" @click="randomizeColor" />
-        <input
-          class="ml-2 flex-grow rounded border border-gray-300 px-2 py-1 text-black shadow-inner"
-          type="text"
-          v-model="username"
-        />
+        <StandardInput type="text" v-model="username" />
       </div>
 
       <button

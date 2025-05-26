@@ -3,6 +3,7 @@ import RoomWrapper from '@/components/room/RoomWrapper.vue'
 import { useRoomStore } from '@/stores/room'
 import { ref, onMounted } from 'vue'
 import Api from '@/services/api'
+import StandardInput from '@/components/common/StandardInput.vue'
 
 const roomExists = ref(false)
 const roomCode = ref('')
@@ -51,8 +52,7 @@ onMounted(() => {
         class="flex-item mt-4 rounded-lg border border-zinc-200 bg-white p-6 shadow-md dark:border-zinc-700 dark:bg-zinc-800"
       >
         <div class="flex items-center space-x-2">
-          <input
-            class="flex-grow rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400"
+          <StandardInput
             placeholder="Room Code"
             maxlength="4"
             v-model="roomCode"

@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useMsal } from '@/auth/useMsal'
 import { useRouter } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
+import StandardInput from '../common/StandardInput.vue' // Corrected import path
 
 const { accounts } = useMsal()
 const { clearRoom, updateRoomCode } = useRoomStore()
@@ -72,12 +73,7 @@ onMounted(() => {
           </h2>
           <form @submit.prevent="submitGuess" class="space-y-4">
             <div>
-              <input
-                class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                :value="guess"
-                @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-                v-bind="$attrs"
-              />
+              <StandardInput id="guess" v-model="guess" placeholder="Enter your guess..." />
             </div>
             <button
               type="submit"
@@ -120,8 +116,8 @@ onMounted(() => {
             </div>
 
             <div class="flex items-center space-x-2">
-              <input
-                class="flex-grow rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400"
+              <StandardInput
+                class="flex-grow"
                 placeholder="Room Code"
                 maxlength="4"
                 v-model="roomCode"
