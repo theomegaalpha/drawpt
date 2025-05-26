@@ -31,7 +31,9 @@
         "NODE_ENV": "development",
         "services__drawptapi__http__0": "{drawptapi.bindings.http.url}",
         "services__drawptapi__https__0": "{drawptapi.bindings.https.url}",
-        "PORT": "{vue.bindings.http.targetPort}"
+        "PORT": "{vue.bindings.http.targetPort}",
+        "VITE_SUPABASE_URL": "{supabase-url}",
+        "VITE_SUPABASE_ANON_KEY": "{supabase-anon-key}"
       },
       "bindings": {
         "http": {
