@@ -8,15 +8,15 @@ namespace DrawPT.MigrationService.Migrations
         private readonly string[] _themes =
         [
             "Under the Sea", "Space Adventure", "Jungle Safari",
-            "Fairy Tale Kingdom", "Wild West", "Ancient Egypt",
-            "Medieval Castle", "Futuristic City", "Enchanted Forest",
-            "Circus Fun", "Dinosaur World", "Pirate's Treasure",
-            "Arctic Expedition", "Desert Oasis", "Rainbow Paradise",
-            "Haunted House", "Candy Land", "Robot Factory",
-            "Superhero City", "Farming Life", "Deep Space",
-            "Ocean Depths", "Mountain Peak", "Volcanic Island",
-            "Crystal Cave", "Floating Islands", "Time Machine",
-            "Magical Garden", "Castle in the Clouds", "Underground City"
+            "Fairy Tale", "Wild West", "Ancient Egypt",
+            "Anime", "Cyberpunk", "Miniaturecore", "Academia",
+            "Steampunk", "Circus", "Horror Anime", "Cartoon",
+            "Marvel Superheroes", "DC Superheroes",
+            "Goblins", "Supernatural", "Fantasy", "Sci-Fi",
+            "Aliens & UFOs", "Mystical", "Magical",
+            "Invasions", "Time Travel", "Dinosaurs",
+            "Nature and Wildlife", "Sports and Games",
+            "Gundams"
         ];
 
         /// <inheritdoc />

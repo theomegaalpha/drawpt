@@ -11,6 +11,7 @@ namespace DrawPT.Api.AI
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
+        private readonly GeminiImageGenerator _geminiImageGenerator;
 
         string _imagePrompt = @"You are a very creative player of a game that's trying to use AI to generate a digital art picture.
             Given a theme, please generate a short and unique prompt about anything you want that would produce a cool picture.
@@ -25,10 +26,11 @@ namespace DrawPT.Api.AI
             Ensure the returned result is an array of JSON objects even if only one answer is provided.
             Now, the original phrase is: ";
 
-        public AIClient(OpenAIClient aiClient, IConfiguration configuration)
+        public AIClient(OpenAIClient aiClient, GeminiImageGenerator geminiImageGenerator, IConfiguration configuration)
         {
             _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
             _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel"));
+            _geminiImageGenerator = geminiImageGenerator;
         }
 
         public async Task<string> GenerateAssessmentAsync(string originalPrompt, List<GameAnswer> answers)
@@ -165,6 +167,8 @@ namespace DrawPT.Api.AI
         // create a GenerateImageAsync method here
         private async Task<string> GenerateImageAsync(string prompt)
         {
+            return await GenerateImageRestfullyAsync(prompt);
+
             ClientResult<GeneratedImage> imageResult = await _imageClient.GenerateImageAsync(prompt, new()
             {
                 Quality = GeneratedImageQuality.Standard,
@@ -176,6 +180,12 @@ namespace DrawPT.Api.AI
             GeneratedImage image = imageResult.Value;
             Console.WriteLine($"Image URL: {image.ImageUri}");
             return image.ImageUri.ToString() ?? string.Empty;
+        }
+
+        private async Task<string> GenerateImageRestfullyAsync(string prompt)
+        {
+            await _geminiImageGenerator.GenerateAndSaveImageAsync(prompt);
+            return "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp";
         }
     }
 }

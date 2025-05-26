@@ -27,12 +27,14 @@ var storage = builder.AddAzureStorage("storage")
 //    ? builder.AddAzureOpenAI("openai")
 //    : builder.AddConnectionString("openai");
 var openai = builder.AddConnectionString("openai");
+var gemini = builder.AddConnectionString("gemini");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
     .WithReference(storage)
     .WithReference(openai)
+    .WithReference(gemini)
     .WithReference(signalr)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)

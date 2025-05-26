@@ -32,6 +32,7 @@ builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
 builder.Services.AddTransient<AIClient>();
+builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
