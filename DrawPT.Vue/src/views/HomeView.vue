@@ -4,9 +4,7 @@ import Banner from '@/components/banner/Banner.vue'
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-zinc-900 dark:to-purple-900"
-  >
+  <div class="min-h-screen">
     <Banner />
     <main className="flex flex-col items-center">
       <TheEntry />

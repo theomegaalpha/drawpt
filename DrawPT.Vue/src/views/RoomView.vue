@@ -38,10 +38,7 @@ onMounted(() => {
 
 <template>
   <main>
-    <div
-      v-if="!roomExists"
-      class="flex h-screen flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-zinc-900 dark:to-purple-900"
-    >
+    <div v-if="!roomExists" class="flex h-screen flex-col items-center justify-center">
       <div
         v-if="errorMessage"
         class="mb-4 flex items-center justify-center rounded-sm border-red-200 bg-red-50 px-4 py-1 dark:text-slate-700"

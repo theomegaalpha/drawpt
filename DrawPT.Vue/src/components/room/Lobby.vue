@@ -35,7 +35,7 @@ const copyRoomCodeToClipboard = () => {
 
 <template>
   <main
-    class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 space-x-4 bg-gradient-to-br from-indigo-50 to-purple-100 p-10 md:grid-cols-2 dark:from-zinc-900 dark:to-purple-900"
+    class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 space-x-4 p-10 md:grid-cols-2"
   >
     <div class="col-span-1 p-10 text-center">
       <h1 class="mb-5 text-4xl font-bold">DrawPT</h1>
