@@ -69,11 +69,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Setup CORS policy
-app.UseCors(x => x.AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowAnyOrigin());
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
