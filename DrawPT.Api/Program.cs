@@ -70,26 +70,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // Setup CORS policy
-var allowedOrigins = builder.Configuration.GetValue<string>("CORS:AllowedOrigins");
-// add logging for allowedOrigins
-app.Logger.LogInformation($"Allowed Origins: {allowedOrigins}");
-if (!string.IsNullOrWhiteSpace(allowedOrigins))
-{
-    var allowedOriginsTokens = allowedOrigins.Split(",", StringSplitOptions.RemoveEmptyEntries);
-    app.UseCors(x => x.AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials()
-                    .WithOrigins(allowedOriginsTokens)
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .SetPreflightMaxAge(TimeSpan.FromSeconds(2520))
-                    .WithExposedHeaders("WWW-Authenticate"));
-}
-else
-{
-    app.UseCors(x => x.AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowAnyOrigin());
-}
+app.UseCors(x => x.AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin());
 
 app.UseHttpsRedirection();
 
