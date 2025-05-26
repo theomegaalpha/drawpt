@@ -13,6 +13,7 @@ permissions:
   id-token: write
   contents: read
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,8 +25,6 @@ jobs:
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
       AZURE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
-      VITE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +33,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
+          dotnet-version: | 
             8.x.x
             9.x.x
 
@@ -45,6 +44,7 @@ jobs:
             --federated-credential-provider "github" `
             --tenant-id "$Env:AZURE_TENANT_ID"
         shell: pwsh
+
 
       - name: Provision Infrastructure
         run: azd provision --no-prompt
@@ -57,3 +57,4 @@ jobs:
         env:
           AZURE_OPENAI: ${{ secrets.AZURE_OPENAI }}
           AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
+        

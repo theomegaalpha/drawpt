@@ -45,10 +45,12 @@ var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
     .WaitFor(api)
+    .WithHttpEndpoint(env: "PORT")
     .WithEnvironment("VITE_SUPABASE_URL", supabaseUrl)
     .WithEnvironment("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
-    .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
-    .PublishAsDockerFile();
+    .PublishAsDockerFile(c =>
+        c.WithBuildArg("VITE_SUPABASE_URL", supabaseUrl)
+         .WithBuildArg("VITE_SUPABASE_ANON_KEY", supabaseAnonKey));
 
 builder.Build().Run();
