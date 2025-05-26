@@ -27,8 +27,8 @@ namespace DrawPT.Api.AI
 
         public AIClient(OpenAIClient aiClient, IConfiguration configuration)
         {
-            _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel") ?? "gpt-4.1-nano");
-            _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel") ?? "dall-e-3");
+            _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
+            _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel"));
         }
 
         public async Task<string> GenerateAssessmentAsync(string originalPrompt, List<GameAnswer> answers)
