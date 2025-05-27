@@ -1,4 +1,3 @@
-'''
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
@@ -72,4 +71,3 @@ const localSubmitGuess = () => {
     </button>
   </div>
 </template>
-'''
