@@ -14,8 +14,7 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, transparent, rgb(209, 214, 215))
-    rgb(250, 250, 250);
+  background: linear-gradient(to bottom, transparent, rgb(209, 214, 215)) rgb(250, 250, 250);
   min-height: 100vh;
 }
 

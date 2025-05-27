@@ -146,10 +146,8 @@ const submitGuess = async (value: string) => {
   <GameTimer :max-time="timeoutPerQuestion" v-if="!lockGuess" class="fixed left-0 right-0 top-0" />
   <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
   <RoundResults v-if="showResults" />
-  <main v-else class="mt-10 flex w-full items-center justify-center">
-    <div
-      class="flex max-w-[1048px] flex-col rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-700 dark:bg-gray-800"
-    >
+  <main v-else class="flex min-h-screen w-full items-center justify-center">
+    <div>
       <SelectTheme
         v-if="selectableThemeOptions.length > 0"
         :themes="selectableThemeOptions"
@@ -157,9 +155,7 @@ const submitGuess = async (value: string) => {
       />
       <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
 
-      <div
-        class="mt-2 flex flex-col rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
-      >
+      <div>
         <ImageLoader v-if="imageUrl === '' && selectableThemeOptions.length === 0" />
         <img
           v-else-if="imageUrl !== ''"
@@ -167,10 +163,7 @@ const submitGuess = async (value: string) => {
           :src="imageUrl"
         />
       </div>
-      <div
-        v-if="!lockGuess"
-        class="mt-2 rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
-      >
+      <div v-if="!lockGuess">
         <GuessInput v-model="guessInput" :submitAction="submitGuess" />
       </div>
     </div>

@@ -20,7 +20,7 @@ const handleClick = (theme: string) => {
       v-for="(theme, index) in props.themes"
       :key="index"
       @click="handleClick(theme)"
-      class="border rounded-md border-gray-400 p-2 m-2 cursor-pointer hover:bg-gray-200"
+      class="m-2 cursor-pointer rounded-md border border-gray-400 p-2 hover:bg-gray-200"
     >
       {{ theme }}
     </div>
