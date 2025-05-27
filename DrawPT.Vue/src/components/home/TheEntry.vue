@@ -4,7 +4,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
-import StandardInput from '../common/StandardInput.vue' // Corrected import path
+import GuessInput from '../common/GuessInput.vue'
+import StandardInput from '../common/StandardInput.vue'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
 const roomCode = ref('')
@@ -14,7 +15,6 @@ const showTooltip = ref(false)
 const submitGuess = () => {
   if (guess.value.trim()) {
     console.log('Submitted guess:', guess.value)
-    // Here you would typically send the guess to your backend
     guess.value = ''
   }
 }
@@ -49,8 +49,10 @@ onMounted(() => {
       <!-- Left Column - Drawing Display -->
       <div class="overflow-hidden rounded-xl bg-white shadow-md lg:col-span-3 dark:bg-zinc-800">
         <div class="bg-indigo-600 p-4 text-white dark:bg-indigo-500">
-          <h2 class="text-xl font-medium">Current Drawing</h2>
-          <p class="text-sm opacity-80">Guess what the AI has drawn!</p>
+          <h2 class="text-xl font-medium">Guess Today's Prompt</h2>
+          <p class="text-sm opacity-80">
+            Guess what the AI has drawn! (Hint: it's not an easy one)
+          </p>
         </div>
 
         <div class="p-6">
@@ -73,17 +75,9 @@ onMounted(() => {
           <h2 class="mb-4 text-xl font-bold text-indigo-600 dark:text-indigo-400">
             Make Your Guess
           </h2>
-          <form @submit.prevent="submitGuess" class="space-y-4">
-            <div>
-              <StandardInput id="guess" v-model="guess" placeholder="Enter your guess..." />
-            </div>
-            <button
-              type="submit"
-              class="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-offset-zinc-800"
-            >
-              Submit Guess
-            </button>
-          </form>
+          <div class="space-y-4">
+            <GuessInput v-model="guess" :submitAction="submitGuess" />
+          </div>
         </div>
 
         <!-- Game Actions -->
@@ -111,7 +105,7 @@ onMounted(() => {
             <div class="relative">
               <button
                 class="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-offset-zinc-800"
-                v-disabled="!isAuthenticated"
+                :disabled="!isAuthenticated"
                 @click="createRoom()"
               >
                 Create Room

@@ -22,20 +22,12 @@ export function useSpeechRecognition() {
   recognitionInstance.lang = 'en-US'
 
   recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-    let finalTranscript = ''
+    const t = Array.from(event.results)
+      .map((result) => result[0])
+      .map((result) => result.transcript)
+      .join('')
 
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript
-      if (event.results[i].isFinal) {
-        if (event.results[i][0].confidence > 0.2) {
-          finalTranscript += transcript
-        }
-      }
-    }
-
-    if (finalTranscript) {
-      transcribedText.value = finalTranscript
-    }
+    transcribedText.value = t.trim()
   }
 
   recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -44,13 +36,7 @@ export function useSpeechRecognition() {
   }
 
   recognitionInstance.onend = () => {
-    if (isListening.value) {
-      // Potentially restart, or handle as per your app's logic
-    } else {
-      recognitionInstance.stop()
-    }
-    // isListening.value = false; // Ensure isListening is false if recognition truly stops
-    // interimText.value = ''; // Clear interim when listening ends, handled by toggleListening
+    recognitionInstance.stop()
   }
 
   const toggleListening = () => {

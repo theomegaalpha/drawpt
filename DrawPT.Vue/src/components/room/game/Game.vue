@@ -5,11 +5,11 @@ import SelectTheme from './midround/SelectTheme.vue'
 import ViewThemes from './midround/ViewThemes.vue'
 import GameTimer from './midround/GameTimer.vue'
 import ImageLoader from './midround/ImageLoader.vue'
+import GuessInput from '@/components/common/GuessInput.vue'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import service from '@/services/signalRService'
-import { useSpeechRecognition } from '@/composables/useSpeechRecognition' // Added import
 
 import type { GameAnswerBase } from '@/models/gameModels'
 
@@ -29,27 +29,6 @@ const timeoutPerQuestion = 40000
 const questionTimeout = ref<NodeJS.Timeout>()
 const timeoutForTheme = 20000
 const themeTimeout = ref<NodeJS.Timeout>()
-
-// Speech Recognition integration
-const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
-
-watch(transcribedText, (newText) => {
-  if (newText) {
-    guessInput.value += newText
-  }
-})
-
-const handleRecordButtonMouseDown = () => {
-  if (!isListening.value) {
-    toggleListening()
-  }
-}
-
-const handleRecordButtonMouseUp = () => {
-  if (isListening.value) {
-    toggleListening()
-  }
-}
 
 async function askForTheme(): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -190,28 +169,9 @@ const submitGuess = async (value: string) => {
       </div>
       <div
         v-if="!lockGuess"
-        class="mt-2 flex items-center rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
+        class="mt-2 rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
       >
-        <input
-          class="flex-grow rounded border border-gray-300 px-2 py-1 text-black shadow-inner"
-          type="text"
-          v-model="guessInput"
-          @keyup.enter="submitGuess(guessInput)"
-        />
-        <button
-          class="ml-2 rounded border border-blue-700 bg-blue-500 px-4 py-2 hover:bg-blue-700 hover:disabled:bg-blue-500"
-          :disabled="guessInput === ''"
-          @click="submitGuess(guessInput)"
-        >
-          Submit
-        </button>
-        <button
-          class="ml-2 rounded border border-green-700 bg-green-500 px-4 py-2 hover:bg-green-700"
-          @mousedown="handleRecordButtonMouseDown"
-          @mouseup="handleRecordButtonMouseUp"
-        >
-          🎤
-        </button>
+        <GuessInput v-model="guessInput" :submitAction="submitGuess" />
       </div>
     </div>
   </main>
