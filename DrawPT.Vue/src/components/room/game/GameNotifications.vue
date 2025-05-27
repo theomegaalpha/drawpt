@@ -22,7 +22,7 @@ const { gameNotifications } = notificationStore
           id="notification"
           class="mt-2 w-fit rounded-lg border border-zinc-400 bg-white p-2 px-5 transition-all duration-300 dark:border-zinc-500 dark:bg-zinc-800"
           :class="{
-            'border-red-600 bg-red-200 pr-8 font-semibold text-red-800 motion-safe:animate-[pulse_1s_ease-in-out]':
+            'animate-slide-in border-red-600 bg-red-200 pr-8 font-semibold text-red-800':
               notification.isAlert
           }"
         >

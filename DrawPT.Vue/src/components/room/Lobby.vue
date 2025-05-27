@@ -80,19 +80,4 @@ const copyRoomCodeToClipboard = () => {
   </main>
 </template>
 
-<style>
-@keyframes slide-in {
-  0% {
-    transform: translateX(20%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in {
-  animation: slide-in 0.2s ease-in forwards;
-}
-</style>
+<style></style>
