@@ -12,10 +12,10 @@ const isYou = (playerConnectionId: string) => playerConnectionId === you.connect
 </script>
 
 <template>
-  <div class="fixed top-4 right-4 bottom-4 left-4 border-grey-50">
-    <div className="flex flex-col items-center">
+  <div class="border-grey-50 fixed bottom-4 left-4 right-4 top-4">
+    <div className="flex flex-col items-center justify-center">
       <div
-        class="flex flex-col mt-2 p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+        class="mt-2 flex flex-col rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
       >
         <h2>Original Prompt: {{ lastRoundResults.question.originalPrompt }}</h2>
       </div>
