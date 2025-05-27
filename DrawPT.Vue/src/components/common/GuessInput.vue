@@ -24,7 +24,6 @@ const handleRecordButtonMouseUp = () => {
 }
 
 watch(transcribedText, (newText) => {
-  console.log('Transcribed text:', newText)
   if (newText && newText !== '') {
     emit('update:modelValue', newText)
   }
