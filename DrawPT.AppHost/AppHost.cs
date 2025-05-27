@@ -42,6 +42,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
 
 var supabaseUrl = builder.AddParameter("supabase-url");
 var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
+var googleClientId = builder.AddParameter("google-client-id");
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
@@ -49,9 +50,11 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithHttpEndpoint(env: "PORT", port: 5173)
     .WithEnvironment("VITE_SUPABASE_URL", supabaseUrl)
     .WithEnvironment("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
+    .WithEnvironment("VITE_GOOGLE_CLIENT_ID", googleClientId)
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile(c =>
         c.WithBuildArg("VITE_SUPABASE_URL", supabaseUrl)
-         .WithBuildArg("VITE_SUPABASE_ANON_KEY", supabaseAnonKey));
+         .WithBuildArg("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
+         .WithBuildArg("VITE_GOOGLE_CLIENT_ID", googleClientId));
 
 builder.Build().Run();

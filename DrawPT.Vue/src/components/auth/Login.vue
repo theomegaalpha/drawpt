@@ -1,6 +1,8 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
+  <div class="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div
+      class="w-full max-w-md space-y-8 rounded-lg border border-gray-300 bg-white p-10 shadow-lg dark:bg-slate-500/50"
+    >
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
@@ -44,9 +46,13 @@
             <span v-else>Sign in</span>
           </button>
         </div>
-
         <div v-if="error" class="text-center text-sm text-red-500">
           {{ error }}
+        </div>
+
+        <!-- Google Sign-In Button Container -->
+        <div class="text-center">
+          <div class="g_id_signin"></div>
         </div>
 
         <div class="text-center text-sm">
@@ -60,9 +66,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import type { GoogleCredentialResponse } from '@/types/google'
 
 const router = useRouter()
 const email = ref('')
@@ -91,4 +98,89 @@ const handleLogin = async () => {
     loading.value = false
   }
 }
+
+const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
+  try {
+    loading.value = true
+    error.value = ''
+
+    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: response.credential
+    })
+
+    if (signInError) throw signInError
+
+    if (data.user) {
+      router.push('/')
+    }
+  } catch (e: any) {
+    error.value = e.message || 'An error occurred during Google sign in'
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadGoogleScript = (): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById('google-signin-script')) {
+      resolve(true)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.id = 'google-signin-script'
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.onload = () => resolve(true)
+    script.onerror = () => reject(new Error('Failed to load Google Sign-In script'))
+    document.head.appendChild(script)
+  })
+}
+
+const initializeGoogleSignIn = () => {
+  if (window.google?.accounts) {
+    // Make the callback function globally available
+    window.handleSignInWithGoogle = handleSignInWithGoogle
+
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleSignInWithGoogle,
+      auto_select: true,
+      cancel_on_tap_outside: false
+    })
+
+    const buttonContainer = document.querySelector('.g_id_signin')
+    if (buttonContainer) {
+      window.google.accounts.id.renderButton(buttonContainer, {
+        type: 'standard',
+        shape: 'pill',
+        theme: 'outline',
+        text: 'signin_with',
+        size: 'large',
+        logo_alignment: 'left'
+      })
+    }
+
+    // Optional: Display the One Tap prompt
+    window.google.accounts.id.prompt()
+  }
+}
+
+onMounted(async () => {
+  try {
+    await loadGoogleScript()
+    // Wait a bit for the script to fully initialize
+    setTimeout(initializeGoogleSignIn, 100)
+  } catch (error) {
+    console.error('Failed to load Google Sign-In:', error)
+  }
+})
+
+onUnmounted(() => {
+  // Clean up the global callback
+  if (window.handleSignInWithGoogle) {
+    delete window.handleSignInWithGoogle
+  }
+})
 </script>
