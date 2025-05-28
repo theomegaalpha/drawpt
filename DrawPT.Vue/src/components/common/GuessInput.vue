@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
+import StandardInput from '@/components/common/StandardInput.vue'
 
 const props = defineProps<{
   modelValue: string
@@ -41,16 +42,15 @@ const localSubmitGuess = () => {
 
 <template>
   <div class="mt-2 flex items-center rounded-lg shadow">
-    <input
+    <StandardInput
       class="flex-grow rounded border border-gray-300 px-2 py-1 text-black shadow-inner"
-      type="text"
-      :value="modelValue"
-      @input="handleInput"
-      @keyup.enter="localSubmitGuess"
       placeholder="Type or hold 🎤 to speak"
+      :modelValue="props.modelValue"
+      @keyup.enter="localSubmitGuess"
+      @input="handleInput"
     />
     <button
-      class="ml-2 rounded border px-4 py-1"
+      class="btn ml-2"
       :class="{
         'border-green-700 bg-green-500 hover:bg-green-700': !isListening,
         'border-red-700 bg-red-500 text-white hover:bg-red-700': isListening
@@ -61,11 +61,7 @@ const localSubmitGuess = () => {
     >
       {{ isListening ? '...' : '🎤' }}
     </button>
-    <button
-      class="ml-2 rounded border border-blue-700 bg-blue-500 px-4 py-1 hover:bg-blue-700 hover:disabled:bg-blue-500"
-      :disabled="modelValue === ''"
-      @click="localSubmitGuess"
-    >
+    <button class="btn-primary ml-2" :disabled="modelValue === ''" @click="localSubmitGuess">
       Submit
     </button>
   </div>
