@@ -52,7 +52,8 @@ const localSubmitGuess = () => {
     <button
       class="btn ml-2"
       :class="{
-        'border-green-700 bg-green-500 hover:bg-green-700': !isListening,
+        'border-green-700 bg-green-500 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500':
+          !isListening,
         'border-red-700 bg-red-500 text-white hover:bg-red-700': isListening
       }"
       @mousedown="handleRecordButtonMouseDown"
