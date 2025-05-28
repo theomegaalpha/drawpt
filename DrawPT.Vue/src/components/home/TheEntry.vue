@@ -47,8 +47,8 @@ onMounted(() => {
     <!-- Game Interface - Web Layout -->
     <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
       <!-- Left Column - Drawing Display -->
-      <div class="overflow-hidden rounded-xl bg-white shadow-md lg:col-span-3 dark:bg-zinc-800">
-        <div class="bg-indigo-600 p-4 text-white dark:bg-indigo-500">
+      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md lg:col-span-3">
+        <div class="bg-surface-accent p-4 text-white">
           <h2 class="text-xl font-medium">Guess Today's Prompt</h2>
           <p class="text-sm opacity-80">
             Guess what the AI has drawn! (Hint: it's not an easy one)
@@ -71,18 +71,16 @@ onMounted(() => {
       <!-- Right Column - Game Controls -->
       <div class="flex flex-col gap-6 lg:col-span-2">
         <!-- Guess Input -->
-        <div class="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
-          <h2 class="mb-4 text-xl font-bold text-indigo-600 dark:text-indigo-400">
-            Make Your Guess
-          </h2>
+        <div class="bg-surface-default rounded-xl p-6 shadow-md">
+          <h2 class="text-color-accent mb-4 text-xl font-bold">Make Your Guess</h2>
           <div class="space-y-4">
             <GuessInput v-model="guess" :submitAction="submitGuess" />
           </div>
         </div>
 
         <!-- Game Actions -->
-        <div class="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
-          <h2 class="mb-4 text-xl font-bold text-indigo-600 dark:text-indigo-400">Game Options</h2>
+        <div class="bg-surface-default rounded-xl p-6 shadow-md">
+          <h2 class="text-color-accent mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
             <div class="relative">
               <button
@@ -135,9 +133,9 @@ onMounted(() => {
     <!-- Game Explanation & Demo -->
     <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <!-- Game Explanation -->
-      <div class="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
-        <h2 class="mb-4 text-2xl font-bold text-indigo-600 dark:text-indigo-400">How to Play</h2>
-        <div class="prose prose-indigo dark:prose-invert">
+      <div class="bg-surface-default rounded-xl p-6 shadow-md">
+        <h2 class="text-color-accent mb-4 text-2xl font-bold">How to Play</h2>
+        <div class="prose prose-indigo dark:prose-invert text-color-default">
           <p class="text-lg">
             AI is the artist! Guess what it drew based on unique and tricky prompts. Test your
             skills and challenge yourself!
@@ -152,15 +150,15 @@ onMounted(() => {
       </div>
 
       <!-- Game Demo -->
-      <div class="overflow-hidden rounded-xl bg-white shadow-md dark:bg-zinc-800">
-        <div class="bg-indigo-600 p-4 text-white dark:bg-indigo-500">
+      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md">
+        <div class="bg-surface-accent p-4 text-white">
           <h2 class="text-xl font-medium">See How It Works</h2>
         </div>
         <div class="p-6">
           <div class="overflow-hidden rounded-lg bg-gray-50 dark:bg-zinc-900">
             <img src="https://picsum.photos/id/237/800/450" alt="Game Demo" class="h-auto w-full" />
           </div>
-          <p class="mt-4 text-gray-600 dark:text-gray-400">
+          <p class="text-color-muted mt-4">
             Watch as AI generates drawings in real-time and players submit their guesses! The faster
             you guess correctly, the more points you earn.
           </p>
@@ -169,10 +167,8 @@ onMounted(() => {
     </div>
 
     <!-- Features Section -->
-    <div class="mb-10 rounded-xl bg-white p-8 shadow-md dark:bg-zinc-800">
-      <h2 class="mb-6 text-center text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-        Game Features
-      </h2>
+    <div class="bg-surface-default mb-10 rounded-xl p-8 shadow-md">
+      <h2 class="text-color-accent mb-6 text-center text-2xl font-bold">Game Features</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="p-4 text-center">
           <div
@@ -193,10 +189,8 @@ onMounted(() => {
               <path d="M12 17.8 5.8 21 7 14.1 2 9.3l7-1L12 2l3 6.3 7 1-5 4.8 1.2 6.9-6.2-3.2Z" />
             </svg>
           </div>
-          <h3 class="mb-2 text-lg font-bold text-gray-800 dark:text-gray-200">AI-Generated Art</h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            Unique drawings created by advanced AI algorithms
-          </p>
+          <h3 class="text-color-default mb-2 text-lg font-bold">AI-Generated Art</h3>
+          <p class="text-color-muted">Unique drawings created by advanced AI algorithms</p>
         </div>
         <div class="p-4 text-center">
           <div
@@ -220,10 +214,8 @@ onMounted(() => {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <h3 class="mb-2 text-lg font-bold text-gray-800 dark:text-gray-200">Multiplayer Mode</h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            Compete with friends to see who can guess fastest
-          </p>
+          <h3 class="text-color-default mb-2 text-lg font-bold">Multiplayer Mode</h3>
+          <p class="text-color-muted">Compete with friends to see who can guess fastest</p>
         </div>
         <div class="p-4 text-center">
           <div
@@ -245,10 +237,8 @@ onMounted(() => {
               <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
             </svg>
           </div>
-          <h3 class="mb-2 text-lg font-bold text-gray-800 dark:text-gray-200">Creative Prompts</h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            Challenging and unique concepts to test your skills
-          </p>
+          <h3 class="text-color-default mb-2 text-lg font-bold">Creative Prompts</h3>
+          <p class="text-color-muted">Challenging and unique concepts to test your skills</p>
         </div>
       </div>
     </div>
