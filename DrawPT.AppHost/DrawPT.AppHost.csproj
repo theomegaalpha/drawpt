@@ -8,10 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>084b2d42-88df-4787-8e9e-962836a9c8a9</UserSecretsId>
+	<NoWarn>$(NoWarn);ASPIREACADOMAINS001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.AppContainers" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.Azure.SignalR" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.0" />
@@ -34,5 +36,13 @@
     <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
     <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
   </Target>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Projects\DrawPT\DrawPT.AppHost\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Projects\DrawPT\DrawPT.AppHost\.editorconfig" />
+  </ItemGroup>
 
 </Project>

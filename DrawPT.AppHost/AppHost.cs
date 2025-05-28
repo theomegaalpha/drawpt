@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.Azure;
+using Google.Protobuf.WellKnownTypes;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -44,10 +45,13 @@ var supabaseUrl = builder.AddParameter("supabase-url");
 var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
 var googleClientId = builder.AddParameter("google-client-id");
 
+var customDomain = builder.AddParameter("customDomain");
+var certificateName = builder.AddParameter("certificateName");
+
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
     .WaitFor(api)
-    .WithHttpEndpoint(env: "PORT", port: 5173)
+    .WithHttpEndpoint(env: "PORT", port: builder.ExecutionContext.IsPublishMode ? 80 : 5173)
     .WithEnvironment("VITE_SUPABASE_URL", supabaseUrl)
     .WithEnvironment("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
     .WithEnvironment("VITE_GOOGLE_CLIENT_ID", googleClientId)
@@ -55,6 +59,11 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .PublishAsDockerFile(c =>
         c.WithBuildArg("VITE_SUPABASE_URL", supabaseUrl)
          .WithBuildArg("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
-         .WithBuildArg("VITE_GOOGLE_CLIENT_ID", googleClientId));
+         .WithBuildArg("VITE_GOOGLE_CLIENT_ID", googleClientId))
+    .PublishAsAzureContainerApp((infra, app) =>
+    {
+        app.ConfigureCustomDomain(customDomain, certificateName);
+    });
+
 
 builder.Build().Run();

@@ -13,6 +13,7 @@ permissions:
   id-token: write
   contents: read
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,9 +23,11 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_GOOGLE_CLIENT_ID: ${{ vars.AZURE_GOOGLE_CLIENT_ID }}
-      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-      AZURE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
       AZURE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      AZURE_CERTIFICATE_NAME: ${{ vars.AZURE_CERTIFICATE_NAME }}
+      AZURE_CUSTOM_DOMAIN: ${{ vars.AZURE_CUSTOM_DOMAIN }}
+      AZURE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +36,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
+          dotnet-version: | 
             8.x.x
             9.x.x
 
@@ -44,6 +47,7 @@ jobs:
             --federated-credential-provider "github" `
             --tenant-id "$Env:AZURE_TENANT_ID"
         shell: pwsh
+
 
       - name: Provision Infrastructure
         run: azd provision --no-prompt
@@ -56,3 +60,4 @@ jobs:
         env:
           AZURE_GEMINI: ${{ secrets.AZURE_GEMINI }}
           AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
+        
