@@ -86,7 +86,7 @@ onMounted(() => {
           <div class="space-y-3">
             <div class="relative">
               <button
-                class="w-full cursor-not-allowed rounded-md bg-gray-200 px-4 py-2 text-gray-400 dark:bg-zinc-700 dark:text-zinc-500"
+                class="btn-default w-full"
                 disabled
                 @mouseenter="showTooltip = true"
                 @mouseleave="showTooltip = false"
@@ -103,11 +103,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="relative">
-              <button
-                class="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-offset-zinc-800"
-                :disabled="!isAuthenticated"
-                @click="createRoom()"
-              >
+              <button class="btn-primary w-full" :disabled="!isAuthenticated" @click="createRoom()">
                 Create Room
               </button>
             </div>
@@ -122,7 +118,7 @@ onMounted(() => {
                 @keyup.enter="roomCode.length === 4 ? joinRoom(roomCode) : null"
               />
               <button
-                class="w-auto rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:disabled:bg-indigo-800 dark:disabled:text-indigo-500"
+                class="btn-primary w-auto"
                 :disabled="roomCode.length < 4"
                 @click="joinRoom(roomCode)"
               >
@@ -130,11 +126,7 @@ onMounted(() => {
               </button>
             </div>
 
-            <button
-              class="w-full rounded-md bg-gray-200 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600 dark:focus:ring-gray-500 dark:focus:ring-offset-zinc-800"
-            >
-              View Leaderboard
-            </button>
+            <button class="btn-default w-full">View Leaderboard</button>
           </div>
         </div>
       </div>
