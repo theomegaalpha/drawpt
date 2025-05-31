@@ -23,9 +23,8 @@ namespace DrawPT.Api.Hubs
     public class GameHub : Hub<IGameClient>
     {
         private readonly ILogger<GameHub> _logger;
-        private readonly IConnection _rabbitMqConnection;
         private readonly IModel _channel;
-        private readonly string _gameId;
+        private readonly string _gameId = (new Guid()).ToString();
 
         public GameHub(
             ILogger<GameHub> logger,
@@ -33,11 +32,10 @@ namespace DrawPT.Api.Hubs
             string gameId)
         {
             _logger = logger;
-            _rabbitMqConnection = rabbitMqConnection;
             _gameId = gameId;
 
             // Set up RabbitMQ channel
-            _channel = _rabbitMqConnection.CreateModel();
+            _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
 
             // Declare queue for this game
