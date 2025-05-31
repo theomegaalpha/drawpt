@@ -5,8 +5,10 @@ using Google.Protobuf.WellKnownTypes;
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add SQL Server container
-var sql = builder.AddSqlServer("sql")
-                 .WithLifetime(ContainerLifetime.Persistent);
+var sql = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureSqlServer("sql")
+    : builder.AddAzureSqlServer("sql")
+        .RunAsContainer();
 
 var db = sql.AddDatabase("database");
 
