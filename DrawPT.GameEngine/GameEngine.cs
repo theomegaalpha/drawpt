@@ -1,4 +1,3 @@
-using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
 using RabbitMQ.Client;
@@ -6,166 +5,87 @@ using RabbitMQ.Client;
 namespace DrawPT.GameEngine
 {
     /// <summary>
-    /// Base implementation of the game engine
+    /// Core game engine implementation
     /// </summary>
     public class GameEngine : IGameEngine
     {
+        private readonly ILogger<GameEngine> _logger;
+        private readonly IModel _channel;
+        private readonly string _gameId;
+        private readonly GameConfiguration _configuration;
         private readonly IPlayerManager _playerManager;
         private readonly IRoundManager _roundManager;
         private readonly IQuestionManager _questionManager;
-        private readonly IModel _channel;
-        private readonly ILogger<GameEngine> _logger;
-
-        private GameConfiguration _configuration = null!;
-        private GameState _currentState = GameState.WaitingForPlayers;
-
-        /// <summary>
-        /// Unique identifier for the game instance
-        /// </summary>
-        public string GameId { get; }
-
-        /// <summary>
-        /// Current state of the game
-        /// </summary>
-        public GameState CurrentState => _currentState;
 
         public GameEngine(
+            ILogger<GameEngine> logger,
+            IConnection rabbitMqConnection,
+            string gameId,
+            GameConfiguration configuration,
             IPlayerManager playerManager,
             IRoundManager roundManager,
-            IQuestionManager questionManager,
-            IConnection rabbitMQConnection,
-            ILogger<GameEngine> logger)
+            IQuestionManager questionManager)
         {
+            _logger = logger;
+            _gameId = gameId;
+            _configuration = configuration;
             _playerManager = playerManager;
             _roundManager = roundManager;
             _questionManager = questionManager;
-            _channel = rabbitMQConnection.CreateModel();
-            _logger = logger;
-            GameId = Guid.NewGuid().ToString();
+
+            // Set up RabbitMQ channel
+            _channel = rabbitMqConnection.CreateModel();
+            _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
+
+            // Declare queue for game events
+            _channel.QueueDeclare($"game_events_{gameId}", true, false, false);
+            _channel.QueueBind($"game_events_{gameId}", "game_events", $"game.{gameId}.*");
         }
 
         /// <summary>
-        /// Starts a new game instance
+        /// Gets the unique identifier for this game instance
         /// </summary>
-        public async Task StartGameAsync(GameConfiguration configuration)
+        public string GameId => _gameId;
+
+        /// <summary>
+        /// Gets the game configuration
+        /// </summary>
+        public GameConfiguration Configuration => _configuration;
+
+        /// <summary>
+        /// Gets the player manager for this game
+        /// </summary>
+        public IPlayerManager PlayerManager => _playerManager;
+
+        /// <summary>
+        /// Gets the round manager for this game
+        /// </summary>
+        public IRoundManager RoundManager => _roundManager;
+
+        /// <summary>
+        /// Gets the question manager for this game
+        /// </summary>
+        public IQuestionManager QuestionManager => _questionManager;
+
+        /// <summary>
+        /// Starts the game
+        /// </summary>
+        public async Task StartGameAsync()
         {
-            _configuration = configuration;
-            _currentState = GameState.InProgress;
-
-            _channel.BasicPublish();
-
-            _logger.LogInformation("Game {GameId} started with configuration {@Configuration}", GameId, configuration);
+            await RoundManager.StartNewRoundAsync();
         }
 
         /// <summary>
-        /// Ends the current game instance
+        /// Ends the game
         /// </summary>
         public async Task EndGameAsync()
         {
-            _currentState = GameState.Ended;
-
-            var results = new GameResults
-            {
-                PlayerResults = (await _playerManager.GetPlayersAsync())
-                    .Select(p => new PlayerResult
-                    {
-                        Id = p.Id,
-                        ConnectionId = p.ConnectionId,
-                        Username = p.Username,
-                        FinalScore = p.Score
-                    })
-                    .ToList(),
-                TotalRounds = _roundManager.CurrentRoundNumber,
-                WasCompleted = true
-            };
-
-            await _eventBus.PublishAsync(new GameEndedEvent
-            {
-                GameId = GameId,
-                Results = results
-            });
-
-            _logger.LogInformation("Game {GameId} ended with results {@Results}", GameId, results);
+            await RoundManager.EndRoundAsync();
         }
 
-        /// <summary>
-        /// Adds a player to the game
-        /// </summary>
-        public async Task<bool> AddPlayerAsync(string connectionId, Player player)
+        public void Dispose()
         {
-            if (_currentState != GameState.WaitingForPlayers)
-            {
-                _logger.LogWarning($"Cannot add player {player.Id} to game {GameId} in state {_currentState}");
-                return false;
-            }
-
-            var addedPlayer = await _playerManager.AddPlayerAsync(connectionId, player);
-            if (addedPlayer != null)
-            {
-                await _eventBus.PublishAsync(new PlayerJoinedEvent
-                {
-                    GameId = GameId,
-                    Player = addedPlayer
-                });
-
-                _logger.LogInformation($"Player {player.Id} joined game {GameId}");
-                return true;
-            }
-
-            return false;
+            _channel?.Dispose();
         }
-
-        /// <summary>
-        /// Removes a player from the game
-        /// </summary>
-        public async Task RemovePlayerAsync(string connectionId)
-        {
-            var player = await _playerManager.GetPlayerAsync(connectionId);
-            if (player != null)
-            {
-                await _playerManager.RemovePlayerAsync(connectionId);
-                await _eventBus.PublishAsync(new PlayerLeftEvent
-                {
-                    GameId = GameId,
-                    Player = player
-                });
-
-                _logger.LogInformation($"Player {player.Id} left game {GameId}");
-            }
-        }
-
-        /// <summary>
-        /// Processes the next round of the game
-        /// </summary>
-        public async Task ProcessNewRoundAsync()
-        {
-            if (_currentState != GameState.InProgress)
-            {
-                _logger.LogWarning($"Cannot process next round in game {GameId} in state {_currentState}");
-                return;
-            }
-
-            var round = await _roundManager.StartNewRoundAsync();
-            await _eventBus.PublishAsync(new RoundStartedEvent
-            {
-                GameId = GameId,
-                Round = round
-            });
-
-            // Process the round
-            await _roundManager.EndRoundAsync();
-            await _eventBus.PublishAsync(new RoundEndedEvent
-            {
-                GameId = GameId,
-                Round = round
-            });
-
-            _logger.LogInformation($"Round {_roundManager.CurrentRoundNumber} completed in game {GameId}");
-        }
-
-        /// <summary>
-        /// Gets the current game configuration
-        /// </summary>
-        public GameConfiguration GetConfiguration() => _configuration;
     }
-}
+} 

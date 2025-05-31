@@ -1,5 +1,3 @@
-using DrawPT.GameEngine.Events;
-
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>

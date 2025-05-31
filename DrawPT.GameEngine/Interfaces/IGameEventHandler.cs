@@ -1,21 +1,15 @@
-using DrawPT.GameEngine.Events;
-
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>
-    /// Interface for handling game events
+    /// Handler for game events
     /// </summary>
-    public interface IGameEventHandler
+    /// <typeparam name="T">The type of event to handle</typeparam>
+    public interface IGameEventHandler<in T> where T : IGameEvent
     {
-        /// <summary>
-        /// Gets the type of event this handler can process
-        /// </summary>
-        GameEventType EventType { get; }
-
         /// <summary>
         /// Handles a game event
         /// </summary>
-        /// <param name="eventJson">The event data as JSON</param>
-        void HandleEvent(string eventJson);
+        /// <param name="gameEvent">The event to handle</param>
+        Task HandleAsync(T gameEvent);
     }
 } 

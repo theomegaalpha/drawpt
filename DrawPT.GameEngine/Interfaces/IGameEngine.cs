@@ -1,51 +1,45 @@
 using DrawPT.GameEngine.Models;
-using DrawPT.GameEngine.Events;
 
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>
-    /// Core interface for the game engine that manages the game lifecycle and state
+    /// Interface for the game engine
     /// </summary>
-    public interface IGameEngine
+    public interface IGameEngine : IDisposable
     {
         /// <summary>
-        /// Unique identifier for the game instance
+        /// Gets the unique identifier for this game instance
         /// </summary>
         string GameId { get; }
 
         /// <summary>
-        /// Current state of the game
+        /// Gets the game configuration
         /// </summary>
-        GameState CurrentState { get; }
+        GameConfiguration Configuration { get; }
 
         /// <summary>
-        /// Starts a new game instance
+        /// Gets the player manager for this game
         /// </summary>
-        Task StartGameAsync(GameConfiguration configuration);
+        IPlayerManager PlayerManager { get; }
 
         /// <summary>
-        /// Ends the current game instance
+        /// Gets the round manager for this game
+        /// </summary>
+        IRoundManager RoundManager { get; }
+
+        /// <summary>
+        /// Gets the question manager for this game
+        /// </summary>
+        IQuestionManager QuestionManager { get; }
+
+        /// <summary>
+        /// Starts the game
+        /// </summary>
+        Task StartGameAsync();
+
+        /// <summary>
+        /// Ends the game
         /// </summary>
         Task EndGameAsync();
-
-        /// <summary>
-        /// Adds a player to the game
-        /// </summary>
-        Task<bool> AddPlayerAsync(string connectionId, Player player);
-
-        /// <summary>
-        /// Removes a player from the game
-        /// </summary>
-        Task RemovePlayerAsync(string connectionId);
-
-        /// <summary>
-        /// Processes the next round of the game
-        /// </summary>
-        Task ProcessNewRoundAsync();
-
-        /// <summary>
-        /// Gets the current game configuration
-        /// </summary>
-        GameConfiguration GetConfiguration();
     }
 }

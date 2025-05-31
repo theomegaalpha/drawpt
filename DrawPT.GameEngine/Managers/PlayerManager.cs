@@ -1,7 +1,5 @@
-using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Collections.Concurrent;
 using System.Text;
@@ -15,8 +13,6 @@ namespace DrawPT.GameEngine.Managers
     public class PlayerManager : IPlayerManager
     {
         private readonly ILogger<PlayerManager> _logger;
-        private readonly IGameEventBus _eventBus;
-        private readonly IConnection _rabbitMqConnection;
         private readonly IModel _channel;
         private readonly string _gameId;
         private readonly ConcurrentDictionary<string, Player> _players = new();
@@ -24,19 +20,16 @@ namespace DrawPT.GameEngine.Managers
 
         public PlayerManager(
             ILogger<PlayerManager> logger,
-            IGameEventBus eventBus,
             IConnection rabbitMqConnection,
             string gameId,
             GameConfiguration configuration)
         {
             _logger = logger;
-            _eventBus = eventBus;
-            _rabbitMqConnection = rabbitMqConnection;
             _gameId = gameId;
             _configuration = configuration;
 
             // Set up RabbitMQ channel
-            _channel = _rabbitMqConnection.CreateModel();
+            _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
 
             // Declare queues for player events
@@ -52,7 +45,7 @@ namespace DrawPT.GameEngine.Managers
         /// <summary>
         /// Adds a new player to the game
         /// </summary>
-        public async Task<Player> AddPlayerAsync(string connectionId, Player player)
+        public Player AddPlayer(string connectionId, Player player)
         {
             if (IsGameFull())
             {
@@ -88,7 +81,7 @@ namespace DrawPT.GameEngine.Managers
         /// <summary>
         /// Removes a player from the game
         /// </summary>
-        public async Task RemovePlayerAsync(string connectionId)
+        public void RemovePlayer(string connectionId)
         {
             if (_players.TryRemove(connectionId, out var player))
             {
@@ -122,7 +115,7 @@ namespace DrawPT.GameEngine.Managers
         /// <summary>
         /// Updates a player's score
         /// </summary>
-        public async Task UpdatePlayerScoreAsync(string connectionId, int score)
+        public void UpdatePlayerScore(string connectionId, int score)
         {
             if (_players.TryGetValue(connectionId, out var player))
             {
@@ -151,9 +144,17 @@ namespace DrawPT.GameEngine.Managers
         /// <summary>
         /// Gets a specific player by their connection ID
         /// </summary>
-        public Task<Player?> GetPlayerAsync(string connectionId)
+        public Player? GetPlayer(string connectionId)
         {
-            return Task.FromResult(_players.TryGetValue(connectionId, out var player) ? player : null);
+            return _players.TryGetValue(connectionId, out var player) ? player : null;
+        }
+
+        /// <summary>
+        /// Gets all players in the game
+        /// </summary>
+        public IEnumerable<Player> GetPlayers()
+        {
+            return _players.Values;
         }
 
         /// <summary>

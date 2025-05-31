@@ -10,27 +10,27 @@ namespace DrawPT.GameEngine.Interfaces
         /// <summary>
         /// Adds a new player to the game
         /// </summary>
-        Task<Player> AddPlayerAsync(string connectionId, Player player);
+        Player AddPlayer(string connectionId, Player player);
 
         /// <summary>
         /// Removes a player from the game
         /// </summary>
-        Task RemovePlayerAsync(string connectionId);
+        void RemovePlayer(string connectionId);
 
         /// <summary>
         /// Gets all current players in the game
         /// </summary>
-        Task<IEnumerable<Player>> GetPlayersAsync();
+        IEnumerable<Player> GetPlayers();
 
         /// <summary>
         /// Updates a player's score
         /// </summary>
-        Task UpdatePlayerScoreAsync(string connectionId, int score);
+        void UpdatePlayerScore(string connectionId, int score);
 
         /// <summary>
         /// Gets a specific player by their connection ID
         /// </summary>
-        Task<Player?> GetPlayerAsync(string connectionId);
+        Player? GetPlayer(string connectionId);
 
         /// <summary>
         /// Checks if the game has reached maximum player capacity

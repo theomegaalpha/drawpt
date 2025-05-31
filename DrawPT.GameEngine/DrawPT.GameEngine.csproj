@@ -19,7 +19,8 @@
 
   <ItemGroup>
     <Folder Include="Configuration\" />
-    <Folder Include="Infrastructure\" />
+    <Folder Include="Engine\" />
+    <Folder Include="Events\" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,5 @@
-using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
-using DrawPT.GameEngine.Services;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine.Managers
@@ -13,8 +10,6 @@ namespace DrawPT.GameEngine.Managers
     public class QuestionManager : IQuestionManager
     {
         private readonly ILogger<QuestionManager> _logger;
-        private readonly IGameEventBus _eventBus;
-        private readonly IConnection _rabbitMqConnection;
         private readonly IModel _channel;
         private readonly string _gameId;
         private readonly GameConfiguration _configuration;
@@ -25,7 +20,6 @@ namespace DrawPT.GameEngine.Managers
 
         public QuestionManager(
             ILogger<QuestionManager> logger,
-            IGameEventBus eventBus,
             IConnection rabbitMqConnection,
             string gameId,
             GameConfiguration configuration,
@@ -33,15 +27,13 @@ namespace DrawPT.GameEngine.Managers
             IThemeRepository themeRepository)
         {
             _logger = logger;
-            _eventBus = eventBus;
-            _rabbitMqConnection = rabbitMqConnection;
             _gameId = gameId;
             _configuration = configuration;
             _aiService = aiService;
             _themeRepository = themeRepository;
 
             // Set up RabbitMQ channel
-            _channel = _rabbitMqConnection.CreateModel();
+            _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
 
             // Declare queue for question events

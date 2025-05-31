@@ -1,20 +1,23 @@
-using DrawPT.GameEngine.Events;
-
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>
-    /// Interface for game events
+    /// Base interface for all game events
     /// </summary>
     public interface IGameEvent
     {
         /// <summary>
-        /// Gets the type of the event
+        /// Type of the event
         /// </summary>
-        GameEventType EventType { get; }
+        string EventType { get; }
 
         /// <summary>
-        /// Gets game ID
+        /// When the event occurred
         /// </summary>
-        Guid GameId { get; }
+        DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The game ID this event belongs to
+        /// </summary>
+        string GameId { get; }
     }
 } 

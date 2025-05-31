@@ -1,8 +1,5 @@
-using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
-using DrawPT.GameEngine.Services;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine.Managers
@@ -13,7 +10,6 @@ namespace DrawPT.GameEngine.Managers
     public class RoundManager : IRoundManager
     {
         private readonly ILogger<RoundManager> _logger;
-        private readonly IGameEventBus _eventBus;
         private readonly IModel _channel;
         private readonly string _gameId;
         private readonly GameConfiguration _configuration;
@@ -25,7 +21,6 @@ namespace DrawPT.GameEngine.Managers
 
         public RoundManager(
             ILogger<RoundManager> logger,
-            IGameEventBus eventBus,
             IConnection rabbitMqConnection,
             string gameId,
             GameConfiguration configuration,
@@ -34,7 +29,6 @@ namespace DrawPT.GameEngine.Managers
             IImageRepository imageRepository)
         {
             _logger = logger;
-            _eventBus = eventBus;
             _gameId = gameId;
             _configuration = configuration;
             _aiService = aiService;
