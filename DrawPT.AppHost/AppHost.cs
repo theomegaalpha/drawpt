@@ -4,7 +4,7 @@ using Google.Protobuf.WellKnownTypes;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add SQL Server container
+// Add Azure SQL Server
 var sql = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSqlServer("sql")
     : builder.AddAzureSqlServer("sql")
@@ -15,7 +15,6 @@ var db = sql.AddDatabase("database");
 var signalr = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSignalR("signalr")
     : builder.AddConnectionString("signalr");
-//var signalr = builder.AddConnectionString("signalr");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -26,10 +25,13 @@ var storage = builder.AddAzureStorage("storage")
                      .RunAsEmulator()
                      .AddBlobs("blobs");
 
+// Add AI
 var openai = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureOpenAI("openai")
     : builder.AddConnectionString("openai");
 var gemini = builder.AddConnectionString("gemini");
+
+var rabbitMq = builder.AddRabbitMQ("messaging");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
@@ -66,6 +68,11 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     {
         app.ConfigureCustomDomain(customDomain, certificateName);
     });
+
+
+builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking");
+
+builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine");
 
 
 builder.Build().Run();
