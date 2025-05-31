@@ -1,3 +1,5 @@
+using DrawPT.GameEngine.Interfaces;
+
 namespace DrawPT.GameEngine.Events
 {
     /// <summary>
@@ -6,9 +8,9 @@ namespace DrawPT.GameEngine.Events
     public abstract class BaseGameEvent : IGameEvent
     {
         /// <summary>
-        /// Type of the event
+        /// Gets the type of the event
         /// </summary>
-        public abstract string EventType { get; }
+        public abstract GameEventType EventType { get; }
 
         /// <summary>
         /// When the event occurred
@@ -18,6 +20,6 @@ namespace DrawPT.GameEngine.Events
         /// <summary>
         /// The game ID this event belongs to
         /// </summary>
-        public string GameId { get; set; } = string.Empty;
+        public Guid GameId { get; set; } = Guid.NewGuid();
     }
 } 

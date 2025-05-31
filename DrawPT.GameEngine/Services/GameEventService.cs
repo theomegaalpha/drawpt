@@ -1,84 +1,42 @@
 using System.Text;
 using System.Text.Json;
 using DrawPT.GameEngine.Events;
+using DrawPT.GameEngine.Interfaces;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace DrawPT.GameEngine.Services
 {
     /// <summary>
-    /// Service for handling game events through RabbitMQ
+    /// Service for handling game events using RabbitMQ
     /// </summary>
-    public class GameEventService : IDisposable
+    public class GameEventService : IGameEventService, IDisposable
     {
-        private readonly IConnection _rabbitMQConnection;
         private readonly ILogger<GameEventService> _logger;
+        private readonly IConnection _connection;
         private readonly IModel _channel;
         private readonly string _exchangeName;
-        private readonly string _queueName;
+        private readonly Dictionary<GameEventType, IGameEventHandler> _eventHandlers;
 
         public GameEventService(
-            IConfiguration configuration,
-            IConnection rabbitMQConnection,
-            ILogger<GameEventService> logger)
+            ILogger<GameEventService> logger,
+            IConnection connection,
+            IEnumerable<IGameEventHandler> eventHandlers)
         {
-            _rabbitMQConnection = rabbitMQConnection;
             _logger = logger;
-            _channel = _rabbitMQConnection.CreateModel();
-            _exchangeName = configuration.GetValue<string>("RabbitMQ:ExchangeName") ?? "game_events";
-            _queueName = $"game_engine_{Guid.NewGuid()}";
+            _connection = connection;
+            _channel = connection.CreateModel();
+            _exchangeName = GameEventRouting.Exchange;
+            _eventHandlers = eventHandlers.ToDictionary(h => h.EventType);
 
-            SetupRabbitMQ();
-        }
-
-        private void SetupRabbitMQ()
-        {
-            // Declare exchange
-            _channel.ExchangeDeclare(
-                exchange: _exchangeName,
-                type: ExchangeType.Topic,
-                durable: true,
-                autoDelete: false);
-
-            // Declare queue
-            _channel.QueueDeclare(
-                queue: _queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false);
-
-            // Bind queue to exchange with routing key pattern
-            _channel.QueueBind(
-                queue: _queueName,
-                exchange: _exchangeName,
-                routingKey: "game.*");
+            // Declare the exchange
+            _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic, true);
 
             // Set up consumer
             var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += (model, ea) =>
-            {
-                try
-                {
-                    var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
-                    var routingKey = ea.RoutingKey;
-
-                    _logger.LogInformation("Received message: {Message} with routing key: {RoutingKey}", 
-                        message, routingKey);
-
-                    // TODO: Handle different event types based on routing key
-                    // This will be implemented when we have specific event handlers
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing message");
-                }
-            };
-
-            _channel.BasicConsume(
-                queue: _queueName,
-                autoAck: true,
-                consumer: consumer);
+            consumer.Received += OnMessageReceived;
+            _channel.BasicConsume(queue: "game_events", autoAck: true, consumer: consumer);
         }
 
         /// <summary>
@@ -88,10 +46,9 @@ namespace DrawPT.GameEngine.Services
         {
             try
             {
+                var routingKey = GetRoutingKey(gameEvent);
                 var message = JsonSerializer.Serialize(gameEvent);
                 var body = Encoding.UTF8.GetBytes(message);
-
-                var routingKey = $"game.{gameEvent.GetType().Name.ToLower()}";
 
                 _channel.BasicPublish(
                     exchange: _exchangeName,
@@ -99,19 +56,119 @@ namespace DrawPT.GameEngine.Services
                     basicProperties: null,
                     body: body);
 
-                _logger.LogInformation("Published event: {EventType} with routing key: {RoutingKey}", 
-                    gameEvent.GetType().Name, routingKey);
+                _logger.LogInformation("Published event {EventType} with routing key {RoutingKey}", 
+                    gameEvent.EventType, routingKey);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error publishing event");
+                _logger.LogError(ex, "Error publishing event {EventType}", gameEvent.EventType);
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Subscribes to events for a specific game
+        /// </summary>
+        public void SubscribeToGame(string gameId)
+        {
+            var queueName = GameEventRouting.CreateGameQueueName(gameId);
+            var bindingPattern = GameEventRouting.CreateGameBindingPattern(gameId);
+
+            _channel.QueueDeclare(queueName, true, false, false);
+            _channel.QueueBind(queueName, _exchangeName, bindingPattern);
+
+            _logger.LogInformation("Subscribed to game events for game {GameId}", gameId);
+        }
+
+        /// <summary>
+        /// Subscribes to events for a specific player
+        /// </summary>
+        public void SubscribeToPlayer(string gameId, string playerId)
+        {
+            var queueName = GameEventRouting.CreatePlayerQueueName(gameId, playerId);
+            var bindingPattern = GameEventRouting.CreatePlayerBindingPattern(gameId);
+
+            _channel.QueueDeclare(queueName, true, false, false);
+            _channel.QueueBind(queueName, _exchangeName, bindingPattern);
+
+            _logger.LogInformation("Subscribed to player events for player {PlayerId} in game {GameId}", 
+                playerId, gameId);
+        }
+
+        /// <summary>
+        /// Subscribes to events for a specific round
+        /// </summary>
+        public void SubscribeToRound(string gameId, int roundNumber)
+        {
+            var queueName = GameEventRouting.CreateRoundQueueName(gameId, roundNumber);
+            var bindingPattern = GameEventRouting.CreateRoundBindingPattern(gameId);
+
+            _channel.QueueDeclare(queueName, true, false, false);
+            _channel.QueueBind(queueName, _exchangeName, bindingPattern);
+
+            _logger.LogInformation("Subscribed to round events for round {RoundNumber} in game {GameId}", 
+                roundNumber, gameId);
+        }
+
+        /// <summary>
+        /// Subscribes to events for a specific question
+        /// </summary>
+        public void SubscribeToQuestion(string gameId, string questionId)
+        {
+            var queueName = GameEventRouting.CreateQuestionQueueName(gameId, questionId);
+            var bindingPattern = GameEventRouting.CreateQuestionBindingPattern(gameId);
+
+            _channel.QueueDeclare(queueName, true, false, false);
+            _channel.QueueBind(queueName, _exchangeName, bindingPattern);
+
+            _logger.LogInformation("Subscribed to question events for question {QuestionId} in game {GameId}", 
+                questionId, gameId);
+        }
+
+        private string GetRoutingKey(IGameEvent gameEvent)
+        {
+            return gameEvent switch
+            {
+                GameStartedEvent e => GameEventRouting.CreateGameRoutingKey(e.GameId, gameEvent.EventType),
+                GameEndedEvent e => GameEventRouting.CreateGameRoutingKey(e.GameId, gameEvent.EventType),
+                PlayerJoinedEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
+                PlayerLeftEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
+                PlayerScoreUpdatedEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
+                RoundStartedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
+                RoundEndedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
+                AnswerSubmittedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
+                ThemeSelectedEvent e => GameEventRouting.CreateQuestionRoutingKey(e.GameId, e.QuestionId, gameEvent.EventType),
+                QuestionGeneratedEvent e => GameEventRouting.CreateQuestionRoutingKey(e.GameId, e.QuestionId, gameEvent.EventType),
+                _ => throw new ArgumentException($"Unknown event type: {gameEvent.EventType}")
+            };
+        }
+
+        private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
+        {
+            try
+            {
+                var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                var eventType = GameEventRouting.GetEventTypeFromRoutingKey(e.RoutingKey);
+                
+                if (_eventHandlers.TryGetValue(eventType, out var handler))
+                {
+                    handler.HandleEvent(message);
+                }
+                else
+                {
+                    _logger.LogWarning("No handler found for event type {EventType}", eventType);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing message with routing key {RoutingKey}", e.RoutingKey);
             }
         }
 
         public void Dispose()
         {
             _channel?.Dispose();
+            _connection?.Dispose();
         }
     }
 } 

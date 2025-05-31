@@ -7,8 +7,8 @@ namespace DrawPT.GameEngine.Events
     /// </summary>
     public class GameStartedEvent : BaseGameEvent
     {
-        public override string EventType => "GameStarted";
-        public GameConfiguration Configuration { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.GameStarted;
     }
 
     /// <summary>
@@ -16,26 +16,39 @@ namespace DrawPT.GameEngine.Events
     /// </summary>
     public class GameEndedEvent : BaseGameEvent
     {
-        public override string EventType => "GameEnded";
-        public GameResults Results { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.GameEnded;
     }
 
     /// <summary>
-    /// Event raised when a player joins the game
+    /// Event raised when a player joins a game
     /// </summary>
     public class PlayerJoinedEvent : BaseGameEvent
     {
-        public override string EventType => "PlayerJoined";
-        public Player Player { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public string PlayerId { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.PlayerJoined;
     }
 
     /// <summary>
-    /// Event raised when a player leaves the game
+    /// Event raised when a player leaves a game
     /// </summary>
     public class PlayerLeftEvent : BaseGameEvent
     {
-        public override string EventType => "PlayerLeft";
-        public Player Player { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public string PlayerId { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.PlayerLeft;
+    }
+
+    /// <summary>
+    /// Event raised when a player's score is updated
+    /// </summary>
+    public class PlayerScoreUpdatedEvent : BaseGameEvent
+    {
+        public string GameId { get; set; } = string.Empty;
+        public string PlayerId { get; set; } = string.Empty;
+        public int NewScore { get; set; }
+        public override GameEventType EventType => GameEventType.PlayerScoreUpdated;
     }
 
     /// <summary>
@@ -43,8 +56,9 @@ namespace DrawPT.GameEngine.Events
     /// </summary>
     public class RoundStartedEvent : BaseGameEvent
     {
-        public override string EventType => "RoundStarted";
-        public GameRound Round { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public int RoundNumber { get; set; }
+        public override GameEventType EventType => GameEventType.RoundStarted;
     }
 
     /// <summary>
@@ -52,16 +66,42 @@ namespace DrawPT.GameEngine.Events
     /// </summary>
     public class RoundEndedEvent : BaseGameEvent
     {
-        public override string EventType => "RoundEnded";
-        public GameRound Round { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public int RoundNumber { get; set; }
+        public override GameEventType EventType => GameEventType.RoundEnded;
     }
 
     /// <summary>
-    /// Event raised when a player submits an answer
+    /// Event raised when an answer is submitted
     /// </summary>
     public class AnswerSubmittedEvent : BaseGameEvent
     {
-        public override string EventType => "AnswerSubmitted";
-        public GameAnswer Answer { get; set; } = null!;
+        public string GameId { get; set; } = string.Empty;
+        public int RoundNumber { get; set; }
+        public string PlayerId { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.AnswerSubmitted;
+    }
+
+    /// <summary>
+    /// Event raised when a theme is selected
+    /// </summary>
+    public class ThemeSelectedEvent : BaseGameEvent
+    {
+        public string GameId { get; set; } = string.Empty;
+        public string QuestionId { get; set; } = string.Empty;
+        public string Theme { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.ThemeSelected;
+    }
+
+    /// <summary>
+    /// Event raised when a question is generated
+    /// </summary>
+    public class QuestionGeneratedEvent : BaseGameEvent
+    {
+        public string GameId { get; set; } = string.Empty;
+        public string QuestionId { get; set; } = string.Empty;
+        public string Question { get; set; } = string.Empty;
+        public override GameEventType EventType => GameEventType.QuestionGenerated;
     }
 } 
