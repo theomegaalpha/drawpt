@@ -140,15 +140,15 @@ namespace DrawPT.GameEngine
         /// <summary>
         /// Processes a single round of the game
         /// </summary>
-        public async Task ProcessRoundAsync(int roundNumber)
+        public async Task ProcessNewRoundAsync()
         {
             if (_currentState != GameState.InProgress)
             {
-                _logger.LogWarning($"Cannot process round {roundNumber} in game {GameId} in state {_currentState}");
+                _logger.LogWarning($"Cannot process next round in game {GameId} in state {_currentState}");
                 return;
             }
 
-            var round = await _roundManager.StartRoundAsync(roundNumber);
+            var round = await _roundManager.StartNewRoundAsync();
             await _eventBus.PublishAsync(new RoundStartedEvent
             {
                 GameId = GameId,
@@ -156,16 +156,14 @@ namespace DrawPT.GameEngine
             });
 
             // Process the round
-            await _roundManager.ProcessAnswersAsync(round);
-
-            await _roundManager.EndRoundAsync(roundNumber);
+            await _roundManager.EndRoundAsync();
             await _eventBus.PublishAsync(new RoundEndedEvent
             {
                 GameId = GameId,
                 Round = round
             });
 
-            _logger.LogInformation($"Round {roundNumber} completed in game {GameId}");
+            _logger.LogInformation($"Round {_roundManager.CurrentRoundNumber} completed in game {GameId}");
         }
 
         /// <summary>

@@ -3,29 +3,14 @@ using DrawPT.GameEngine.Models;
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>
-    /// Manages game rounds and their lifecycle
+    /// Interface for managing game rounds
     /// </summary>
-    public interface IRoundManager
+    public interface IRoundManager : IDisposable
     {
         /// <summary>
-        /// Starts a new round
+        /// Gets the current round
         /// </summary>
-        Task<GameRound> StartRoundAsync(int roundNumber);
-
-        /// <summary>
-        /// Ends the current round
-        /// </summary>
-        Task EndRoundAsync(int roundNumber);
-
-        /// <summary>
-        /// Processes all answers for the current round
-        /// </summary>
-        Task ProcessAnswersAsync(GameRound round);
-
-        /// <summary>
-        /// Selects a theme for the current round
-        /// </summary>
-        Task<GameTheme> SelectThemeAsync(Player player);
+        GameRound? CurrentRound { get; }
 
         /// <summary>
         /// Gets the current round number
@@ -38,8 +23,18 @@ namespace DrawPT.GameEngine.Interfaces
         IReadOnlyList<GameRound> Rounds { get; }
 
         /// <summary>
-        /// Gets the current active round
+        /// Starts a new round in the game
         /// </summary>
-        GameRound? CurrentRound { get; }
+        Task<GameRound> StartNewRoundAsync();
+
+        /// <summary>
+        /// Submits an answer for the current round
+        /// </summary>
+        Task SubmitAnswerAsync(string playerId, string answer, bool isGambling = false);
+
+        /// <summary>
+        /// Ends the current round and assesses all answers
+        /// </summary>
+        Task EndRoundAsync();
     }
 }

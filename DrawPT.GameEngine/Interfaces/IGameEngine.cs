@@ -39,9 +39,9 @@ namespace DrawPT.GameEngine.Interfaces
         Task RemovePlayerAsync(string connectionId);
 
         /// <summary>
-        /// Processes a single round of the game
+        /// Processes the next round of the game
         /// </summary>
-        Task ProcessRoundAsync(int roundNumber);
+        Task ProcessNewRoundAsync();
 
         /// <summary>
         /// Gets the current game configuration
