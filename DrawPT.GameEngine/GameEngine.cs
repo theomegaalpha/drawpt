@@ -98,8 +98,7 @@ namespace DrawPT.GameEngine
         {
             if (_currentState != GameState.WaitingForPlayers)
             {
-                _logger.LogWarning("Cannot add player {PlayerId} to game {GameId} in state {State}",
-                    player.Id, GameId, _currentState);
+                _logger.LogWarning($"Cannot add player {player.Id} to game {GameId} in state {_currentState}");
                 return false;
             }
 
@@ -112,7 +111,7 @@ namespace DrawPT.GameEngine
                     Player = addedPlayer
                 });
 
-                _logger.LogInformation("Player {PlayerId} joined game {GameId}", player.Id, GameId);
+                _logger.LogInformation($"Player {player.Id} joined game {GameId}");
                 return true;
             }
 
@@ -134,7 +133,7 @@ namespace DrawPT.GameEngine
                     Player = player
                 });
 
-                _logger.LogInformation("Player {PlayerId} left game {GameId}", player.Id, GameId);
+                _logger.LogInformation($"Player {player.Id} left game {GameId}");
             }
         }
 
@@ -145,8 +144,7 @@ namespace DrawPT.GameEngine
         {
             if (_currentState != GameState.InProgress)
             {
-                _logger.LogWarning("Cannot process round {RoundNumber} in game {GameId} in state {State}",
-                    roundNumber, GameId, _currentState);
+                _logger.LogWarning($"Cannot process round {roundNumber} in game {GameId} in state {_currentState}");
                 return;
             }
 
@@ -167,7 +165,7 @@ namespace DrawPT.GameEngine
                 Round = round
             });
 
-            _logger.LogInformation("Round {RoundNumber} completed in game {GameId}", roundNumber, GameId);
+            _logger.LogInformation($"Round {roundNumber} completed in game {GameId}");
         }
 
         /// <summary>
