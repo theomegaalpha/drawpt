@@ -138,7 +138,7 @@ namespace DrawPT.GameEngine
         }
 
         /// <summary>
-        /// Processes a single round of the game
+        /// Processes the next round of the game
         /// </summary>
         public async Task ProcessNewRoundAsync()
         {

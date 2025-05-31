@@ -3,33 +3,33 @@ using DrawPT.GameEngine.Models;
 namespace DrawPT.GameEngine.Interfaces
 {
     /// <summary>
-    /// Manages game questions and their lifecycle
+    /// Interface for managing game questions and themes
     /// </summary>
-    public interface IQuestionManager
+    public interface IQuestionManager : IDisposable
     {
         /// <summary>
-        /// Generates a new question for a given theme
+        /// Gets the current theme
         /// </summary>
-        Task<GameQuestion> GenerateQuestionAsync(string theme);
+        GameTheme? CurrentTheme { get; }
 
         /// <summary>
-        /// Processes a player's answer to a question
+        /// Gets all available themes
         /// </summary>
-        Task<GameAnswer> ProcessAnswerAsync(string playerId, string answer);
+        Task<IEnumerable<GameTheme>> GetAvailableThemesAsync();
 
         /// <summary>
-        /// Assesses all answers for a question
+        /// Selects a theme for the current round
         /// </summary>
-        Task<GameAssessment> AssessAnswersAsync(GameQuestion question, IEnumerable<GameAnswer> answers);
+        Task<GameTheme> SelectThemeAsync(string playerId);
 
         /// <summary>
-        /// Gets a question by its ID
+        /// Generates a new question based on the current theme
         /// </summary>
-        Task<GameQuestion?> GetQuestionAsync(string questionId);
+        Task<GameQuestion> GenerateQuestionAsync();
 
         /// <summary>
-        /// Saves a question to the database
+        /// Gets a random theme from the available themes
         /// </summary>
-        Task SaveQuestionAsync(GameQuestion question);
+        Task<GameTheme> GetRandomThemeAsync();
     }
 }
