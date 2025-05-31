@@ -1,201 +1,178 @@
+using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
 
-namespace DrawPT.GameEngine;
-
-public class GameEngine : IGameEngine
+namespace DrawPT.GameEngine
 {
-    private readonly IGameStateManager _stateManager;
-    private readonly IAIClient _aiClient;
-    private readonly ILogger<GameEngine> _logger;
-
-    public GameEngine(
-        IGameStateManager stateManager,
-        IAIClient aiClient,
-        ILogger<GameEngine> logger)
+    /// <summary>
+    /// Base implementation of the game engine
+    /// </summary>
+    public class GameEngine : IGameEngine
     {
-        _stateManager = stateManager;
-        _aiClient = aiClient;
-        _logger = logger;
-    }
+        private readonly IPlayerManager _playerManager;
+        private readonly IRoundManager _roundManager;
+        private readonly IQuestionManager _questionManager;
+        private readonly IGameEventBus _eventBus;
+        private readonly ILogger<GameEngine> _logger;
 
-    public async Task<bool> InitializeGameAsync(string roomCode, GameConfiguration configuration)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        state.Status = GameStatus.WaitingForPlayers;
-        await _stateManager.SaveGameStateAsync(roomCode, state);
-        return true;
-    }
+        private GameConfiguration _configuration = null!;
+        private GameState _currentState = GameState.WaitingForPlayers;
 
-    public async Task<bool> AddPlayerAsync(string roomCode, Player player)
-    {
-        return await _stateManager.AddPlayerAsync(roomCode, player);
-    }
+        /// <summary>
+        /// Unique identifier for the game instance
+        /// </summary>
+        public string GameId { get; }
 
-    public async Task<bool> RemovePlayerAsync(string roomCode, string connectionId)
-    {
-        return await _stateManager.RemovePlayerAsync(roomCode, connectionId);
-    }
+        /// <summary>
+        /// Current state of the game
+        /// </summary>
+        public GameState CurrentState => _currentState;
 
-    public async Task<GameState> GetGameStateAsync(string roomCode)
-    {
-        return await _stateManager.GetGameStateAsync(roomCode);
-    }
-
-    public async Task<GameQuestion> GenerateQuestionAsync(string roomCode, string theme)
-    {
-        try
+        public GameEngine(
+            IPlayerManager playerManager,
+            IRoundManager roundManager,
+            IQuestionManager questionManager,
+            IGameEventBus eventBus,
+            ILogger<GameEngine> logger)
         {
-            var question = await _aiClient.GenerateGameQuestionAsync(theme);
-            return new GameQuestion
+            _playerManager = playerManager;
+            _roundManager = roundManager;
+            _questionManager = questionManager;
+            _eventBus = eventBus;
+            _logger = logger;
+            GameId = Guid.NewGuid().ToString();
+        }
+
+        /// <summary>
+        /// Starts a new game instance
+        /// </summary>
+        public async Task StartGameAsync(GameConfiguration configuration)
+        {
+            _configuration = configuration;
+            _currentState = GameState.InProgress;
+
+            await _eventBus.PublishAsync(new GameStartedEvent
             {
-                Id = question.Id,
-                ImageUrl = question.ImageUrl,
-                OriginalPrompt = question.OriginalPrompt
+                GameId = GameId,
+                Configuration = configuration
+            });
+
+            _logger.LogInformation("Game {GameId} started with configuration {@Configuration}", GameId, configuration);
+        }
+
+        /// <summary>
+        /// Ends the current game instance
+        /// </summary>
+        public async Task EndGameAsync()
+        {
+            _currentState = GameState.Ended;
+
+            var results = new GameResults
+            {
+                PlayerResults = (await _playerManager.GetPlayersAsync())
+                    .Select(p => new PlayerResult
+                    {
+                        Id = p.Id,
+                        ConnectionId = p.ConnectionId,
+                        Username = p.Username,
+                        FinalScore = p.Score
+                    })
+                    .ToList(),
+                TotalRounds = _roundManager.CurrentRoundNumber,
+                WasCompleted = true
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating question for theme {Theme}", theme);
-            throw;
-        }
-    }
 
-    public async Task<GameAnswer> SubmitAnswerAsync(string roomCode, string connectionId, string guess, bool isGambling)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var currentRound = state.GameRounds.LastOrDefault();
-        
-        if (currentRound == null)
-        {
-            throw new InvalidOperationException("No active round found");
-        }
-
-        var answer = new GameAnswer
-        {
-            PlayerConnectionId = connectionId,
-            Guess = guess,
-            IsGambling = isGambling,
-            Score = 0,
-            BonusPoints = 0,
-            Reason = "Pending assessment"
-        };
-
-        currentRound.Answers.Add(answer);
-        await _stateManager.SaveGameStateAsync(roomCode, state);
-        
-        return answer;
-    }
-
-    public async Task<List<GameAnswer>> AssessAnswersAsync(string roomCode, int roundNumber)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var round = state.GameRounds.FirstOrDefault(r => r.RoundNumber == roundNumber);
-        
-        if (round == null)
-        {
-            throw new InvalidOperationException($"Round {roundNumber} not found");
-        }
-
-        try
-        {
-            var assessmentJson = await _aiClient.GenerateAssessmentAsync(
-                round.Question.OriginalPrompt,
-                round.Answers);
-
-            var assessedAnswers = System.Text.Json.JsonSerializer.Deserialize<List<GameAnswer>>(assessmentJson) ?? [];
-            round.Answers = assessedAnswers;
-            await _stateManager.SaveGameStateAsync(roomCode, state);
-            
-            return assessedAnswers;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error assessing answers for round {RoundNumber}", roundNumber);
-            throw;
-        }
-    }
-
-    public async Task<GameResults> GetGameResultsAsync(string roomCode)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var results = new GameResults();
-        var playerResults = new Dictionary<string, PlayerResult>();
-
-        foreach (var player in state.Players.Values)
-        {
-            playerResults[player.ConnectionId] = new PlayerResult
+            await _eventBus.PublishAsync(new GameEndedEvent
             {
-                Id = player.Player.Id,
-                ConnectionId = player.ConnectionId,
-                Username = player.Player.Username,
-                FinalScore = 0
-            };
+                GameId = GameId,
+                Results = results
+            });
+
+            _logger.LogInformation("Game {GameId} ended with results {@Results}", GameId, results);
         }
 
-        foreach (var round in state.GameRounds)
+        /// <summary>
+        /// Adds a player to the game
+        /// </summary>
+        public async Task<bool> AddPlayerAsync(string connectionId, Player player)
         {
-            foreach (var answer in round.Answers)
+            if (_currentState != GameState.WaitingForPlayers)
             {
-                if (playerResults.TryGetValue(answer.PlayerConnectionId, out var result))
+                _logger.LogWarning("Cannot add player {PlayerId} to game {GameId} in state {State}",
+                    player.Id, GameId, _currentState);
+                return false;
+            }
+
+            var addedPlayer = await _playerManager.AddPlayerAsync(connectionId, player);
+            if (addedPlayer != null)
+            {
+                await _eventBus.PublishAsync(new PlayerJoinedEvent
                 {
-                    result.FinalScore += answer.Score + answer.BonusPoints;
-                }
+                    GameId = GameId,
+                    Player = addedPlayer
+                });
+
+                _logger.LogInformation("Player {PlayerId} joined game {GameId}", player.Id, GameId);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Removes a player from the game
+        /// </summary>
+        public async Task RemovePlayerAsync(string connectionId)
+        {
+            var player = await _playerManager.GetPlayerAsync(connectionId);
+            if (player != null)
+            {
+                await _playerManager.RemovePlayerAsync(connectionId);
+                await _eventBus.PublishAsync(new PlayerLeftEvent
+                {
+                    GameId = GameId,
+                    Player = player
+                });
+
+                _logger.LogInformation("Player {PlayerId} left game {GameId}", player.Id, GameId);
             }
         }
 
-        results.PlayerResults = playerResults.Values.ToList();
-        return results;
-    }
-
-    public async Task<bool> StartGameAsync(string roomCode)
-    {
-        return await _stateManager.UpdateGameStatusAsync(roomCode, GameStatus.InProgress);
-    }
-
-    public async Task<bool> EndGameAsync(string roomCode)
-    {
-        return await _stateManager.UpdateGameStatusAsync(roomCode, GameStatus.Completed);
-    }
-
-    public async Task<bool> IsGameCompleteAsync(string roomCode)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        return state.Status == GameStatus.Completed;
-    }
-
-    public async Task<bool> IsPlayerTurnAsync(string roomCode, string connectionId)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var currentRound = state.GameRounds.LastOrDefault();
-        
-        if (currentRound == null)
-            return false;
-
-        // Check if it's this player's turn to select a theme
-        var playerIndex = state.Players.Keys.ToList().IndexOf(connectionId);
-        return playerIndex == currentRound.RoundNumber % state.Players.Count;
-    }
-
-    public async Task<string> GetCurrentThemeAsync(string roomCode)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var currentRound = state.GameRounds.LastOrDefault();
-        return currentRound?.Question.OriginalPrompt ?? string.Empty;
-    }
-
-    public async Task<bool> SetThemeAsync(string roomCode, string theme)
-    {
-        var state = await _stateManager.GetGameStateAsync(roomCode);
-        var currentRound = state.GameRounds.LastOrDefault();
-        
-        if (currentRound != null)
+        /// <summary>
+        /// Processes a single round of the game
+        /// </summary>
+        public async Task ProcessRoundAsync(int roundNumber)
         {
-            currentRound.Question.OriginalPrompt = theme;
-            await _stateManager.SaveGameStateAsync(roomCode, state);
-            return true;
+            if (_currentState != GameState.InProgress)
+            {
+                _logger.LogWarning("Cannot process round {RoundNumber} in game {GameId} in state {State}",
+                    roundNumber, GameId, _currentState);
+                return;
+            }
+
+            var round = await _roundManager.StartRoundAsync(roundNumber);
+            await _eventBus.PublishAsync(new RoundStartedEvent
+            {
+                GameId = GameId,
+                Round = round
+            });
+
+            // Process the round
+            await _roundManager.ProcessAnswersAsync(round);
+
+            await _roundManager.EndRoundAsync(roundNumber);
+            await _eventBus.PublishAsync(new RoundEndedEvent
+            {
+                GameId = GameId,
+                Round = round
+            });
+
+            _logger.LogInformation("Round {RoundNumber} completed in game {GameId}", roundNumber, GameId);
         }
 
-        return false;
+        /// <summary>
+        /// Gets the current game configuration
+        /// </summary>
+        public GameConfiguration GetConfiguration() => _configuration;
     }
-} 
+}
