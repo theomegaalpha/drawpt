@@ -27,10 +27,13 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.37" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
+    <ProjectReference Include="..\DrawPT.GameEngine\DrawPT.GameEngine.csproj" />
   </ItemGroup>
 
 </Project>

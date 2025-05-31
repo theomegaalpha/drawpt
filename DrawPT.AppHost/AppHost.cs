@@ -31,7 +31,7 @@ var openai = builder.ExecutionContext.IsPublishMode
     : builder.AddConnectionString("openai");
 var gemini = builder.AddConnectionString("gemini");
 
-var rabbitMq = builder.AddRabbitMQ("messaging");
+var rabbitmq = builder.AddRabbitMQ("messaging");
 
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
@@ -39,6 +39,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(storage)
     .WithReference(openai)
     .WithReference(gemini)
+    .WithReference(rabbitmq)
     .WithReference(signalr)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
@@ -70,9 +71,11 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     });
 
 
-builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking");
+builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
+    .WithReference(rabbitmq);
 
-builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine");
+builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
+    .WithReference(rabbitmq);
 
 
 builder.Build().Run();

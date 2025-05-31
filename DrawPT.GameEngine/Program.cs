@@ -1,12 +1,14 @@
+using DrawPT.GameEngine.Interfaces;
+using DrawPT.GameEngine.Managers;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddRabbitMQClient(connectionName: "messaging");
 
-services.AddSingleton<IGameEventBus, GameEventBus>();
-services.AddScoped<IGameEngine, GameEngine>();
+var services = builder.Services;
 services.AddScoped<IPlayerManager, PlayerManager>();
-services.AddScoped<IRoundManager, RoundManager>();
-services.AddScoped<IQuestionManager, QuestionManager>();
 
 var app = builder.Build();
 app.UseHttpsRedirection();
