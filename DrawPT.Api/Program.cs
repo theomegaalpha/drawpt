@@ -37,12 +37,12 @@ builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
-builder.Services.AddSingleton<GameCollection>();
-builder.Services.AddSingleton<IGameFactory, GameFactory>();
+//builder.Services.AddSingleton<GameCollection>();
+//builder.Services.AddSingleton<IGameFactory, GameFactory>();
 builder.Services.AddOptions<GameOptions>()
                 .BindConfiguration("Game");
 
-builder.Services.AddScoped<Game>();
+//builder.Services.AddScoped<Game>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()
