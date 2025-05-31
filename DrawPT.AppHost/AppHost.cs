@@ -33,6 +33,8 @@ var gemini = builder.AddConnectionString("gemini");
 
 var rabbitmq = builder.AddRabbitMQ("messaging");
 
+var redis = builder.AddRedis("cache");
+
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
@@ -41,6 +43,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(gemini)
     .WithReference(rabbitmq)
     .WithReference(signalr)
+    .WithReference(redis)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
@@ -72,13 +75,18 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
 
 
 builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
-    .WithReference(rabbitmq);
+    .WithReference(rabbitmq)
+    .WithReference(redis)
+    .WaitFor(rabbitmq)
+    .WaitFor(redis);
 
 builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(rabbitmq)
+    .WithReference(redis)
     .WithReference(storage)
     .WaitFor(rabbitmq)
-    .WaitFor(storage);
+    .WaitFor(storage)
+    .WaitFor(redis);
 
 
 builder.Build().Run();

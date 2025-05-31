@@ -1,9 +1,9 @@
 using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
-using DrawPT.Api.Engine;
 using DrawPT.Api.Hubs;
-using DrawPT.Data.Models;
 using DrawPT.Api.Services;
+using DrawPT.Common.Services;
+using DrawPT.Data.Models;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
@@ -26,21 +26,23 @@ builder.Services.AddDistributedMemoryCache();
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
+builder.AddRedisDistributedCache(connectionName: "cache");
+builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
 
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
-builder.Services.AddTransient<AIClient>();
+//builder.Services.AddTransient<AIClient>();
 builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
-builder.Services.AddSingleton<CacheService>();
+builder.Services.AddTransient<CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
 //builder.Services.AddSingleton<GameCollection>();
 //builder.Services.AddSingleton<IGameFactory, GameFactory>();
-builder.Services.AddOptions<GameOptions>()
-                .BindConfiguration("Game");
+//builder.Services.AddOptions<GameOptions>()
+//                .BindConfiguration("Game");
 
 //builder.Services.AddScoped<Game>();
 

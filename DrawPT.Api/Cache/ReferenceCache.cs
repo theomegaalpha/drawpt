@@ -8,7 +8,6 @@ namespace DrawPT.Api.Cache
     {
         public List<string> Adjectives { get; set; }
         public List<string> Nouns { get; set; }
-        public List<ItemType> ItemTypes { get; set; }
         public ConcurrentDictionary<Guid, string> Themes { get; set; } = new();
 
         public void BuildCache(ReferenceRepository _repository)

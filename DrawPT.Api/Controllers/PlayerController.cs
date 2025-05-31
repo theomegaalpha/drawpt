@@ -1,5 +1,6 @@
-﻿using DrawPT.Data.Models;
-using DrawPT.Api.Services;
+﻿using DrawPT.Api.Services;
+using DrawPT.Common.Models;
+using DrawPT.Common.Services;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

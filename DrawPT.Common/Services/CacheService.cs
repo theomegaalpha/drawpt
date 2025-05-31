@@ -1,8 +1,8 @@
-﻿using DrawPT.Data.Models;
+﻿using DrawPT.Common.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
-namespace DrawPT.Api.Services
+namespace DrawPT.Common.Services
 {
     public class CacheService
     {

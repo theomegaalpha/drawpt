@@ -1,4 +1,4 @@
-﻿namespace DrawPT.Data.Models
+﻿namespace DrawPT.Common.Models
 {
     public class Player
     {
