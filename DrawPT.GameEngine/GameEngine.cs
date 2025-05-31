@@ -1,6 +1,7 @@
 using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Models;
+using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine
 {
@@ -12,7 +13,7 @@ namespace DrawPT.GameEngine
         private readonly IPlayerManager _playerManager;
         private readonly IRoundManager _roundManager;
         private readonly IQuestionManager _questionManager;
-        private readonly IGameEventBus _eventBus;
+        private readonly IModel _channel;
         private readonly ILogger<GameEngine> _logger;
 
         private GameConfiguration _configuration = null!;
@@ -32,13 +33,13 @@ namespace DrawPT.GameEngine
             IPlayerManager playerManager,
             IRoundManager roundManager,
             IQuestionManager questionManager,
-            IGameEventBus eventBus,
+            IConnection rabbitMQConnection,
             ILogger<GameEngine> logger)
         {
             _playerManager = playerManager;
             _roundManager = roundManager;
             _questionManager = questionManager;
-            _eventBus = eventBus;
+            _channel = rabbitMQConnection.CreateModel();
             _logger = logger;
             GameId = Guid.NewGuid().ToString();
         }
@@ -51,11 +52,7 @@ namespace DrawPT.GameEngine
             _configuration = configuration;
             _currentState = GameState.InProgress;
 
-            await _eventBus.PublishAsync(new GameStartedEvent
-            {
-                GameId = GameId,
-                Configuration = configuration
-            });
+            _channel.BasicPublish();
 
             _logger.LogInformation("Game {GameId} started with configuration {@Configuration}", GameId, configuration);
         }

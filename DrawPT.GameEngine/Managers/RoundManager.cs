@@ -14,7 +14,6 @@ namespace DrawPT.GameEngine.Managers
     {
         private readonly ILogger<RoundManager> _logger;
         private readonly IGameEventBus _eventBus;
-        private readonly IConnection _rabbitMqConnection;
         private readonly IModel _channel;
         private readonly string _gameId;
         private readonly GameConfiguration _configuration;
@@ -36,7 +35,6 @@ namespace DrawPT.GameEngine.Managers
         {
             _logger = logger;
             _eventBus = eventBus;
-            _rabbitMqConnection = rabbitMqConnection;
             _gameId = gameId;
             _configuration = configuration;
             _aiService = aiService;
@@ -44,7 +42,7 @@ namespace DrawPT.GameEngine.Managers
             _imageRepository = imageRepository;
 
             // Set up RabbitMQ channel
-            _channel = _rabbitMqConnection.CreateModel();
+            _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
 
             // Declare queue for round events

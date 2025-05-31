@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using DrawPT.GameEngine.Events;
 using DrawPT.GameEngine.Interfaces;
-using Microsoft.Extensions.Logging;
+using DrawPT.GameEngine.Helpers;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -46,7 +46,7 @@ namespace DrawPT.GameEngine.Services
         {
             try
             {
-                var routingKey = GetRoutingKey(gameEvent);
+                var routingKey = RabbitMQHelpers.GetRoutingKey(gameEvent);
                 var message = JsonSerializer.Serialize(gameEvent);
                 var body = Encoding.UTF8.GetBytes(message);
 
@@ -125,23 +125,6 @@ namespace DrawPT.GameEngine.Services
                 questionId, gameId);
         }
 
-        private string GetRoutingKey(IGameEvent gameEvent)
-        {
-            return gameEvent switch
-            {
-                GameStartedEvent e => GameEventRouting.CreateGameRoutingKey(e.GameId, gameEvent.EventType),
-                GameEndedEvent e => GameEventRouting.CreateGameRoutingKey(e.GameId, gameEvent.EventType),
-                PlayerJoinedEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
-                PlayerLeftEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
-                PlayerScoreUpdatedEvent e => GameEventRouting.CreatePlayerRoutingKey(e.GameId, e.PlayerId, gameEvent.EventType),
-                RoundStartedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
-                RoundEndedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
-                AnswerSubmittedEvent e => GameEventRouting.CreateRoundRoutingKey(e.GameId, e.RoundNumber, gameEvent.EventType),
-                ThemeSelectedEvent e => GameEventRouting.CreateQuestionRoutingKey(e.GameId, e.QuestionId, gameEvent.EventType),
-                QuestionGeneratedEvent e => GameEventRouting.CreateQuestionRoutingKey(e.GameId, e.QuestionId, gameEvent.EventType),
-                _ => throw new ArgumentException($"Unknown event type: {gameEvent.EventType}")
-            };
-        }
 
         private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
         {
