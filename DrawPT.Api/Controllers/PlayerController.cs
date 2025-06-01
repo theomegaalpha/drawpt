@@ -2,11 +2,13 @@
 using DrawPT.Common.Models;
 using DrawPT.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace DrawPT.Api.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class PlayerController : ControllerBase

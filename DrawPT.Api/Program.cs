@@ -5,15 +5,24 @@ using DrawPT.Api.Services;
 using DrawPT.Common.Services;
 using DrawPT.Common.Interfaces;
 using DrawPT.Data.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Azure.SignalR;
 using Microsoft.Identity.Web;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretKey"]!);
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(bytes),
+        ValidAudience = builder.Configuration["Authentication:ValidAudience"],
+        ValidIssuer = builder.Configuration["Authentication:ValidIssuer"],
+    };
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,6 +46,7 @@ builder.Services.AddTransient<ReferenceRepository>();
 //builder.Services.AddTransient<AIClient>();
 builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
+builder.Services.AddTransient<CacheService>();
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
 //builder.Services.AddSingleton<GameCollection>();

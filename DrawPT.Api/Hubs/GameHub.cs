@@ -70,7 +70,7 @@ namespace DrawPT.Api.Hubs
             // Start consuming from all game events
             _channel.QueueDeclare("client_broadcast", true, false, false);
             // Bind to catch ALL game events with any number of segments
-            _channel.QueueBind("client_broadcast", "client_broadcast", "game.*.*.*");
+            _channel.QueueBind("client_broadcast", "client_broadcast", "game.#");
             _channel.BasicConsume(queue: "client_broadcast",
                                 autoAck: true,
                                 consumer: consumer);

@@ -1,4 +1,13 @@
 import type { Player, PlayerWithExpiration } from '@/models/player'
+import { supabase } from '@/lib/supabase'
+
+const getAccessToken = async () => {
+  const { data, error } = await supabase.auth.getSession()
+  if (error) {
+    throw error
+  }
+  return data.session?.access_token
+}
 
 const Api = {
   getPlayer: async (): Promise<Player> => {
@@ -10,7 +19,12 @@ const Api = {
       }
     }
 
-    const response = await fetch(`/api/player`)
+    const token = await getAccessToken()
+    const response = await fetch(`/api/player`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
@@ -27,10 +41,12 @@ const Api = {
   },
   updatePlayer: async (player: Player): Promise<void> => {
     window.localStorage.removeItem('storedPlayer')
+    const token = await getAccessToken()
     fetch(`/api/player`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(player)
     })
@@ -45,7 +61,12 @@ const Api = {
       })
   },
   createRoom: async (): Promise<string> => {
-    const response = await fetch(`/api/room`)
+    const token = await getAccessToken()
+    const response = await fetch(`/api/room`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
@@ -55,7 +76,12 @@ const Api = {
     return response.text()
   },
   checkRoom: async (roomCode: string): Promise<boolean> => {
-    const response = await fetch(`/api/room/${roomCode}`)
+    const token = await getAccessToken()
+    const response = await fetch(`/api/room/${roomCode}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)

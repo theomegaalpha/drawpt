@@ -1,9 +1,11 @@
 ﻿using DrawPT.Common.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 
 namespace DrawPT.Api.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class RoomController : ControllerBase
