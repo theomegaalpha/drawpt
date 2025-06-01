@@ -3,8 +3,9 @@ using DrawPT.Common.Models;
 using DrawPT.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Supabase;
+using DrawPT.Common.Services;
+using Microsoft.Extensions.Azure;
 
 namespace DrawPT.Api.Controllers
 {
@@ -15,11 +16,17 @@ namespace DrawPT.Api.Controllers
     {
         private readonly RandomService _randomService;
         private readonly ICacheService _cacheService;
+        private readonly ProfileService _profileService;
+        private readonly IConfiguration _configuration;
 
-        public PlayerController(ICacheService cacheService, RandomService randomService)
+        public PlayerController(ICacheService cacheService,
+            RandomService randomService, ProfileService profileService,
+            IConfiguration configuration)
         {
             _randomService = randomService;
             _cacheService = cacheService;
+            _profileService = profileService;
+            _configuration = configuration;
         }
 
         // GET: api/<PlayerController>
@@ -28,6 +35,16 @@ namespace DrawPT.Api.Controllers
         {
             var player = await _cacheService.CreatePlayerAsync();
             player.Username = _randomService.GenerateRandomUsername();
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            
+            if (userId == null)
+            {
+                return BadRequest("User ID claim is not present.");
+            }
+
+            var profile = await _profileService.GetProfile(Guid.Parse(userId));
+
             return Ok(player);
         }
 

@@ -36,6 +36,9 @@ var rabbitmq = builder.AddRabbitMQ("messaging");
 var redis = builder.AddRedis("cache");
 
 
+var supabaseUrl = builder.AddParameter("supabase-url");
+var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
+var googleClientId = builder.AddParameter("google-client-id");
 var supabaseIssuer= builder.AddParameter("supabaseIssuer");
 var supabaseSecretKey = builder.AddParameter("supabaseSecretKey", true);
 // Add DrawPT.Api project to Aspire setup
@@ -49,6 +52,8 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(redis)
     .WithEnvironment("Authentication:ValidIssuer", supabaseIssuer)
     .WithEnvironment("Authentication:SecretKey", supabaseSecretKey)
+    .WithEnvironment("Supabase:Url", supabaseUrl)
+    .WithEnvironment("Supabase:AnonKey", supabaseAnonKey)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
@@ -58,9 +63,6 @@ var customDomain = builder.AddParameter("customDomain");
 var certificateName = builder.AddParameter("certificateName");
 
 
-var supabaseUrl = builder.AddParameter("supabase-url");
-var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
-var googleClientId = builder.AddParameter("google-client-id");
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)

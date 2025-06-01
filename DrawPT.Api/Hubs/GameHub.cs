@@ -59,7 +59,7 @@ namespace DrawPT.Api.Hubs
                     var roomCode = parts[1];
                     var type = parts[2];
                     var action = parts[3];
-                    await HandleGameEvent(roomCode, type, action, message);
+                    await HandleGameEvent(roomCode, action, message);
                 }
                 catch (Exception ex)
                 {
@@ -78,9 +78,9 @@ namespace DrawPT.Api.Hubs
             _logger.LogInformation("Started consuming from client_broadcast queue");
         }
 
-        private async Task HandleGameEvent(string roomCode, string type, string action, string message)
+        private async Task HandleGameEvent(string roomCode, string action, string message)
         {
-            switch (type)
+            switch (action)
             {
                 case "join_request":
                     var player = JsonSerializer.Deserialize<Player>(message);

@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Azure.SignalR;
 using Microsoft.Identity.Web;
 using System.Text;
+using Supabase.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,20 @@ builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
+builder.Services.AddTransient<Supabase.Client>(sp =>
+{
+    var url = builder.Configuration["Supabase:Url"];
+    var secretKey = builder.Configuration["Supabase:AnonKey"];
+    var options = new Supabase.SupabaseOptions
+    {
+        AutoConnectRealtime = true
+    };
+    var client = new Supabase.Client(url, secretKey, options);
+    client.InitializeAsync().Wait();
+    return client;
+});
+builder.Services.AddTransient<ProfileService>();
+
 
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
