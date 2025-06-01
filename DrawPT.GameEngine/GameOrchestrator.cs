@@ -69,7 +69,7 @@ namespace DrawPT.GameEngine
             string serializedGameState = JsonSerializer.Serialize(gameState);
 
             // Store the game state in Redis cache with a 1-hour expiration
-            _cache.SetString($"room:{roomCode}", serializedGameState, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) });
+            _cache.SetString($"room:{roomCode}", serializedGameState, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2) });
         }
     }
 }
