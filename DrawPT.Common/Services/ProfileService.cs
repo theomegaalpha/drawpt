@@ -1,5 +1,7 @@
 ﻿using DrawPT.Common.Models.Supabase;
 using Supabase;
+using System.Reflection;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DrawPT.Common.Services
 {
@@ -12,11 +14,19 @@ namespace DrawPT.Common.Services
             _supabase = supabase;
         }
 
-        public async Task<Profile?> GetProfile(Guid userId)
+        public async Task<Profile?> GetProfileAsync(Guid userId)
         {
             return await _supabase.From<Profile>()
-                .Filter("id", Supabase.Postgrest.Constants.Operator.Equals, userId.ToString())
+                .Where(p => p.Id == userId)
                 .Single();
+        }
+
+        public async Task UpdateUsernameAsync(Guid userId, string username)
+        {
+            await _supabase.From<Profile>()
+              .Where(x => x.Id == userId)
+              .Set(x => x.Username, username)
+              .Update();
         }
     }
 }

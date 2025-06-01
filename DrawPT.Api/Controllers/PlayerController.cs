@@ -1,11 +1,10 @@
 ﻿using DrawPT.Api.Services;
 using DrawPT.Common.Models;
 using DrawPT.Common.Interfaces;
+using DrawPT.Common.Models.Supabase;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Supabase;
 using DrawPT.Common.Services;
-using Microsoft.Extensions.Azure;
 
 namespace DrawPT.Api.Controllers
 {
@@ -43,7 +42,7 @@ namespace DrawPT.Api.Controllers
                 return BadRequest("User ID claim is not present.");
             }
 
-            var profile = await _profileService.GetProfile(Guid.Parse(userId));
+            var profile = await _profileService.GetProfileAsync(new Guid(userId));
 
             return Ok(player);
         }
@@ -66,7 +65,15 @@ namespace DrawPT.Api.Controllers
         [HttpPost()]
         public async Task<ActionResult<Player>> Post([FromBody] Player player)
         {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+
+            if (userId == null)
+            {
+                return BadRequest("User ID claim is not present.");
+            }
+
             var updatedPlayer = await _cacheService.UpdatePlayerAsync(player);
+            await _profileService.UpdateUsernameAsync(new Guid(userId), player.Username);
             return Ok(updatedPlayer);
         }
     }
