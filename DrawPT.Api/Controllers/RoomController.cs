@@ -1,7 +1,6 @@
-﻿using DrawPT.Common.Services;
+﻿using DrawPT.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
-using System.Threading.Channels;
 
 namespace DrawPT.Api.Controllers
 {
@@ -9,10 +8,10 @@ namespace DrawPT.Api.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private readonly CacheService _cacheService;
+        private readonly ICacheService _cacheService;
         private readonly IModel _channel;
 
-        public RoomController(CacheService cacheService, IConnection rabbitMQConnection)
+        public RoomController(ICacheService cacheService, IConnection rabbitMQConnection)
         {
             _cacheService = cacheService;
             _channel = rabbitMQConnection.CreateModel();

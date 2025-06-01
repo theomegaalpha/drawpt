@@ -1,6 +1,6 @@
 ﻿using DrawPT.Api.Services;
 using DrawPT.Common.Models;
-using DrawPT.Common.Services;
+using DrawPT.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -12,9 +12,9 @@ namespace DrawPT.Api.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly RandomService _randomService;
-        private readonly CacheService _cacheService;
+        private readonly ICacheService _cacheService;
 
-        public PlayerController(CacheService cacheService, RandomService randomService)
+        public PlayerController(ICacheService cacheService, RandomService randomService)
         {
             _randomService = randomService;
             _cacheService = cacheService;

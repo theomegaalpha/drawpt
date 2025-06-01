@@ -1,10 +1,11 @@
-﻿using DrawPT.Common.Models;
+﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
 namespace DrawPT.Common.Services
 {
-    public class CacheService
+    public class CacheService : ICacheService
     {
         private readonly IDistributedCache _cache;
 

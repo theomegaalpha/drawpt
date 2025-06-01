@@ -1,8 +1,6 @@
-﻿using DrawPT.Common.Models;
-using DrawPT.Common.Services;
-using DrawPT.Data.Models;
+﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Models;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Caching.Distributed;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -28,13 +26,13 @@ namespace DrawPT.Api.Hubs
         private readonly ILogger<GameHub> _logger;
         private readonly IModel _channel;
         private readonly IHubContext<GameHub, IGameClient> _hubContext;
-        private readonly CacheService _cache;
+        private readonly ICacheService _cache;
 
         public GameHub(
             ILogger<GameHub> logger,
+            ICacheService cacheService,
             IConnection rabbitMqConnection,
-            IHubContext<GameHub, IGameClient> hubContext,
-            CacheService cacheService)
+            IHubContext<GameHub, IGameClient> hubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
