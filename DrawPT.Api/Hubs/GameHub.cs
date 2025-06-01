@@ -1,10 +1,13 @@
-﻿using DrawPT.Common.Interfaces;
+﻿using DrawPT.Common.Configuration;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
+
 
 namespace DrawPT.Api.Hubs
 {
@@ -21,6 +24,7 @@ namespace DrawPT.Api.Hubs
         Task WriteMessage(string message);
     }
 
+    [Authorize]
     public class GameHub : Hub<IGameClient>
     {
         private readonly ILogger<GameHub> _logger;
@@ -40,7 +44,7 @@ namespace DrawPT.Api.Hubs
 
             // Set up RabbitMQ channel
             _channel = rabbitMqConnection.CreateModel();
-            _channel.ExchangeDeclare("client_broadcast", ExchangeType.Topic);
+            _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
 
             // Set up consumer
             var consumer = new EventingBasicConsumer(_channel);
@@ -54,24 +58,24 @@ namespace DrawPT.Api.Hubs
 
                 try
                 {
-                    // Extract room code from routing key (format: game.{roomCode}.{type}.{action})
+                    // Extract room code from routing key (format: client_broadcast.{roomCode}.{action})
                     var parts = routingKey.Split('.');
                     var roomCode = parts[1];
-                    var type = parts[2];
-                    var action = parts[3];
+                    var action = parts[2];
                     await HandleClientBroadcast(roomCode, action, message);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error handling game event: {message}");
+                    _logger.LogError(ex, $"Error handling client broadcast: {message}");
                 }
             };
 
             // Start consuming from all client broadcast messages
-            _channel.QueueDeclare("client_broadcast");
+            _channel.QueueDeclare(ClientBroadcastMQ.QueueName);
             // Bind to catch ALL client broadcast messages with any number of segments
-            _channel.QueueBind("client_broadcast", "client_broadcast", "game.#");
-            _channel.BasicConsume(queue: "client_broadcast",
+            _channel.QueueBind(ClientBroadcastMQ.QueueName,
+                ClientBroadcastMQ.ExchangeName, ClientBroadcastMQ.RoutingKey);
+            _channel.BasicConsume(queue: ClientBroadcastMQ.QueueName,
                                 autoAck: true,
                                 consumer: consumer);
 
@@ -82,12 +86,12 @@ namespace DrawPT.Api.Hubs
         {
             switch (action)
             {
-                case "join_request":
+                case ClientBroadcastMQ.PlayerJoinedAction:
                     var player = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerJoined(player!);
                     break;
 
-                case "leave_request":
+                case ClientBroadcastMQ.PlayerLeftAction:
                     var leftPlayer = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerLeft(leftPlayer!);
                     break;
@@ -131,11 +135,11 @@ namespace DrawPT.Api.Hubs
             await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
-            var routingKey = $"game.{roomCode}.player.join_request";
+            var routingKey = ClientBroadcastMQ.RoutingKeys.PlayerJoined(roomCode);
             _logger.LogInformation($"Publishing message with routing key: {routingKey}");
 
             _channel.BasicPublish(
-                exchange: "client_broadcast",
+                exchange: ClientBroadcastMQ.ExchangeName,
                 routingKey: routingKey,
                 basicProperties: null,
                 body: body);
@@ -155,8 +159,8 @@ namespace DrawPT.Api.Hubs
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
             _channel.BasicPublish(
-                exchange: "client_broadcast",
-                routingKey: $"game.{player.RoomCode}.player.leave_request",
+                exchange: ClientBroadcastMQ.ExchangeName,
+                routingKey: ClientBroadcastMQ.RoutingKeys.PlayerLeft(player.RoomCode),
                 basicProperties: null,
                 body: body);
 
