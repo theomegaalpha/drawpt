@@ -1,13 +1,5 @@
 import type { Player } from '@/models/player'
-import { supabase } from '@/lib/supabase'
-
-const getAccessToken = async () => {
-  const { data, error } = await supabase.auth.getSession()
-  if (error) {
-    throw error
-  }
-  return data.session?.access_token
-}
+import { getAccessToken } from '@/lib/auth'
 
 const Api = {
   getPlayer: async (): Promise<Player> => {

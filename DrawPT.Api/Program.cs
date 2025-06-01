@@ -2,14 +2,15 @@ using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
 using DrawPT.Api.Hubs;
 using DrawPT.Api.Services;
-using DrawPT.Common.Services;
 using DrawPT.Common.Interfaces;
+using DrawPT.Common.Services;
 using DrawPT.Data.Repositories;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
 using Microsoft.Identity.Web;
-using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Supabase.Interfaces;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,24 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
         IssuerSigningKey = new SymmetricSecurityKey(bytes),
         ValidAudience = builder.Configuration["Authentication:ValidAudience"],
         ValidIssuer = builder.Configuration["Authentication:ValidIssuer"],
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Headers.Authorization.FirstOrDefault() ?? "";
+            accessToken = accessToken.Replace("Bearer ", "");
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/gamehub")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 

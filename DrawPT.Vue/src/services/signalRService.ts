@@ -1,4 +1,5 @@
 import * as signalR from '@microsoft/signalr'
+import { getAccessToken } from '@/lib/auth'
 
 export class SignalRService {
   private connection: signalR.HubConnection | null = null
@@ -12,9 +13,10 @@ export class SignalRService {
     this.off = this.off.bind(this)
   }
 
-  public async startConnection(hubUrl: string, token?: string): Promise<void> {
+  public async startConnection(hubUrl: string): Promise<void> {
+    const accessToken = (await getAccessToken()) || ''
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, token ? { accessTokenFactory: () => token } : {})
+      .withUrl(hubUrl, { accessTokenFactory: () => accessToken })
       .withAutomaticReconnect()
       .build()
 

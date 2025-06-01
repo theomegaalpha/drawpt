@@ -16,9 +16,6 @@ namespace DrawPT.Common.Services
 
         public async Task<Profile?> GetProfileAsync(Guid userId)
         {
-            var allProfiles = await _supabase.From<Profile>()
-                .Get();
-
             return await _supabase.From<Profile>()
                 .Where(p => p.Id == userId)
                 .Single();
