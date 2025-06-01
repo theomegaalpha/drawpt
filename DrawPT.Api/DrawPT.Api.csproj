@@ -33,7 +33,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DrawPT.Common\DrawPT.Common.csproj" />
     <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
-    <ProjectReference Include="..\DrawPT.GameEngine\DrawPT.GameEngine.csproj" />
   </ItemGroup>
 
 </Project>

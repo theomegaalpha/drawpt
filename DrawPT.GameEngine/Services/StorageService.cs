@@ -1,4 +1,4 @@
-using DrawPT.GameEngine.Interfaces;
+using DrawPT.Common.Interfaces;
 
 namespace DrawPT.GameEngine.Services
 {

@@ -1,5 +1,5 @@
 using DrawPT.GameEngine;
-using DrawPT.GameEngine.Interfaces;
+using DrawPT.Common.Interfaces;
 using DrawPT.GameEngine.Services;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,7 +1,5 @@
-using Azure.Storage.Blobs;
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -17,11 +15,11 @@ namespace DrawPT.GameEngine
         private readonly IServiceProvider _serviceProvider;
         private IConnection? _messageConnection;
         private IModel? _messageChannel;
-        private readonly RedisCache _cache;
+        private readonly IDistributedCache _cache;
         private EventingBasicConsumer consumer;
 
         public GameOrchestrator(ILogger<GameOrchestrator> logger, IConfiguration config,
-            IServiceProvider serviceProvider, IConnection? messageConnection, RedisCache cache)
+            IServiceProvider serviceProvider, IConnection? messageConnection, IDistributedCache cache)
         {
             _logger = logger;
             _cache = cache;

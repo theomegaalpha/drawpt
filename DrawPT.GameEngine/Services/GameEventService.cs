@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using DrawPT.GameEngine.Interfaces;
+using DrawPT.Common.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

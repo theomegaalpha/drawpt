@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     /// <summary>
     /// Represents the final results of a game

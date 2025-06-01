@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     /// <summary>
     /// Represents a question in a game round

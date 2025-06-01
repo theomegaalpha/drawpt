@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     /// <summary>
     /// Represents a player's answer to a game question

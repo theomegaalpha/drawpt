@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     /// <summary>
     /// Configuration settings for a game

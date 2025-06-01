@@ -1,9 +1,9 @@
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     /// <summary>
     /// Represents a player in the game
     /// </summary>
-    public class Player
+    public class PlayerResult
     {
         /// <summary>
         /// Unique identifier for the player

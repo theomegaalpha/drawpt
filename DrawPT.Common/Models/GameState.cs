@@ -1,6 +1,6 @@
-﻿using DrawPT.GameEngine.Interfaces;
+﻿using DrawPT.Common.Interfaces;
 
-namespace DrawPT.GameEngine.Models
+namespace DrawPT.Common.Models
 {
     public class GameState : IGameState
     {
@@ -9,7 +9,7 @@ namespace DrawPT.GameEngine.Models
         public int MaxRounds { get; set; }
         public Guid HostPlayer { get; set; }
         public List<Guid> Players { get; set; }
-        
+
         public GameState()
         {
             Players = new List<Guid>();

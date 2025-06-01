@@ -1,6 +1,6 @@
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
 
-namespace DrawPT.GameEngine.Interfaces
+namespace DrawPT.Common.Interfaces
 {
     /// <summary>
     /// Manages player-related operations within the game

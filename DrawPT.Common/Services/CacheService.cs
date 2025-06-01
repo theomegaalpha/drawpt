@@ -13,15 +13,15 @@ namespace DrawPT.Common.Services
             _cache = cache;
         }
 
-        public async Task<bool> GetRoomAsync(string code)
+        public async Task<Room?> GetRoomAsync(string code)
         {
-            var roomExists = await _cache.GetStringAsync("room:" + code.ToString());
-            if (roomExists is null)
+            var room = await _cache.GetStringAsync("room:" + code.ToString());
+            if (room is null)
             {
-                return false;
+                return null;
             }
-
-            return JsonSerializer.Deserialize<bool>(roomExists);
+                
+            return JsonSerializer.Deserialize<Room>(room);
         }
 
         public async Task<Room> CreateRoomAsync()

@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Interfaces
+namespace DrawPT.Common.Interfaces
 {
     /// <summary>
     /// Interface for storage-related services

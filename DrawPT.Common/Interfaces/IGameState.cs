@@ -1,4 +1,4 @@
-﻿namespace DrawPT.GameEngine.Interfaces
+﻿namespace DrawPT.Common.Interfaces
 {
     public interface IGameState
     {
@@ -7,7 +7,6 @@
         int MaxRounds { get; set; }
         Guid HostPlayer { get; set; }
         List<Guid> Players { get; set; }
-
 
     }
 }

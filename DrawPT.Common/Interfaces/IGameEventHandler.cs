@@ -1,4 +1,4 @@
-namespace DrawPT.GameEngine.Interfaces
+namespace DrawPT.Common.Interfaces
 {
     /// <summary>
     /// Handler for game events

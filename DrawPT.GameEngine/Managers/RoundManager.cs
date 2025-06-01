@@ -1,5 +1,5 @@
-using DrawPT.GameEngine.Interfaces;
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Interfaces;
+using DrawPT.Common.Models;
 using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine.Managers

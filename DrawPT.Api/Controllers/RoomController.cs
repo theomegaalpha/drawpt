@@ -38,7 +38,7 @@ namespace DrawPT.Api.Controllers
         public async Task<IActionResult> Get(string roomCode)
         {
             var roomExists = await _cacheService.GetRoomAsync(roomCode);
-            return Ok(roomExists);
+            return Ok(roomExists != null);
         }
     }
 }
