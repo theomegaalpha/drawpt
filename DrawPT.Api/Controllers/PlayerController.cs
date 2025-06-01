@@ -16,16 +16,13 @@ namespace DrawPT.Api.Controllers
         private readonly RandomService _randomService;
         private readonly ICacheService _cacheService;
         private readonly ProfileService _profileService;
-        private readonly IConfiguration _configuration;
 
         public PlayerController(ICacheService cacheService,
-            RandomService randomService, ProfileService profileService,
-            IConfiguration configuration)
+            RandomService randomService, ProfileService profileService)
         {
             _randomService = randomService;
             _cacheService = cacheService;
             _profileService = profileService;
-            _configuration = configuration;
         }
 
         // GET: api/<PlayerController>

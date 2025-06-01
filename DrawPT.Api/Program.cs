@@ -43,7 +43,7 @@ builder.AddAzureBlobClient("blobs");
 builder.Services.AddTransient<Supabase.Client>(sp =>
 {
     var url = builder.Configuration["Supabase:Url"];
-    var secretKey = builder.Configuration["Supabase:AnonKey"];
+    var secretKey = builder.Configuration["Supabase:ApiKey"];
     var options = new Supabase.SupabaseOptions
     {
         AutoConnectRealtime = true
