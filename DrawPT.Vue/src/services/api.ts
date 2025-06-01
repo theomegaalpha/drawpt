@@ -1,4 +1,4 @@
-import type { Player, PlayerWithExpiration } from '@/models/player'
+import type { Player } from '@/models/player'
 import { supabase } from '@/lib/supabase'
 
 const getAccessToken = async () => {
@@ -11,14 +11,6 @@ const getAccessToken = async () => {
 
 const Api = {
   getPlayer: async (): Promise<Player> => {
-    const storedPlayer = window.localStorage.getItem('storedPlayer')
-    if (storedPlayer) {
-      const playerWithExpiration = JSON.parse(storedPlayer) as PlayerWithExpiration
-      if (playerWithExpiration && new Date(playerWithExpiration.expiration) > new Date()) {
-        return playerWithExpiration as Player
-      }
-    }
-
     const token = await getAccessToken()
     const response = await fetch(`/api/player`, {
       headers: {
@@ -31,16 +23,9 @@ const Api = {
       throw new Error('Failed to fetch player data')
     }
 
-    const player = await response.json()
-    const playerWithExpiration = {} as PlayerWithExpiration
-    Object.assign(playerWithExpiration, player)
-    playerWithExpiration.expiration = new Date(Date.now() + 6 * 60 * 60 * 1000)
-    window.localStorage.setItem('storedPlayer', JSON.stringify(playerWithExpiration))
-
-    return player as Player
+    return (await response.json()) as Player
   },
   updatePlayer: async (player: Player): Promise<void> => {
-    window.localStorage.removeItem('storedPlayer')
     const token = await getAccessToken()
     fetch(`/api/player`, {
       method: 'POST',
@@ -50,15 +35,6 @@ const Api = {
       },
       body: JSON.stringify(player)
     })
-      .then((_) => {
-        const playerWithExpiration = {} as PlayerWithExpiration
-        Object.assign(playerWithExpiration, player)
-        playerWithExpiration.expiration = new Date(Date.now() + 6 * 60 * 60 * 1000)
-        window.localStorage.setItem('storedPlayer', JSON.stringify(playerWithExpiration))
-      })
-      .catch((error: Error) => {
-        console.error('Failed to update player.', error)
-      })
   },
   createRoom: async (): Promise<string> => {
     const token = await getAccessToken()

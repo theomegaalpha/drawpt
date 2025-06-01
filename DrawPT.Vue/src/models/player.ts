@@ -5,10 +5,6 @@ export interface Player {
   username: string
 }
 
-export interface PlayerWithExpiration extends Player {
-  expiration: Date
-}
-
 export interface PlayerResult extends Player {
   finalScore: number
 }
