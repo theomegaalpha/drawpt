@@ -40,7 +40,7 @@ namespace DrawPT.Api.Hubs
 
             // Set up RabbitMQ channel
             _channel = rabbitMqConnection.CreateModel();
-            _channel.ExchangeDeclare("client_broadcast", ExchangeType.Topic, true);
+            _channel.ExchangeDeclare("client_broadcast", ExchangeType.Topic);
 
             // Set up consumer
             var consumer = new EventingBasicConsumer(_channel);
@@ -50,7 +50,7 @@ namespace DrawPT.Api.Hubs
                 var message = Encoding.UTF8.GetString(body);
                 var routingKey = ea.RoutingKey;
 
-                _logger.LogInformation("Received message with routing key: {RoutingKey}", routingKey);
+                _logger.LogInformation($"Received message with routing key: {routingKey}");
 
                 try
                 {
@@ -59,17 +59,17 @@ namespace DrawPT.Api.Hubs
                     var roomCode = parts[1];
                     var type = parts[2];
                     var action = parts[3];
-                    await HandleGameEvent(roomCode, action, message);
+                    await HandleClientBroadcast(roomCode, action, message);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error handling game event: {Message}", message);
+                    _logger.LogError(ex, $"Error handling game event: {message}");
                 }
             };
 
-            // Start consuming from all game events
-            _channel.QueueDeclare("client_broadcast", true, false, false);
-            // Bind to catch ALL game events with any number of segments
+            // Start consuming from all client broadcast messages
+            _channel.QueueDeclare("client_broadcast");
+            // Bind to catch ALL client broadcast messages with any number of segments
             _channel.QueueBind("client_broadcast", "client_broadcast", "game.#");
             _channel.BasicConsume(queue: "client_broadcast",
                                 autoAck: true,
@@ -78,7 +78,7 @@ namespace DrawPT.Api.Hubs
             _logger.LogInformation("Started consuming from client_broadcast queue");
         }
 
-        private async Task HandleGameEvent(string roomCode, string action, string message)
+        private async Task HandleClientBroadcast(string roomCode, string action, string message)
         {
             switch (action)
             {
@@ -132,7 +132,7 @@ namespace DrawPT.Api.Hubs
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
             var routingKey = $"game.{roomCode}.player.join_request";
-            _logger.LogInformation("Publishing message with routing key: {RoutingKey}", routingKey);
+            _logger.LogInformation($"Publishing message with routing key: {routingKey}");
 
             _channel.BasicPublish(
                 exchange: "client_broadcast",
@@ -149,7 +149,7 @@ namespace DrawPT.Api.Hubs
 
             if (player == null)
             {
-                _logger.LogWarning("Player session not found for connection {ConnectionId}", Context.ConnectionId);
+                _logger.LogWarning($"Player session not found for connection {Context.ConnectionId}");
                 return;
             }
 
