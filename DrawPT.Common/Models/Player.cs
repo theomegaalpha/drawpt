@@ -8,7 +8,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// Unique identifier for the player
         /// </summary>
-        public string Id { get; set; } = string.Empty;
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Player's display name
@@ -29,5 +29,7 @@ namespace DrawPT.Common.Models
         /// Whether the player is currently active in the game
         /// </summary>
         public bool IsActive { get; set; } = true;
+
+        public string RoomCode { get; set; } = string.Empty;
     }
 } 

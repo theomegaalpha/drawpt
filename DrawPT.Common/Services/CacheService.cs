@@ -20,7 +20,7 @@ namespace DrawPT.Common.Services
             {
                 return null;
             }
-                
+
             return JsonSerializer.Deserialize<Room>(room);
         }
 
@@ -87,6 +87,34 @@ namespace DrawPT.Common.Services
             var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1));
             await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, options);
             return player;
+        }
+
+        /// <summary>
+        /// Get player session by Connection ID.
+        /// </summary>
+        /// <param name="connectionId">Connection ID</param>
+        /// <returns></returns>
+        public async Task<Player?> GetPlayerSessionAsync(string connectionId)
+        {
+            var playerJson = await _cache.GetStringAsync("connectionId:" + connectionId.ToString());
+            if (playerJson is null)
+                return null;
+
+            var player = JsonSerializer.Deserialize<Player>(playerJson);
+            return player;
+        }
+
+        /// <summary>
+        /// Set player session by Connection ID.
+        /// </summary>
+        /// <param name="connectionId">Connection ID</param>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public async Task SetPlayerSessionAsync(string connectionId, Player player)
+        {
+            var playerJson = JsonSerializer.Serialize(player);
+            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            await _cache.SetStringAsync("connectionId:" + connectionId.ToString(), playerJson, options);
         }
     }
 }

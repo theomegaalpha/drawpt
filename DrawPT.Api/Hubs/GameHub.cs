@@ -1,5 +1,8 @@
 ﻿using DrawPT.Common.Models;
+using DrawPT.Common.Services;
+using DrawPT.Data.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Distributed;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -25,18 +28,21 @@ namespace DrawPT.Api.Hubs
         private readonly ILogger<GameHub> _logger;
         private readonly IModel _channel;
         private readonly IHubContext<GameHub, IGameClient> _hubContext;
+        private readonly CacheService _cache;
 
         public GameHub(
             ILogger<GameHub> logger,
             IConnection rabbitMqConnection,
-            IHubContext<GameHub, IGameClient> hubContext)
+            IHubContext<GameHub, IGameClient> hubContext,
+            CacheService cacheService)
         {
             _logger = logger;
             _hubContext = hubContext;
+            _cache = cacheService;
 
             // Set up RabbitMQ channel
             _channel = rabbitMqConnection.CreateModel();
-            _channel.ExchangeDeclare("game_events", ExchangeType.Topic, true);
+            _channel.ExchangeDeclare("client_broadcast", ExchangeType.Topic, true);
 
             // Set up consumer
             var consumer = new EventingBasicConsumer(_channel);
@@ -46,15 +52,16 @@ namespace DrawPT.Api.Hubs
                 var message = Encoding.UTF8.GetString(body);
                 var routingKey = ea.RoutingKey;
 
+                _logger.LogInformation("Received message with routing key: {RoutingKey}", routingKey);
+
                 try
                 {
-                    // Extract room code from routing key (format: game.{roomCode}.event)
+                    // Extract room code from routing key (format: game.{roomCode}.{type}.{action})
                     var parts = routingKey.Split('.');
-                    if (parts.Length >= 2)
-                    {
-                        var roomCode = parts[1];
-                        await HandleGameEvent(message, roomCode);
-                    }
+                    var roomCode = parts[1];
+                    var type = parts[2];
+                    var action = parts[3];
+                    await HandleGameEvent(roomCode, type, action, message);
                 }
                 catch (Exception ex)
                 {
@@ -63,53 +70,52 @@ namespace DrawPT.Api.Hubs
             };
 
             // Start consuming from all game events
-            _channel.QueueDeclare("game_events", true, false, false);
-            _channel.QueueBind("game_events", "game_events", "game.#");
-            _channel.BasicConsume(queue: "game_events",
+            _channel.QueueDeclare("client_broadcast", true, false, false);
+            // Bind to catch ALL game events with any number of segments
+            _channel.QueueBind("client_broadcast", "client_broadcast", "game.*.*.*");
+            _channel.BasicConsume(queue: "client_broadcast",
                                 autoAck: true,
                                 consumer: consumer);
+
+            _logger.LogInformation("Started consuming from client_broadcast queue");
         }
 
-        private async Task HandleGameEvent(string message, string roomCode)
+        private async Task HandleGameEvent(string roomCode, string type, string action, string message)
         {
-            var eventData = JsonSerializer.Deserialize<JsonElement>(message);
-            var eventType = eventData.GetProperty("EventType").GetString();
-
-            switch (eventType)
+            switch (type)
             {
-                case "PlayerJoined":
-                    var player = JsonSerializer.Deserialize<Player>(eventData.GetProperty("Player").GetRawText());
+                case "join_request":
+                    var player = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerJoined(player!);
                     break;
 
-                case "PlayerLeft":
-                    var leftPlayer = JsonSerializer.Deserialize<Player>(eventData.GetProperty("Player").GetRawText());
+                case "leave_request":
+                    var leftPlayer = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerLeft(leftPlayer!);
                     break;
 
                 case "PlayerScoreUpdated":
-                    var playerId = eventData.GetProperty("PlayerId").GetString();
-                    var newScore = eventData.GetProperty("NewScore").GetInt32();
-                    await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerId!, newScore);
+                    var playerResult = JsonSerializer.Deserialize<PlayerResult>(message);
+                    await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResult.Id, playerResult.Score);
                     break;
 
                 case "GameStarted":
-                    var config = JsonSerializer.Deserialize<GameConfiguration>(eventData.GetProperty("Configuration").GetRawText());
+                    var config = JsonSerializer.Deserialize<GameConfiguration>(message);
                     await _hubContext.Clients.Group(roomCode).GameStarted(config!);
                     break;
 
                 case "GameEnded":
-                    var results = JsonSerializer.Deserialize<GameResults>(eventData.GetProperty("Results").GetRawText());
+                    var results = JsonSerializer.Deserialize<GameResults>(message);
                     await _hubContext.Clients.Group(roomCode).GameEnded(results!);
                     break;
 
                 case "RoundStarted":
-                    var round = JsonSerializer.Deserialize<GameRound>(eventData.GetProperty("Round").GetRawText());
+                    var round = JsonSerializer.Deserialize<GameRound>(message);
                     await _hubContext.Clients.Group(roomCode).RoundStarted(round!);
                     break;
 
                 case "RoundEnded":
-                    var endedRound = JsonSerializer.Deserialize<GameRound>(eventData.GetProperty("Round").GetRawText());
+                    var endedRound = JsonSerializer.Deserialize<GameRound>(message);
                     await _hubContext.Clients.Group(roomCode).RoundEnded(endedRound!);
                     break;
             }
@@ -120,47 +126,42 @@ namespace DrawPT.Api.Hubs
             // Add player to SignalR group
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
 
-            // Publish join request to RabbitMQ
-            var player = new Player()
-            {
-                ConnectionId = Context.ConnectionId,
-                Id = playerId.ToString()
-            };
+            var player = await _cache.GetPlayerAsync(playerId);
+            if (player == null)
+                return;
+            player.RoomCode = roomCode;
+            await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
+            var routingKey = $"game.{roomCode}.player.join_request";
+            _logger.LogInformation("Publishing message with routing key: {RoutingKey}", routingKey);
+
             _channel.BasicPublish(
-                exchange: "game_events",
-                routingKey: $"game.{roomCode}.player.join_request",
+                exchange: "client_broadcast",
+                routingKey: routingKey,
                 basicProperties: null,
                 body: body);
 
             await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
         }
 
-        public async Task LeaveGame(string roomCode)
-        {
-            // Remove player from SignalR group
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomCode);
-
-            // Publish leave request to RabbitMQ
-            var message = new
-            {
-                EventType = "PlayerLeaveRequest",
-                RoomCode = roomCode,
-                ConnectionId = Context.ConnectionId
-            };
-
-            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
-            _channel.BasicPublish(
-                exchange: "game_events",
-                routingKey: $"game.{roomCode}.player.leave_request",
-                basicProperties: null,
-                body: body);
-        }
-
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            // Note: You'll need to track which room the player is in to properly handle disconnection
+            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+
+            if (player == null)
+            {
+                _logger.LogWarning("Player session not found for connection {ConnectionId}", Context.ConnectionId);
+                return;
+            }
+
+            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
+            _channel.BasicPublish(
+                exchange: "client_broadcast",
+                routingKey: $"game.{player.RoomCode}.player.leave_request",
+                basicProperties: null,
+                body: body);
+
             await base.OnDisconnectedAsync(exception);
         }
 
