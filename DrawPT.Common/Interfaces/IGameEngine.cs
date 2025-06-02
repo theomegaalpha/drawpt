@@ -18,11 +18,6 @@ namespace DrawPT.Common.Interfaces
         GameConfiguration Configuration { get; }
 
         /// <summary>
-        /// Gets the player manager for this game
-        /// </summary>
-        IPlayerManager PlayerManager { get; }
-
-        /// <summary>
         /// Gets the round manager for this game
         /// </summary>
         IRoundManager RoundManager { get; }

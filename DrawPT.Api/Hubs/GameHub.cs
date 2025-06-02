@@ -8,29 +8,15 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-
 namespace DrawPT.Api.Hubs
 {
-    public interface IGameClient
-    {
-        Task PlayerJoined(Player player);
-        Task PlayerLeft(Player player);
-        Task PlayerScoreUpdated(string playerId, int newScore);
-        Task GameStarted(GameConfiguration configuration);
-        Task GameEnded(GameResults results);
-        Task RoundStarted(GameRound round);
-        Task RoundEnded(GameRound round);
-        Task SuccessfullyJoined(string connectionId);
-        Task WriteMessage(string message);
-    }
-
     [Authorize]
-    public class GameHub : Hub<IGameClient>
+    public partial class GameHub : Hub<IGameClient>
     {
-        private readonly ILogger<GameHub> _logger;
-        private readonly IModel _channel;
-        private readonly IHubContext<GameHub, IGameClient> _hubContext;
-        private readonly ICacheService _cache;
+        protected readonly ILogger<GameHub> _logger;
+        protected readonly IModel _channel;
+        protected readonly IHubContext<GameHub, IGameClient> _hubContext;
+        protected readonly ICacheService _cache;
 
         public GameHub(
             ILogger<GameHub> logger,
@@ -42,6 +28,7 @@ namespace DrawPT.Api.Hubs
             _hubContext = hubContext;
             _cache = cacheService;
 
+            #region broadcast setup
             // Set up RabbitMQ channel
             _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
@@ -78,8 +65,68 @@ namespace DrawPT.Api.Hubs
             _channel.BasicConsume(queue: ClientBroadcastMQ.QueueName,
                                 autoAck: true,
                                 consumer: consumer);
+            #endregion
+
+            #region interaction setup
+            _channel.ExchangeDeclare(ClientInteractionMQ.ExchangeName, ExchangeType.Topic);
+            _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+
+            var interactionConsumer = new AsyncEventingBasicConsumer(_channel);
+            interactionConsumer.Received += async (object sender, BasicDeliverEventArgs ea) =>
+            {
+                var cons = (AsyncEventingBasicConsumer)sender;
+                var ch = cons.Model;
+                var corrId = ea.BasicProperties.CorrelationId;
+                string response = string.Empty;
+
+                byte[] body = ea.Body.ToArray();
+                var routingKey = ea.RoutingKey;
+                var connectionId = routingKey.Split('.')[1];
+                var action = routingKey.Split('.')[2];
+                IBasicProperties props = ea.BasicProperties;
+
+                var message = Encoding.UTF8.GetString(body);
+                int n = int.Parse(message);
+
+                if (action == ClientInteractionMQ.AskTheme)
+                {
+                    response = (await _hubContext.Clients.Client(connectionId).AskTheme([""], CancellationToken.None)).ToString();
+                    var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+                    _channel.BasicPublish(GameResponseMQ.ExchangeName, GameResponseMQ.RoutingKeys.AnswerTheme, body: body2);
+                }
+                else if (action == ClientInteractionMQ.AskQuestion)
+                {
+                    response = (await _hubContext.Clients.Client(connectionId).AskQuestion(new GameQuestion(), CancellationToken.None)).ToString();
+                    var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+                    _channel.BasicPublish(GameResponseMQ.ExchangeName, GameResponseMQ.RoutingKeys.AnswerQuestion, body: body2);
+                }
+                else
+                {
+                    _logger.LogWarning($"Unknown action '{action}' for connection {connectionId}");
+                    return;
+                }
+            };
+
+            _channel.QueueDeclare(ClientInteractionMQ.QueueName);
+            // Bind to catch ALL client broadcast messages with any number of segments
+            _channel.QueueBind(ClientInteractionMQ.QueueName,
+                ClientInteractionMQ.ExchangeName, ClientInteractionMQ.RoutingKey);
+            _channel.BasicConsume(ClientInteractionMQ.QueueName, true, interactionConsumer);
+            #endregion
 
             _logger.LogInformation("Started consuming from client_broadcast queue");
+        }
+
+        public void SendResponse(string responsePayload, string correlationId, string replyQueue)
+        {
+            var properties = _channel.CreateBasicProperties();
+            properties.CorrelationId = correlationId; // Match the correlation ID
+
+            var responseBytes = Encoding.UTF8.GetBytes(responsePayload);
+            _channel.BasicPublish(exchange: "",
+                                  routingKey: replyQueue,
+                                  basicProperties: properties,
+                                  body: responseBytes);
         }
 
         private async Task HandleClientBroadcast(string roomCode, string action, string message)
@@ -87,7 +134,7 @@ namespace DrawPT.Api.Hubs
             switch (action)
             {
                 case ClientBroadcastMQ.PlayerJoinedAction:
-                    var player = JsonSerializer.Deserialize<Player>(message);
+                    Player player = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerJoined(player!);
                     break;
 
@@ -101,7 +148,7 @@ namespace DrawPT.Api.Hubs
                     await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResult.Id, playerResult.Score);
                     break;
 
-                case "GameStarted":
+                case ClientBroadcastMQ.GameStarted:
                     var config = JsonSerializer.Deserialize<GameConfiguration>(message);
                     await _hubContext.Clients.Group(roomCode).GameStarted(config!);
                     break;
@@ -145,6 +192,29 @@ namespace DrawPT.Api.Hubs
                 body: body);
 
             await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
+        }
+
+        public async Task StartGame()
+        {
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in claim while starting a game!");
+                return;
+            }
+
+            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+            if (player == null)
+            {
+                _logger.LogWarning("The user that started the game can not be found in cache!");
+                return;
+            }
+
+            var message = JsonSerializer.Serialize(new { RoomCode = player.RoomCode });
+            var body = Encoding.UTF8.GetBytes(message);
+            _channel.BasicPublish(exchange: GameMQ.ExchangeName,
+                                routingKey: GameMQ.RoutingKeys.GameStarted(player.RoomCode),
+                                body: body);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)

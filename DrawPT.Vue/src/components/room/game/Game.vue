@@ -82,6 +82,7 @@ onMounted(() => {
   })
 
   service.on('askTheme', async (themes: string[]) => {
+    console.log('Available themes:', themes)
     imageUrl.value = ''
     showResults.value = false
     themeSelection.value = ''

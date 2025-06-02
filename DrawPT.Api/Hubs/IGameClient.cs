@@ -1,0 +1,20 @@
+﻿using DrawPT.Common.Models;
+
+namespace DrawPT.Api.Hubs
+{
+    public interface IGameClient
+    {
+        Task PlayerJoined(Player player);
+        Task PlayerLeft(Player player);
+        Task PlayerScoreUpdated(string playerId, int newScore);
+        Task GameStarted(GameConfiguration configuration);
+        Task GameEnded(GameResults results);
+        Task RoundStarted(GameRound round);
+        Task RoundEnded(GameRound round);
+        Task SuccessfullyJoined(string connectionId);
+        Task WriteMessage(string message);
+
+        Task<string> AskTheme(string[] themes, CancellationToken ct);
+        Task<string> AskQuestion(GameQuestion question, CancellationToken ct);
+    }
+}

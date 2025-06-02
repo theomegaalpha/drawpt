@@ -1,0 +1,66 @@
+using DrawPT.Common.Configuration;
+using DrawPT.GameEngine.Interfaces;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
+
+namespace DrawPT.GameEngine.BackgroundWorkers;
+
+public class GameEventListener : BackgroundService
+{
+    private readonly ILogger<GameEventListener> _logger;
+    private readonly IModel _channel;
+    private readonly IGameFlowController _gameFlowController;
+
+    public GameEventListener(
+        ILogger<GameEventListener> logger,
+        IConnection rabbitMqConnection,
+        IGameFlowController gameFlowController)
+    {
+        _logger = logger;
+        _channel = rabbitMqConnection.CreateModel();
+        _gameFlowController = gameFlowController;
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        // Declare exchange and queue
+        _channel.ExchangeDeclare(GameMQ.ExchangeName, ExchangeType.Topic);
+        _channel.QueueDeclare(GameMQ.QueueName);
+        _channel.QueueBind(GameMQ.QueueName, GameMQ.ExchangeName, GameMQ.RoutingKey);
+
+        // Set up consumer
+        var consumer = new EventingBasicConsumer(_channel);
+        consumer.Received += async (model, ea) =>
+        {
+            var body = ea.Body.ToArray();
+            var message = Encoding.UTF8.GetString(body);
+            var routingKey = ea.RoutingKey;
+
+            _logger.LogInformation($"Received message with routing key: {routingKey}");
+            _logger.LogInformation($"Message content: {message}");
+
+            // Handle game started event
+            if (routingKey.EndsWith(GameMQ.GameStart))
+            {
+                _logger.LogInformation($"Game started event received for room: {routingKey.Split('.')[1]}");
+                await _gameFlowController.PlayGameAsync();
+            }
+        };
+
+        _channel.BasicConsume(
+            queue: GameMQ.QueueName,
+            autoAck: true,
+            consumer: consumer);
+
+        _logger.LogInformation("Started consuming from game queue");
+
+        return Task.CompletedTask;
+    }
+
+    public override void Dispose()
+    {
+        _channel?.Dispose();
+        base.Dispose();
+    }
+}

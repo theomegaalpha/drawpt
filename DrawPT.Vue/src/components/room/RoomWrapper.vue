@@ -37,7 +37,7 @@ onUnmounted(() => {
     <GameResults v-if="gameResults.playerResults.length > 0" />
     <div v-else>
       <Lobby v-if="!room.isGameStarted" />
-      <Game v-else />
+      <Game />
     </div>
   </div>
 </template>

@@ -33,8 +33,9 @@ namespace DrawPT.Common.Services
                 room.RegenerateCode();
             }
 
+            var roomJson = JsonSerializer.Serialize(room);
             var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1));
-            await _cache.SetStringAsync($"room:{room.Code}", "true", options);
+            await _cache.SetStringAsync($"room:{room.Code}", roomJson, options);
             return room;
         }
 

@@ -1,4 +1,5 @@
 using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
 
 namespace DrawPT.GameEngine.Interfaces;
 
@@ -6,7 +7,7 @@ public interface IScoringService
 {
     Task<int> CalculateRoundScoreAsync(PlayerAnswer answer, PlayerAnswer assessment);
     Task<int> CalculateBonusPointsAsync(PlayerAnswer answer);
-    Task<GameResults> CalculateFinalResultsAsync(GameState gameState);
+    Task<int> CalculateFinalResultsAsync();
 }
 
 public class GameResults

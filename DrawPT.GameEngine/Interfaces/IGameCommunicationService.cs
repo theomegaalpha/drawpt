@@ -1,4 +1,4 @@
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
 
 namespace DrawPT.GameEngine.Interfaces;
 
@@ -8,6 +8,8 @@ public interface IGameCommunicationService
     Task SendToPlayerAsync(string connectionId, PlayerEvent playerEvent);
     Task BroadcastRoundResultsAsync(GameRound round);
     Task BroadcastFinalResultsAsync(GameResults results);
+    Task<string> AskPlayerForThemeAsync(string connectionId, List<string> themes, TimeSpan timeout);
+    Task<PlayerAnswer> AskPlayerForAnswerAsync(string connectionId, string imageUrl, TimeSpan timeout);
 }
 
 public abstract class GameEvent
@@ -24,6 +26,16 @@ public class GameStartedEvent : GameEvent
 public class GameCompletedEvent : GameEvent
 {
     public required GameResults Results { get; init; }
+}
+
+public class ThemeSelectionStartedEvent : GameEvent
+{
+    public required string SelectorId { get; init; }
+}
+
+public class ThemeSelectedEvent : GameEvent
+{
+    public required string ThemeName { get; init; }
 }
 
 public abstract class PlayerEvent
