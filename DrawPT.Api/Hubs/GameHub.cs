@@ -90,17 +90,45 @@ namespace DrawPT.Api.Hubs
                 {
                     CancellationTokenSource themeTimoutTokenSource = new();
                     themeTimoutTokenSource.CancelAfter(TimeSpan.FromSeconds(30 + 5));
-                    var user = _hubContext.Clients.User(connectionId);
-                    response = await user.AskTheme([message], themeTimoutTokenSource.Token);
+                    _logger.LogInformation($"Asking theme for connection {connectionId} with message: {message}");
+                    var client = _hubContext.Clients.Client(connectionId);
+                    if (client == null)
+                    {
+                        _logger.LogError($"Client with connection ID {connectionId} not found in {action}!");
+                        return;
+                    }
+                    try
+                    {
+                        response = await client.AskTheme([message], themeTimoutTokenSource.Token);
+                    }
+                    catch
+                    {
+                        _logger.LogError($"Error while asking theme for connection {connectionId} with message: {message}");
+                        return;
+                    }
                     var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
                     _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, body: body2);
                 }
                 else if (action == ClientInteractionMQ.Question)
                 {
-                    CancellationTokenSource themeTimoutTokenSource = new();
-                    themeTimoutTokenSource.CancelAfter(TimeSpan.FromSeconds(30 + 5));
-                    var user = _hubContext.Clients.User(connectionId);
-                    response = await user.AskQuestion(new GameQuestion(), CancellationToken.None);
+                    CancellationTokenSource questionTimeoutSource = new();
+                    questionTimeoutSource.CancelAfter(TimeSpan.FromSeconds(30 + 5));
+                    var client = _hubContext.Clients.Client(connectionId);
+                    if (client == null)
+                    {
+                        _logger.LogError($"Client with connection ID {connectionId} not found in {action}!");
+                        return;
+                    }
+                    try
+                    {
+                        await client.WriteMessage("fuckery?");
+                        response = await client.AskQuestion(new GameQuestion(), questionTimeoutSource.Token);
+                    }
+                    catch
+                    {
+                        _logger.LogError($"Error while asking question for connection {connectionId} with message: {message}");
+                        return;
+                    }
                     var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
                     _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, body: body2);
                 }
@@ -180,6 +208,7 @@ namespace DrawPT.Api.Hubs
         {
             // Add player to SignalR group
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
+            _logger.LogInformation($"Player {playerId} joined room {roomCode} with connection {Context.ConnectionId}");
 
             var player = await _cache.GetPlayerAsync(playerId);
             if (player == null)
@@ -200,21 +229,22 @@ namespace DrawPT.Api.Hubs
             await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
         }
 
-        public async Task StartGame()
+        public async Task<bool> StartGame()
         {
             var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
             if (userId == null)
             {
                 _logger.LogWarning("user_id not found in claim while starting a game!");
-                return;
+                return false;
             }
 
             var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
             if (player == null)
             {
                 _logger.LogWarning("The user that started the game can not be found in cache!");
-                return;
+                return false;
             }
+            _logger.LogInformation($"Player {userId} joined room {player.RoomCode} with connection {Context.ConnectionId}");
 
             var message = JsonSerializer.Serialize(new GameConfiguration());
             var body = Encoding.UTF8.GetBytes(message);
@@ -226,6 +256,8 @@ namespace DrawPT.Api.Hubs
                 exchange: ClientBroadcastMQ.ExchangeName,
                 routingKey: ClientBroadcastMQ.RoutingKeys.GameStarted(player.RoomCode),
                 body: body);
+
+            return true;
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)

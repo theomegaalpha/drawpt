@@ -11,7 +11,6 @@ public class GameFlowController : IGameFlowController
     private readonly IRoundOrchestrator _roundOrchestrator;
     private readonly IModel _channel;
     private readonly ICacheService _cacheService;
-    private string roomCode { get; set; }
 
     public GameFlowController(
         ICacheService cacheService,
@@ -38,6 +37,9 @@ public class GameFlowController : IGameFlowController
             var question = await _roundOrchestrator.GenerateQuestionAsync(theme);
 
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
+
+            await Task.Delay(500);
+
             var answer = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
             var answers = await _roundOrchestrator.CollectAnswersAsync(question);
             var assessedAnswers = await _roundOrchestrator.AssessAnswersAsync(question, answers);

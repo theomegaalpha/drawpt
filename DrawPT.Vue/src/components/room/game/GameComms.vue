@@ -43,6 +43,7 @@ onMounted(async () => {
     })
 
     service.on('writeMessage', (message) => {
+      console.log('Received message:', message)
       addGameNotification(message)
     })
   })
