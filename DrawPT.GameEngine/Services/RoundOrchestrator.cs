@@ -18,6 +18,7 @@ public class RoundOrchestrator : IRoundOrchestrator
     {
         _channel = rabbitMqConnection.CreateModel();
         _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
+        _channel.ExchangeDeclare(ClientInteractionMQ.ExchangeName, ExchangeType.Topic);
         _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
 
         var replyQueue = GameResponseMQ.QueueName;
@@ -39,7 +40,7 @@ public class RoundOrchestrator : IRoundOrchestrator
     }
 
 
-    public async Task<string> RequestUserInputAsync(string requestPayload, int timeoutMilliseconds)
+    public async Task<string> RequestUserInputAsync(string requestPayload, string connectionId, int timeoutMilliseconds)
     {
         var correlationId = Guid.NewGuid().ToString();
         var replyQueue = GameResponseMQ.QueueName;
@@ -54,8 +55,8 @@ public class RoundOrchestrator : IRoundOrchestrator
         var tcs = new TaskCompletionSource<string>();
         _pendingRequests[correlationId] = tcs;
 
-        _channel.BasicPublish(exchange: GameRequestMQ.QueueName,
-                              routingKey: GameRequestMQ.RoutingKey,
+        _channel.BasicPublish(exchange: ClientInteractionMQ.ExchangeName,
+                              routingKey: ClientInteractionMQ.RoutingKeys.AskTheme(connectionId),
                               basicProperties: properties,
                               body: messageBytes);
 
@@ -66,11 +67,11 @@ public class RoundOrchestrator : IRoundOrchestrator
 
         if (completedTask == tcs.Task)
         {
-            return tcs.Task.Result; // Response received
+            return tcs.Task.Result;
         }
         else
         {
-            _pendingRequests.TryRemove(correlationId, out _); // Cleanup
+            _pendingRequests.TryRemove(correlationId, out _);
             throw new TimeoutException("No response received within the timeout period.");
         }
     }

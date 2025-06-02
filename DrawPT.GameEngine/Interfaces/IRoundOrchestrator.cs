@@ -9,4 +9,5 @@ public interface IRoundOrchestrator
     Task<List<PlayerAnswer>> CollectAnswersAsync(GameQuestion question);
     Task<List<PlayerAnswer>> AssessAnswersAsync(GameQuestion question, List<PlayerAnswer> answers);
     Task<bool> IsRoundCompleteAsync(GameRound round);
+    Task<string> RequestUserInputAsync(string requestPayload, string connectionId, int timeoutMilliseconds);
 } 

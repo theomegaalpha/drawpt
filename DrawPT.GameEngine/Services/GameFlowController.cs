@@ -1,5 +1,7 @@
-using DrawPT.GameEngine.Interfaces;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
+using DrawPT.Common.Services;
+using DrawPT.GameEngine.Interfaces;
 using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine.Services;
@@ -8,16 +10,20 @@ public class GameFlowController : IGameFlowController
 {
     private readonly IRoundOrchestrator _roundOrchestrator;
     private readonly IModel _channel;
+    private readonly ICacheService _cacheService;
+    private string roomCode { get; set; }
 
     public GameFlowController(
+        ICacheService cacheService,
         IConnection rabbitMqConnection,
         IRoundOrchestrator roundOrchestrator)
     {
+        _cacheService = cacheService;
         _roundOrchestrator = roundOrchestrator;
         _channel = rabbitMqConnection.CreateModel();
     }
 
-    public async Task PlayGameAsync()
+    public async Task PlayGameAsync(string roomCode)
     {
         await StartGameAsync();
 
@@ -30,6 +36,9 @@ public class GameFlowController : IGameFlowController
 
             // Question and answers
             var question = await _roundOrchestrator.GenerateQuestionAsync(theme);
+
+            var players = await _cacheService.GetRoomPlayersAsync(roomCode);
+            var answer = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
             var answers = await _roundOrchestrator.CollectAnswersAsync(question);
             var assessedAnswers = await _roundOrchestrator.AssessAnswersAsync(question, answers);
 

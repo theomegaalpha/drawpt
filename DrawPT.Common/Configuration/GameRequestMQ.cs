@@ -6,11 +6,13 @@ namespace DrawPT.Common.Configuration
         public const string QueueName = "game_request";
         public const string RoutingKey = "game_request.#";
 
-        public const string GameStarted = "game_started";
+        public const string Theme = "ask_theme";
+        public const string Question = "ask_question";
 
         public static class RoutingKeys
         {
-            public static string GameStarted(string roomCode) => $"game_request.{roomCode}.{GameStarted}";
+            public static string AskTheme(string connectionId) => $"game_request.{connectionId}.{Theme}";
+            public static string AskQuestion(string connectionId) => $"game_request.{connectionId}.{Question}";
         }
     }
 } 

@@ -4,7 +4,7 @@ namespace DrawPT.GameEngine.Interfaces;
 
 public interface IGameFlowController
 {
-    Task PlayGameAsync();
+    Task PlayGameAsync(string roomCode);
     Task StartGameAsync();
     Task<GameRound> StartNewRoundAsync(int roundNumber);
     Task EndRoundAsync(GameRound round);

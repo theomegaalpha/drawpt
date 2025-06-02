@@ -36,6 +36,7 @@ public class GameEventListener : BackgroundService
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
             var routingKey = ea.RoutingKey;
+            var roomCode = routingKey.Split('.')[1];
 
             _logger.LogInformation($"Received message with routing key: {routingKey}");
             _logger.LogInformation($"Message content: {message}");
@@ -44,7 +45,7 @@ public class GameEventListener : BackgroundService
             if (routingKey.EndsWith(GameMQ.GameStart))
             {
                 _logger.LogInformation($"Game started event received for room: {routingKey.Split('.')[1]}");
-                await _gameFlowController.PlayGameAsync();
+                await _gameFlowController.PlayGameAsync(roomCode);
             }
         };
 
