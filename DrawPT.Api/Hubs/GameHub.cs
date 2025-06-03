@@ -1,6 +1,7 @@
 ﻿using DrawPT.Common.Configuration;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
@@ -179,8 +180,13 @@ namespace DrawPT.Api.Hubs
                     break;
 
                 case "PlayerScoreUpdated":
-                    var playerResult = JsonSerializer.Deserialize<PlayerResult>(message);
-                    await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResult.Id, playerResult.Score);
+                    var playerResults = JsonSerializer.Deserialize<PlayerResults>(message);
+                    if (playerResults == null)
+                    {
+                        _logger.LogError($"PlayerResults deserialization failed for message: {message}");
+                        return;
+                    }
+                    await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResults.PlayerId, playerResults.Score);
                     break;
 
                 case ClientBroadcastMQ.StartedGame:

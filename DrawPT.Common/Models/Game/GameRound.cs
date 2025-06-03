@@ -1,4 +1,4 @@
-namespace DrawPT.Common.Models
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Represents a single round in the game
@@ -8,7 +8,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// Unique identifier for the round
         /// </summary>
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// The round number in the game sequence
@@ -18,7 +18,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// The theme for this round
         /// </summary>
-        public GameTheme Theme { get; set; } = null!;
+        public string Theme { get; set; } = string.Empty;
 
         /// <summary>
         /// The question for this round
@@ -28,12 +28,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// All answers submitted for this round
         /// </summary>
-        public List<GameAnswer> Answers { get; set; } = new();
-
-        /// <summary>
-        /// Whether the round is currently active
-        /// </summary>
-        public bool IsActive { get; set; }
+        public List<PlayerAnswer> Answers { get; set; } = new();
 
         /// <summary>
         /// When the round started

@@ -1,5 +1,5 @@
 using DrawPT.GameEngine.Interfaces;
-using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 
 namespace DrawPT.GameEngine.Services;
 

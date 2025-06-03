@@ -16,11 +16,6 @@ namespace DrawPT.Common.Models
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
-        /// Player's current score
-        /// </summary>
-        public int Score { get; set; }
-
-        /// <summary>
         /// Player's connection ID for real-time communication
         /// </summary>
         public string ConnectionId { get; set; } = string.Empty;
@@ -30,6 +25,9 @@ namespace DrawPT.Common.Models
         /// </summary>
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// Room code for the game this player is in
+        /// </summary>
         public string RoomCode { get; set; } = string.Empty;
     }
 } 

@@ -1,19 +1,19 @@
-namespace DrawPT.Common.Models
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Represents a player's answer to a game question
     /// </summary>
-    public class GameAnswer
+    public class PlayerAnswer
     {
         /// <summary>
         /// Unique identifier for the answer
         /// </summary>
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// The player's connection ID
         /// </summary>
-        public string PlayerConnectionId { get; set; } = string.Empty;
+        public string ConnectionId { get; set; } = string.Empty;
 
         /// <summary>
         /// The player's guess/answer

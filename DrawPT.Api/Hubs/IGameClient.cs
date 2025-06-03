@@ -1,4 +1,5 @@
 ﻿using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 
 namespace DrawPT.Api.Hubs
 {
@@ -6,7 +7,7 @@ namespace DrawPT.Api.Hubs
     {
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);
-        Task PlayerScoreUpdated(string playerId, int newScore);
+        Task PlayerScoreUpdated(Guid playerId, int newScore);
         Task GameStarted(GameConfiguration configuration);
         Task GameEnded(GameResults results);
         Task RoundStarted(GameRound round);

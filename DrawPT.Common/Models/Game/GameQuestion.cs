@@ -1,4 +1,4 @@
-namespace DrawPT.Common.Models
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Represents a question in a game round
@@ -8,7 +8,12 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// Unique identifier for the question
         /// </summary>
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public Guid Id { get; set; } = Guid.NewGuid();
+
+        /// <summary>
+        /// The theme of this question
+        /// </summary>
+        public string Theme { get; set; } = string.Empty;
 
         /// <summary>
         /// The original prompt used to generate the question
@@ -19,11 +24,6 @@ namespace DrawPT.Common.Models
         /// URL to the image associated with the question
         /// </summary>
         public string ImageUrl { get; set; } = string.Empty;
-
-        /// <summary>
-        /// The theme this question belongs to
-        /// </summary>
-        public string ThemeId { get; set; } = string.Empty;
 
         /// <summary>
         /// When this question was created

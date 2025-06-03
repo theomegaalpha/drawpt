@@ -1,4 +1,4 @@
-namespace DrawPT.Common.Models
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Represents a game theme
@@ -16,18 +16,8 @@ namespace DrawPT.Common.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the description of the theme
-        /// </summary>
-        public string Description { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets whether this theme is active
+        /// Gets or sets the active status of this theme
         /// </summary>
         public bool IsActive { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the difficulty level of the theme (1-5)
-        /// </summary>
-        public int DifficultyLevel { get; set; } = 1;
     }
 }

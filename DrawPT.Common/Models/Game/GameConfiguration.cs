@@ -1,9 +1,11 @@
-namespace DrawPT.Common.Models
+using DrawPT.Common.Interfaces.Game;
+
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Configuration settings for a game
     /// </summary>
-    public class GameConfiguration
+    public class GameConfiguration : IGameConfiguration
     {
         /// <summary>
         /// Gets or sets the maximum number of players allowed in the game

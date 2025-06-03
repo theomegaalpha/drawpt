@@ -1,5 +1,5 @@
 using DrawPT.Common.Configuration;
-using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -90,7 +90,7 @@ public class RoundOrchestrator : IRoundOrchestrator
 
     public async Task<List<PlayerAnswer?>> CollectAnswersAsync(GameQuestion question)
     {
-        return await Task.FromResult(new List<PlayerAnswer?>());
+        return await Task.FromResult<List<PlayerAnswer>>(new List<PlayerAnswer?>());
     }
 
     public async Task<List<PlayerAnswer>> AssessAnswersAsync(GameQuestion question, List<PlayerAnswer> answers)

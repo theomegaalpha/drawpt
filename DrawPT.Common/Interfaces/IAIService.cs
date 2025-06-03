@@ -1,4 +1,4 @@
-using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 
 namespace DrawPT.Common.Interfaces
 {
@@ -15,6 +15,6 @@ namespace DrawPT.Common.Interfaces
         /// <summary>
         /// Assesses player answers for a round
         /// </summary>
-        Task<List<GameAnswer>> AssessAnswersAsync(string originalPrompt, List<GameAnswer> answers);
+        Task<List<PlayerAnswer>> AssessAnswersAsync(string originalPrompt, List<PlayerAnswer> answers);
     }
 } 

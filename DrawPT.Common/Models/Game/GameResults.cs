@@ -1,4 +1,4 @@
-namespace DrawPT.Common.Models
+namespace DrawPT.Common.Models.Game
 {
     /// <summary>
     /// Represents the final results of a game
@@ -8,7 +8,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// List of player results
         /// </summary>
-        public List<PlayerResult> PlayerResults { get; set; } = new();
+        public List<PlayerResults> PlayerResults { get; set; } = new();
 
         /// <summary>
         /// When the game ended

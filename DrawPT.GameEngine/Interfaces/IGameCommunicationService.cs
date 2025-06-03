@@ -1,4 +1,5 @@
 using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 
 namespace DrawPT.GameEngine.Interfaces;
 
