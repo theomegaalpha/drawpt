@@ -1,7 +1,6 @@
-using System.Collections.Concurrent;
-using System.Threading.Channels;
 using DrawPT.GameEngine.Interfaces;
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
+using System.Threading.Channels;
 
 namespace DrawPT.GameEngine.Services;
 
@@ -37,9 +36,9 @@ public class PlayerManager : IPlayerManager
         //TODO:  implement
     }
 
-    public Task<IEnumerable<PlayerState>> GetPlayersAsync()
+    public Task<IEnumerable<Player>> GetPlayersAsync()
     {
-        var test = new List<PlayerState>();
-        return Task.FromResult<IEnumerable<PlayerState>>(test);
+        var test = new List<Player>();
+        return Task.FromResult<IEnumerable<Player>>(test);
     }
 }

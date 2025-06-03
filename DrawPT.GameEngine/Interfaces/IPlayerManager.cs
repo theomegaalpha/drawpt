@@ -1,4 +1,4 @@
-using DrawPT.GameEngine.Models;
+using DrawPT.Common.Models;
 
 namespace DrawPT.GameEngine.Interfaces;
 
@@ -8,7 +8,7 @@ public interface IPlayerManager
     Task RemovePlayerAsync(string connectionId);
     Task<bool> IsRoomFullAsync();
     Task BroadcastPlayerUpdateAsync(Player player, PlayerUpdateType updateType);
-    Task<IEnumerable<PlayerState>> GetPlayersAsync();
+    Task<IEnumerable<Player>> GetPlayersAsync();
 }
 
 public enum PlayerUpdateType

@@ -4,5 +4,5 @@ namespace DrawPT.GameEngine.Interfaces;
 
 public interface IThemeService
 {
-    Task<List<GameTheme>> GetRandomThemesAsync();
+    Task<List<string>> GetRandomThemesAsync();
 } 

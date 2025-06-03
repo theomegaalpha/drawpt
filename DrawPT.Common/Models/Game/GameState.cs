@@ -11,4 +11,12 @@ namespace DrawPT.Common.Models.Game
         public Guid HostPlayer { get; set; }
         public List<Guid> Players { get; set; } = new ();
     }
+
+    public enum GameStatus
+    {
+        WaitingForPlayers,
+        InProgress,
+        Completed,
+        Abandoned
+    }
 }
