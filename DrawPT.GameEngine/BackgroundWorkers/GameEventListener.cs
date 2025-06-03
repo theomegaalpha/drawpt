@@ -47,7 +47,7 @@ public class GameEventListener : BackgroundService
                 _logger.LogInformation($"Game started event received for room: {routingKey.Split('.')[1]}");
 
                 // TODO: implement way of tracking used threads and clean up when game ends
-                _ = Task.Run(async () => await StartGameAsync(roomCode, ea.DeliveryTag));
+                _ = Task.Run(async () => await _gameFlowController.PlayGameAsync(roomCode));
             }
         };
 
