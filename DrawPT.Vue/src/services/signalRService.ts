@@ -14,9 +14,8 @@ export class SignalRService {
   }
 
   public async startConnection(hubUrl: string): Promise<void> {
-    const accessToken = (await getAccessToken()) || ''
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, { accessTokenFactory: () => accessToken })
+      .withUrl(hubUrl, { accessTokenFactory: async () => (await getAccessToken()) || '' })
       .withAutomaticReconnect()
       .build()
 

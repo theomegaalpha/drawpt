@@ -83,6 +83,7 @@ namespace DrawPT.Api.Hubs
                 var connectionId = routingKey.Split('.')[1];
                 var action = routingKey.Split('.')[2];
                 IBasicProperties props = ea.BasicProperties;
+                props.CorrelationId = corrId;
 
                 var message = Encoding.UTF8.GetString(body);
 
@@ -107,7 +108,7 @@ namespace DrawPT.Api.Hubs
                         return;
                     }
                     var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
-                    _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, body: body2);
+                    _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, basicProperties: props, body: body2);
                 }
                 else if (action == ClientInteractionMQ.Question)
                 {
@@ -130,7 +131,7 @@ namespace DrawPT.Api.Hubs
                         return;
                     }
                     var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
-                    _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, body: body2);
+                    _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, basicProperties: props, body: body2);
                 }
                 else
                 {

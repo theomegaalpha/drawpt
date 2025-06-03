@@ -12,17 +12,18 @@ public class RoundOrchestrator : IRoundOrchestrator
 {
     private readonly IModel _channel;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests;
+    private readonly ILogger<RoundOrchestrator> _logger;
 
     public RoundOrchestrator(
-        IConnection rabbitMqConnection)
+        IConnection rabbitMqConnection,
+        ILogger<RoundOrchestrator> logger)
     {
         _channel = rabbitMqConnection.CreateModel();
+        _channel.ExchangeDeclare(GameResponseMQ.ExchangeName, ExchangeType.Topic);
         _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
         _channel.ExchangeDeclare(ClientInteractionMQ.ExchangeName, ExchangeType.Topic);
         _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
-
-        var replyQueue = GameResponseMQ.QueueName;
-        _channel.QueueDeclare(queue: replyQueue);
+        _logger = logger;
 
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += (model, ea) =>
@@ -36,7 +37,10 @@ public class RoundOrchestrator : IRoundOrchestrator
                 tcs.TrySetResult(response);
             }
         };
-        _channel.BasicConsume(queue: replyQueue, autoAck: true, consumer: consumer);
+        _channel.QueueDeclare(queue: GameResponseMQ.QueueName);
+        _channel.QueueBind(GameResponseMQ.QueueName,
+            GameResponseMQ.ExchangeName, GameResponseMQ.RoutingKey);
+        _channel.BasicConsume(queue: GameResponseMQ.QueueName, autoAck: true, consumer: consumer);
     }
 
 
@@ -66,14 +70,11 @@ public class RoundOrchestrator : IRoundOrchestrator
         var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutMilliseconds));
 
         if (completedTask == tcs.Task)
-        {
             return tcs.Task.Result;
-        }
-        else
-        {
-            _pendingRequests.TryRemove(correlationId, out _);
-            throw new TimeoutException("No response received within the timeout period.");
-        }
+
+        _pendingRequests.TryRemove(correlationId, out _);
+        _logger.LogDebug("No response received from client within the timeout period.");
+        return string.Empty;
     }
 
     public async Task<GameTheme> SelectThemeAsync(string playerConnectionId)
