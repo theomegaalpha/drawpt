@@ -24,53 +24,25 @@ public class GameFlowController : IGameFlowController
 
     public async Task PlayGameAsync(string roomCode)
     {
-        await StartGameAsync();
+        // Broadcast start game message
 
         for (int i = 0; i < 8; i++)
         {
-            var round = await StartNewRoundAsync(i);
-
-            // Theme selection
-            var theme = await _roundOrchestrator.SelectThemeAsync("1");
-
-            // Question and answers
-            var question = await _roundOrchestrator.GenerateQuestionAsync(theme);
-
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
 
-            await Task.Delay(500);
+            // get 5 theme options from the database
+            var selectedTheme = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
 
+            // generate question
+
+            // collect answers
             var answer = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
-            var answers = await _roundOrchestrator.CollectAnswersAsync(question);
-            var assessedAnswers = await _roundOrchestrator.AssessAnswersAsync(question, answers);
 
-            await EndRoundAsync(round);
+            // assess answers
+
+            // broadcast round scores to players
         }
 
-        await EndGameAsync();
-    }
-
-    public async Task StartGameAsync()
-    {
-        // Broadcast
-    }
-
-    public async Task<GameRound> StartNewRoundAsync(int roundNumber)
-    {
-        return new GameRound();
-    }
-
-    public async Task EndRoundAsync(GameRound round)
-    {
-
-    }
-
-    public async Task EndGameAsync()
-    {
-    }
-
-    public Task<bool> IsGameCompleteAsync()
-    {
-        return Task.FromResult(false);
+        // broadcast end game scores to players
     }
 } 
