@@ -1,5 +1,6 @@
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Services;
+using DrawPT.GameEngine;
 using DrawPT.GameEngine.BackgroundWorkers;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Services;
@@ -12,14 +13,13 @@ builder.AddAzureBlobClient(connectionName: "storage");
 builder.AddRedisDistributedCache(connectionName: "cache");
 
 var services = builder.Services;
+services.AddHostedService<GameEventListener>();
 services.AddTransient<IAIService, AIService>();
 services.AddTransient<ICacheService, CacheService>();
-
-services.AddTransient<IGameFlowController, GameFlowController>();
-services.AddHostedService<GameEventListener>();
 services.AddTransient<IStorageService, StorageService>();
 services.AddTransient<IPlayerManager, PlayerManager>();
-services.AddTransient<IRoundOrchestrator, RoundOrchestrator>();
+services.AddTransient<IGameCommunicationService, GameCommunicationService>();
+services.AddTransient<IGameEngine, GameEngine>();
 
 var app = builder.Build();
 app.UseHttpsRedirection();

@@ -1,24 +1,22 @@
 using DrawPT.Common.Interfaces;
-using DrawPT.Common.Models;
-using DrawPT.Common.Services;
 using DrawPT.GameEngine.Interfaces;
 using RabbitMQ.Client;
 
-namespace DrawPT.GameEngine.Services;
+namespace DrawPT.GameEngine;
 
-public class GameFlowController : IGameFlowController
+public class GameEngine : IGameEngine
 {
-    private readonly IRoundOrchestrator _roundOrchestrator;
+    private readonly IGameCommunicationService _gameCommunicationService;
     private readonly IModel _channel;
     private readonly ICacheService _cacheService;
 
-    public GameFlowController(
+    public GameEngine(
         ICacheService cacheService,
         IConnection rabbitMqConnection,
-        IRoundOrchestrator roundOrchestrator)
+        IGameCommunicationService gameCommunicationService)
     {
         _cacheService = cacheService;
-        _roundOrchestrator = roundOrchestrator;
+        _gameCommunicationService = gameCommunicationService;
         _channel = rabbitMqConnection.CreateModel();
     }
 
@@ -34,13 +32,13 @@ public class GameFlowController : IGameFlowController
 
             // get 5 theme options from the database
             // themesService
-            var selectedTheme = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
+            //var selectedTheme = await _gameCommunicationService.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
 
             // generate question
             // questionService
 
             // collect answers
-            var answer = await _roundOrchestrator.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
+            //var answer = await _gameCommunicationService.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
 
             // scoringService
 

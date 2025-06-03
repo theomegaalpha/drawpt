@@ -10,12 +10,12 @@ public class GameEventListener : BackgroundService
 {
     private readonly ILogger<GameEventListener> _logger;
     private readonly IModel _channel;
-    private readonly IGameFlowController _gameFlowController;
+    private readonly IGameEngine _gameFlowController;
 
     public GameEventListener(
         ILogger<GameEventListener> logger,
         IConnection rabbitMqConnection,
-        IGameFlowController gameFlowController)
+        IGameEngine gameFlowController)
     {
         _logger = logger;
         _channel = rabbitMqConnection.CreateModel();
