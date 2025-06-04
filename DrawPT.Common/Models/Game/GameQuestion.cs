@@ -10,6 +10,9 @@ namespace DrawPT.Common.Models.Game
         /// </summary>
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public int RoundNumber { get; set; } = 0;
+
+
         /// <summary>
         /// The theme of this question
         /// </summary>

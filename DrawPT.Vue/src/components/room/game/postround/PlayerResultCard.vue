@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { GameAnswer } from '@/models/gameModels'
+import type { PlayerAnswer } from '@/models/gameModels'
 import { ref, computed } from 'vue'
 const props = defineProps<{
   username?: string
   isYou?: boolean
-  answer: GameAnswer
+  answer: PlayerAnswer
 }>()
 
 const showReason = ref(props.isYou)

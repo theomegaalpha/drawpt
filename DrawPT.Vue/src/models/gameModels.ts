@@ -6,24 +6,30 @@ export interface GameResults {
 
 export interface GameRound {
   roundNumber: number
-  question: GameQuestion
-  answers: GameAnswer[]
+  question: PlayerQuestion
+  answers: PlayerAnswer[]
 }
 
-export interface GameAnswerBase {
+export interface PlayerAnswerBase {
   guess: string
   isGambling: boolean
 }
 
-export interface GameAnswer extends GameAnswerBase {
-  playerConnectionId: string
+export interface PlayerAnswer {
+  id: string
+  connectionId: string
+  guess: string
   score: number
   bonusPoints: number
   reason: string
+  isGambling: boolean
+  submittedAt: string
 }
 
-export interface GameQuestion {
+export interface PlayerQuestion {
   Id: string
+  theme: string
+  roundNumber: number
   originalPrompt: string
   imageUrl: string
 }

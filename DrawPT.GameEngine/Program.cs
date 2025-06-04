@@ -22,6 +22,7 @@ services.AddTransient<ICacheService, CacheService>();
 services.AddTransient<IStorageService, StorageService>();
 services.AddTransient<IPlayerManager, PlayerManager>();
 services.AddTransient<IThemeService, ThemeService>();
+services.AddTransient<IQuestionService, QuestionService>();
 services.AddTransient<IGameCommunicationService, GameCommunicationService>();
 services.AddTransient<IGameEngine, GameEngine>();
 services.AddTransient<ReferenceRepository>();

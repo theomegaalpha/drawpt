@@ -11,7 +11,7 @@ import { useNotificationStore } from '@/stores/notifications'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import service from '@/services/signalRService'
 
-import type { GameAnswerBase } from '@/models/gameModels'
+import type { PlayerAnswerBase, PlayerQuestion } from '@/models/gameModels'
 
 const { addRoundResult, setRound } = useScoreboardStore()
 const { addGameNotification } = useNotificationStore()
@@ -48,7 +48,7 @@ async function askForTheme(): Promise<string> {
   })
 }
 
-async function askQuestion(): Promise<GameAnswerBase> {
+async function askQuestion(): Promise<PlayerAnswerBase> {
   return new Promise((resolve, reject) => {
     questionTimeout.value = setTimeout(() => {
       lockGuess.value = true
@@ -58,7 +58,7 @@ async function askQuestion(): Promise<GameAnswerBase> {
 
     watch(guess, (newValue) => {
       if (newValue) {
-        const answer: GameAnswerBase = {
+        const answer: PlayerAnswerBase = {
           guess: newValue,
           isGambling: false
         }
@@ -90,17 +90,15 @@ onMounted(() => {
     return theme
   })
 
-  service.on(
-    'askQuestion',
-    async (currentRound: number, newImageUrl: string): Promise<GameAnswerBase> => {
-      showResults.value = false
-      lockGuess.value = false
-      imageUrl.value = newImageUrl
-      setRound(currentRound)
-      const answer = await askQuestion()
-      return answer
-    }
-  )
+  service.on('askQuestion', async (question: PlayerQuestion): Promise<PlayerAnswerBase> => {
+    console.log('askQuestion', question)
+    showResults.value = false
+    lockGuess.value = false
+    imageUrl.value = question.imageUrl || ''
+    setRound(question.roundNumber)
+    const answer = await askQuestion()
+    return answer
+  })
 
   service.on('broadcastRoundResults', (gameRound) => {
     addRoundResult(gameRound)

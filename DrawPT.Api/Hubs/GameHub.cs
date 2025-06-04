@@ -124,7 +124,11 @@ namespace DrawPT.Api.Hubs
                     }
                     try
                     {
-                        response = await client.AskQuestion(new GameQuestion(), questionTimeoutSource.Token);
+                        var question = JsonSerializer.Deserialize<GameQuestion>(message);
+                        if (question == null)
+                            question = new GameQuestion(); //TODO:  default question
+                        var playerAnswer = await client.AskQuestion(question, questionTimeoutSource.Token);
+                        response = JsonSerializer.Serialize(playerAnswer);
                     }
                     catch
                     {

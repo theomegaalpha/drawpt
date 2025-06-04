@@ -7,6 +7,8 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace DrawPT.GameEngine.Services;
 
@@ -52,24 +54,39 @@ public class GameCommunicationService : IGameCommunicationService
     public async Task<string> AskPlayerTheme(Player player, int timeoutInSeconds)
     {
         var themes = _themeService.GetRandomThemes();
-        var themesJson = System.Text.Json.JsonSerializer.Serialize(themes);
-
-        var selectedTheme = await RequestUserInputAsync(themesJson, player.ConnectionId, timeoutInSeconds*1000);
+        var themesJson = JsonSerializer.Serialize(themes);
+        var routingKey = ClientInteractionMQ.RoutingKeys.AskTheme(player.ConnectionId);
+        var selectedTheme = await RequestUserInputAsync(routingKey, themesJson, player.ConnectionId, timeoutInSeconds*1000);
 
         if (string.IsNullOrEmpty(selectedTheme))
         {
-            _logger.LogDebug("No theme selected by player {PlayerId} within the timeout period.", player.Id);
+            _logger.LogDebug($"[{player.RoomCode}] No theme selected by player {player.Id} within the timeout period.");
             return themes[new Random().Next(themes.Count)];
         }
         return selectedTheme;
     }
-    public Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutSeconds)
+
+    public async Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutInSeconds)
     {
-        return Task.FromResult(new PlayerAnswer());
+        var questionJson = JsonSerializer.Serialize(question);
+        var routingKey = ClientInteractionMQ.RoutingKeys.AskQuestion(player.ConnectionId);
+        var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
+        var answer = JsonSerializer.Deserialize<PlayerAnswer>(answerString);
+        if (answer == null)
+        {
+            _logger.LogDebug($"[{player.RoomCode}] No answer given by player {player.Id} within the timeout period.");
+            return new PlayerAnswer {
+                ConnectionId = player.ConnectionId,
+                Score = 0,
+                Reason = "No answer provided within the timeout period.",
+            };
+        }
+
+        return answer;
     }
 
 
-    private async Task<string> RequestUserInputAsync(string requestPayload, string connectionId, int timeoutMilliseconds)
+    private async Task<string> RequestUserInputAsync(string routingKey, string requestPayload, string connectionId, int timeoutMilliseconds)
     {
         var correlationId = Guid.NewGuid().ToString();
         var replyQueue = GameResponseMQ.QueueName;
@@ -85,7 +102,7 @@ public class GameCommunicationService : IGameCommunicationService
         _pendingRequests[correlationId] = tcs;
 
         _channel.BasicPublish(exchange: ClientInteractionMQ.ExchangeName,
-                              routingKey: ClientInteractionMQ.RoutingKeys.AskTheme(connectionId),
+                              routingKey: routingKey,
                               basicProperties: properties,
                               body: messageBytes);
 

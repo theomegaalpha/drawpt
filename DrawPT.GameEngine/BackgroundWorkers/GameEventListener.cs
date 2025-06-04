@@ -10,16 +10,16 @@ public class GameEventListener : BackgroundService
 {
     private readonly ILogger<GameEventListener> _logger;
     private readonly IModel _channel;
-    private readonly IGameEngine _gameFlowController;
+    private readonly IGameEngine _gameEngine;
 
     public GameEventListener(
         ILogger<GameEventListener> logger,
         IConnection rabbitMqConnection,
-        IGameEngine gameFlowController)
+        IGameEngine gameEngine)
     {
         _logger = logger;
         _channel = rabbitMqConnection.CreateModel();
-        _gameFlowController = gameFlowController;
+        _gameEngine = gameEngine;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,7 +47,7 @@ public class GameEventListener : BackgroundService
                 _logger.LogInformation($"Game started event received for room: {routingKey.Split('.')[1]}");
 
                 // TODO: implement way of tracking used threads and clean up when game ends
-                _ = Task.Run(async () => await _gameFlowController.PlayGameAsync(roomCode));
+                _ = Task.Run(async () => await _gameEngine.PlayGameAsync(roomCode));
             }
         };
 
