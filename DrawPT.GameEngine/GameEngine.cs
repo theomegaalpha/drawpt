@@ -1,35 +1,25 @@
 using DrawPT.Common.Interfaces;
-using DrawPT.Common.Interfaces.Game;
-using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-using DrawPT.GameEngine.Services;
-using RabbitMQ.Client;
 
 namespace DrawPT.GameEngine;
 
 public class GameEngine : IGameEngine
 {
     private readonly IGameCommunicationService _gameCommunicationService;
-    private readonly IModel _channel;
     private readonly ICacheService _cacheService;
-    private readonly IThemeService _themeService;
     private readonly IQuestionService _questionService;
     private readonly ILogger<GameEngine> _logger;
 
     public GameEngine(
-        IConnection rabbitMqConnection,
-        IThemeService themeService,
         ICacheService cacheService,
         IQuestionService questionService,
         IGameCommunicationService gameCommunicationService,
         ILogger<GameEngine> logger)
     {
-        _themeService = themeService;
         _cacheService = cacheService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
-        _channel = rabbitMqConnection.CreateModel();
         _logger = logger;
     }
 
