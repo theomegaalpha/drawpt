@@ -135,7 +135,7 @@ namespace DrawPT.Api.Hubs
                         _logger.LogError($"Error while asking question for connection {connectionId} with message: {message}");
                         return;
                     }
-                    var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+                    var body2 = Encoding.UTF8.GetBytes(response);
                     _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, basicProperties: props, body: body2);
                 }
                 else

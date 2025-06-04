@@ -8,7 +8,6 @@ using RabbitMQ.Client.Events;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace DrawPT.GameEngine.Services;
 
@@ -71,17 +70,27 @@ public class GameCommunicationService : IGameCommunicationService
         var questionJson = JsonSerializer.Serialize(question);
         var routingKey = ClientInteractionMQ.RoutingKeys.AskQuestion(player.ConnectionId);
         var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
-        var answer = JsonSerializer.Deserialize<PlayerAnswer>(answerString);
-        if (answer == null)
+        PlayerAnswerBase answerBase;
+        try 
         {
-            _logger.LogDebug($"[{player.RoomCode}] No answer given by player {player.Id} within the timeout period.");
-            return new PlayerAnswer {
-                ConnectionId = player.ConnectionId,
-                Score = 0,
-                Reason = "No answer provided within the timeout period.",
-            };
+            answerBase = JsonSerializer.Deserialize<PlayerAnswerBase>(answerString);
+        }
+        catch
+        {
+            answerBase = null;
         }
 
+        var answer = new PlayerAnswer();
+        if (answerBase == null)
+        {
+            _logger.LogDebug($"[{player.RoomCode}] No answer given by player {player.Id} within the timeout period.");
+            answer.Reason = "No answer provided within the timeout period.";
+            return answer;
+        }
+
+        answer.ConnectionId = player.ConnectionId;
+        answer.IsGambling = answerBase.IsGambling;
+        answer.Guess = answerBase.Guess;
         return answer;
     }
 

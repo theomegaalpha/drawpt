@@ -16,6 +16,6 @@ namespace DrawPT.Api.Hubs
         Task WriteMessage(string message);
 
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
-        Task<PlayerAnswer> AskQuestion(GameQuestion question, CancellationToken ct);
+        Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
     }
 }
