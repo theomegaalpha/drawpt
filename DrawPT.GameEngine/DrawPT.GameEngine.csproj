@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.0" />
+    <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="9.3.0" />
     <PackageReference Include="Aspire.RabbitMQ.Client" Version="9.3.0" />
     <PackageReference Include="Aspire.StackExchange.Redis" Version="9.3.0" />
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.3.0" />
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DrawPT.Common\DrawPT.Common.csproj" />
+    <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
     <ProjectReference Include="..\DrawPT.ServiceDefaults\DrawPT.ServiceDefaults.csproj" />
   </ItemGroup>
 

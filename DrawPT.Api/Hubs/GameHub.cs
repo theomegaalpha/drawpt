@@ -101,7 +101,8 @@ namespace DrawPT.Api.Hubs
                     }
                     try
                     {
-                        response = await client.AskTheme([message], themeTimoutTokenSource.Token);
+                        var themes = JsonSerializer.Deserialize<List<string>>(message);
+                        response = await client.AskTheme(themes ?? [], themeTimoutTokenSource.Token);
                     }
                     catch
                     {
@@ -123,7 +124,6 @@ namespace DrawPT.Api.Hubs
                     }
                     try
                     {
-                        await client.WriteMessage("fuckery?");
                         response = await client.AskQuestion(new GameQuestion(), questionTimeoutSource.Token);
                     }
                     catch

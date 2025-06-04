@@ -1,4 +1,5 @@
 using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces.Game;
 using DrawPT.GameEngine.Interfaces;
 using RabbitMQ.Client;
 
@@ -9,12 +10,15 @@ public class GameEngine : IGameEngine
     private readonly IGameCommunicationService _gameCommunicationService;
     private readonly IModel _channel;
     private readonly ICacheService _cacheService;
+    private readonly IThemeService _themeService;
 
     public GameEngine(
+        IThemeService themeService,
         ICacheService cacheService,
         IConnection rabbitMqConnection,
         IGameCommunicationService gameCommunicationService)
     {
+        _themeService = themeService;
         _cacheService = cacheService;
         _gameCommunicationService = gameCommunicationService;
         _channel = rabbitMqConnection.CreateModel();
@@ -30,9 +34,7 @@ public class GameEngine : IGameEngine
             // gameStateService.StartRound(roomCode, i);
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
 
-            // get 5 theme options from the database
-            // themesService
-            //var selectedTheme = await _gameCommunicationService.RequestUserInputAsync("hi", players.First().ConnectionId, 60000);
+            var selectedTheme = await _gameCommunicationService.AskPlayerTheme(players.ElementAt(i%players.Count), 30);
 
             // generate question
             // questionService

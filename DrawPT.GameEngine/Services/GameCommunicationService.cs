@@ -1,4 +1,5 @@
 using DrawPT.Common.Configuration;
+using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
@@ -12,13 +13,17 @@ namespace DrawPT.GameEngine.Services;
 public class GameCommunicationService : IGameCommunicationService
 {
     private readonly IModel _channel;
+    private readonly IThemeService _themeService;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests;
     private readonly ILogger<GameCommunicationService> _logger;
 
     public GameCommunicationService(
+        IThemeService themeService,
         IConnection rabbitMqConnection,
         ILogger<GameCommunicationService> logger)
     {
+        _themeService = themeService;
+
         _channel = rabbitMqConnection.CreateModel();
         _channel.ExchangeDeclare(GameResponseMQ.ExchangeName, ExchangeType.Topic);
         _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
@@ -44,14 +49,25 @@ public class GameCommunicationService : IGameCommunicationService
         _channel.BasicConsume(queue: GameResponseMQ.QueueName, autoAck: true, consumer: consumer);
     }
 
-    public Task<GameTheme> AskPlayerTheme(Player player, int timeoutMilliseconds)
+    public async Task<string> AskPlayerTheme(Player player, int timeoutInSeconds)
     {
-        return Task.FromResult(new GameTheme());
+        var themes = _themeService.GetRandomThemes();
+        var themesJson = System.Text.Json.JsonSerializer.Serialize(themes);
+
+        var selectedTheme = await RequestUserInputAsync(themesJson, player.ConnectionId, timeoutInSeconds*1000);
+
+        if (string.IsNullOrEmpty(selectedTheme))
+        {
+            _logger.LogDebug("No theme selected by player {PlayerId} within the timeout period.", player.Id);
+            return themes[new Random().Next(themes.Count)];
+        }
+        return selectedTheme;
     }
-    public Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutMilliseconds)
+    public Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutSeconds)
     {
         return Task.FromResult(new PlayerAnswer());
     }
+
 
     private async Task<string> RequestUserInputAsync(string requestPayload, string connectionId, int timeoutMilliseconds)
     {

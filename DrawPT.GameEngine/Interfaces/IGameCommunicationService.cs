@@ -5,8 +5,8 @@ namespace DrawPT.GameEngine.Interfaces;
 
 public interface IGameCommunicationService
 {
-    Task<GameTheme> AskPlayerTheme(Player player, int timeoutMilliseconds);
-    Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutMilliseconds);
+    Task<string> AskPlayerTheme(Player player, int timeoutInSeconds);
+    Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutInSeconds);
     Task BroadcastGameMessage(string roomCode, string message);
     //Task BroadcastGameEvent(GameEvent gameEvent);
 }
