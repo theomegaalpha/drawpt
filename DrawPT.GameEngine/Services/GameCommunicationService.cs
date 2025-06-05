@@ -26,36 +26,19 @@ public class GameCommunicationService : IGameCommunicationService
         _themeService = themeService;
 
         _channel = rabbitMqConnection.CreateModel();
-        _channel.ExchangeDeclare(GameResponseMQ.ExchangeName, ExchangeType.Topic);
-        _channel.ExchangeDeclare(ClientBroadcastMQ.ExchangeName, ExchangeType.Topic);
-        _channel.ExchangeDeclare(ClientInteractionMQ.ExchangeName, ExchangeType.Topic);
+        _channel.ExchangeDeclare(ApiResponseMQ.ExchangeName, ExchangeType.Topic);
+        _channel.ExchangeDeclare(GameEngineBroadcastMQ.ExchangeName, ExchangeType.Topic);
+        _channel.ExchangeDeclare(GameEngineRequestMQ.ExchangeName, ExchangeType.Topic);
         _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
         _logger = logger;
-
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += (model, ea) =>
-        {
-            var body = ea.Body.ToArray();
-            var response = Encoding.UTF8.GetString(body);
-            var correlationId = ea.BasicProperties.CorrelationId;
-
-            if (_pendingRequests.TryRemove(correlationId, out var tcs))
-            {
-                tcs.TrySetResult(response);
-            }
-        };
-        _channel.QueueDeclare(queue: GameResponseMQ.QueueName);
-        _channel.QueueBind(GameResponseMQ.QueueName,
-            GameResponseMQ.ExchangeName, GameResponseMQ.RoutingKey);
-        _channel.BasicConsume(queue: GameResponseMQ.QueueName, autoAck: true, consumer: consumer);
     }
 
     public void BroadcastGameEvent(string roomCode, string gameAction, object? message = null)
     {
-        var routingKey = $"{ClientBroadcastMQ.QueueName}.{roomCode}.{gameAction}";
+        var routingKey = $"{GameEngineBroadcastMQ.QueueName(roomCode)}.{gameAction}";
         var payloadJson = JsonSerializer.Serialize(message);
         var messageBytes = Encoding.UTF8.GetBytes(payloadJson);
-        _channel.BasicPublish(exchange: ClientBroadcastMQ.ExchangeName,
+        _channel.BasicPublish(exchange: GameEngineBroadcastMQ.ExchangeName,
                               routingKey: routingKey,
                               basicProperties: null,
                               body: messageBytes);
@@ -66,7 +49,7 @@ public class GameCommunicationService : IGameCommunicationService
     {
         var themes = _themeService.GetRandomThemes();
         var themesJson = JsonSerializer.Serialize(themes);
-        var routingKey = ClientInteractionMQ.RoutingKeys.AskTheme(player.ConnectionId);
+        var routingKey = GameEngineRequestMQ.RoutingKeys.AskTheme(player.ConnectionId);
         var selectedTheme = await RequestUserInputAsync(routingKey, themesJson, player.ConnectionId, timeoutInSeconds * 1000);
 
         if (string.IsNullOrEmpty(selectedTheme))
@@ -80,7 +63,7 @@ public class GameCommunicationService : IGameCommunicationService
     public async Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutInSeconds)
     {
         var questionJson = JsonSerializer.Serialize(question);
-        var routingKey = ClientInteractionMQ.RoutingKeys.AskQuestion(player.ConnectionId);
+        var routingKey = GameEngineRequestMQ.RoutingKeys.AskQuestion(player.ConnectionId);
         var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
         PlayerAnswerBase? answerBase;
         try 
@@ -109,8 +92,25 @@ public class GameCommunicationService : IGameCommunicationService
 
     private async Task<string> RequestUserInputAsync(string routingKey, string requestPayload, string connectionId, int timeoutMilliseconds)
     {
+        var consumer = new EventingBasicConsumer(_channel);
+        consumer.Received += (model, ea) =>
+        {
+            var body = ea.Body.ToArray();
+            var response = Encoding.UTF8.GetString(body);
+            var correlationId = ea.BasicProperties.CorrelationId;
+
+            if (_pendingRequests.TryRemove(correlationId, out var tcs))
+            {
+                tcs.TrySetResult(response);
+            }
+        };
+        _channel.QueueDeclare(queue: ApiResponseMQ.QueueName(connectionId));
+        _channel.QueueBind(ApiResponseMQ.QueueName(connectionId),
+            ApiResponseMQ.ExchangeName, ApiResponseMQ.RoutingKey(connectionId));
+        _channel.BasicConsume(queue: ApiResponseMQ.QueueName(connectionId), autoAck: true, consumer: consumer);
+
         var correlationId = Guid.NewGuid().ToString();
-        var replyQueue = GameResponseMQ.QueueName;
+        var replyQueue = ApiResponseMQ.QueueName(connectionId);
 
         var properties = _channel.CreateBasicProperties();
         properties.CorrelationId = correlationId;
@@ -122,7 +122,7 @@ public class GameCommunicationService : IGameCommunicationService
         var tcs = new TaskCompletionSource<string>();
         _pendingRequests[correlationId] = tcs;
 
-        _channel.BasicPublish(exchange: ClientInteractionMQ.ExchangeName,
+        _channel.BasicPublish(exchange: GameEngineRequestMQ.ExchangeName,
                               routingKey: routingKey,
                               basicProperties: properties,
                               body: messageBytes);

@@ -25,13 +25,13 @@ public class GameEventListener : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Declare exchange and queue
-        _channel.ExchangeDeclare(GameMQ.ExchangeName, ExchangeType.Topic);
-        _channel.QueueDeclare(GameMQ.QueueName);
-        _channel.QueueBind(GameMQ.QueueName, GameMQ.ExchangeName, GameMQ.RoutingKey);
+        _channel.ExchangeDeclare(ApiGameMQ.ExchangeName, ExchangeType.Topic);
+        _channel.QueueDeclare(ApiGameMQ.QueueName);
+        _channel.QueueBind(ApiGameMQ.QueueName, ApiGameMQ.ExchangeName, ApiGameMQ.RoutingKey);
 
         // Set up consumer
         var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += async (model, ea) =>
+        consumer.Received += (model, ea) =>
         {
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
@@ -42,9 +42,9 @@ public class GameEventListener : BackgroundService
             _logger.LogInformation($"Message content: {message}");
 
             // Handle game started event
-            if (routingKey.EndsWith(GameMQ.GameStart))
+            if (routingKey.EndsWith(ApiGameMQ.GameStart))
             {
-                _logger.LogInformation($"Game started event received for room: {routingKey.Split('.')[1]}");
+                _logger.LogInformation($"Game started event received for room: {roomCode}");
 
                 // TODO: implement way of tracking used threads and clean up when game ends
                 _ = Task.Run(async () => await _gameEngine.PlayGameAsync(roomCode));
@@ -52,7 +52,7 @@ public class GameEventListener : BackgroundService
         };
 
         _channel.BasicConsume(
-            queue: GameMQ.QueueName,
+            queue: ApiGameMQ.QueueName,
             autoAck: true,
             consumer: consumer);
 

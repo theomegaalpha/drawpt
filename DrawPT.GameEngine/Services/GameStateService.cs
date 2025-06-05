@@ -23,7 +23,7 @@ namespace DrawPT.GameEngine.Services
             gameState ??= new GameState() { RoomCode = roomCode };
             await _cacheService.SetGameState(gameState);
 
-            _gameCommunicationService.BroadcastGameEvent(roomCode, ClientBroadcastMQ.GameStarted);
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction);
         }
 
         public async Task StartRoundAsync(string roomCode, int roundNumber)
