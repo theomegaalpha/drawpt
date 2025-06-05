@@ -50,12 +50,24 @@ public class GameCommunicationService : IGameCommunicationService
         _channel.BasicConsume(queue: GameResponseMQ.QueueName, autoAck: true, consumer: consumer);
     }
 
+    public void BroadcastGameEvent(string roomCode, string gameAction, object? message = null)
+    {
+        var routingKey = $"{ClientBroadcastMQ.QueueName}.{roomCode}.{gameAction}";
+        var payloadJson = JsonSerializer.Serialize(message);
+        var messageBytes = Encoding.UTF8.GetBytes(payloadJson);
+        _channel.BasicPublish(exchange: ClientBroadcastMQ.ExchangeName,
+                              routingKey: routingKey,
+                              basicProperties: null,
+                              body: messageBytes);
+        _logger.LogDebug($"[{roomCode}] Broadcasted game event: {gameAction} with message: {message}");
+    }
+
     public async Task<string> AskPlayerTheme(Player player, int timeoutInSeconds)
     {
         var themes = _themeService.GetRandomThemes();
         var themesJson = JsonSerializer.Serialize(themes);
         var routingKey = ClientInteractionMQ.RoutingKeys.AskTheme(player.ConnectionId);
-        var selectedTheme = await RequestUserInputAsync(routingKey, themesJson, player.ConnectionId, timeoutInSeconds*1000);
+        var selectedTheme = await RequestUserInputAsync(routingKey, themesJson, player.ConnectionId, timeoutInSeconds * 1000);
 
         if (string.IsNullOrEmpty(selectedTheme))
         {
@@ -70,7 +82,7 @@ public class GameCommunicationService : IGameCommunicationService
         var questionJson = JsonSerializer.Serialize(question);
         var routingKey = ClientInteractionMQ.RoutingKeys.AskQuestion(player.ConnectionId);
         var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
-        PlayerAnswerBase answerBase;
+        PlayerAnswerBase? answerBase;
         try 
         {
             answerBase = JsonSerializer.Deserialize<PlayerAnswerBase>(answerString);
@@ -128,7 +140,7 @@ public class GameCommunicationService : IGameCommunicationService
         return string.Empty;
     }
 
-    public Task BroadcastGameMessage(string roomCode, string message)
+    public Task BroadcastGameEvent(string roomCode, string message)
     {
         return Task.CompletedTask;
     }

@@ -103,13 +103,14 @@ namespace DrawPT.Api.Hubs
                     {
                         var themes = JsonSerializer.Deserialize<List<string>>(message);
                         response = await client.AskTheme(themes ?? [], themeTimoutTokenSource.Token);
+                        response = JsonSerializer.Serialize(response);
                     }
                     catch
                     {
                         _logger.LogError($"Error while asking theme for connection {connectionId} with message: {message}");
                         return;
                     }
-                    var body2 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+                    var body2 = Encoding.UTF8.GetBytes(response);
                     _channel.BasicPublish(GameResponseMQ.ExchangeName, replyTo, basicProperties: props, body: body2);
                 }
                 else if (action == ClientInteractionMQ.Question)
@@ -174,7 +175,7 @@ namespace DrawPT.Api.Hubs
             switch (action)
             {
                 case ClientBroadcastMQ.PlayerJoinedAction:
-                    Player player = JsonSerializer.Deserialize<Player>(message);
+                    var player = JsonSerializer.Deserialize<Player>(message);
                     await _hubContext.Clients.Group(roomCode).PlayerJoined(player!);
                     break;
 
@@ -183,7 +184,7 @@ namespace DrawPT.Api.Hubs
                     await _hubContext.Clients.Group(roomCode).PlayerLeft(leftPlayer!);
                     break;
 
-                case "PlayerScoreUpdated":
+                case ClientBroadcastMQ.PlayerScoreUpdate:
                     var playerResults = JsonSerializer.Deserialize<PlayerResults>(message);
                     if (playerResults == null)
                     {
@@ -193,24 +194,28 @@ namespace DrawPT.Api.Hubs
                     await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResults.PlayerId, playerResults.Score);
                     break;
 
-                case ClientBroadcastMQ.StartedGame:
+                case ClientBroadcastMQ.GameStarted:
                     var config = JsonSerializer.Deserialize<GameConfiguration>(message);
                     await _hubContext.Clients.Group(roomCode).GameStarted(config!);
                     break;
 
-                case "GameEnded":
-                    var results = JsonSerializer.Deserialize<GameResults>(message);
-                    await _hubContext.Clients.Group(roomCode).GameEnded(results!);
-                    break;
-
-                case "RoundStarted":
+                case ClientBroadcastMQ.RoundStarted:
                     var round = JsonSerializer.Deserialize<GameRound>(message);
                     await _hubContext.Clients.Group(roomCode).RoundStarted(round!);
                     break;
 
-                case "RoundEnded":
+                case ClientBroadcastMQ.AssessingAnswers:
+                    await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing player scores...");
+                    break;
+
+                case ClientBroadcastMQ.RoundEnded:
                     var endedRound = JsonSerializer.Deserialize<GameRound>(message);
                     await _hubContext.Clients.Group(roomCode).RoundEnded(endedRound!);
+                    break;
+
+                case ClientBroadcastMQ.GameEnded:
+                    var results = JsonSerializer.Deserialize<GameResults>(message);
+                    await _hubContext.Clients.Group(roomCode).GameEnded(results!);
                     break;
             }
         }
@@ -262,11 +267,6 @@ namespace DrawPT.Api.Hubs
             _channel.BasicPublish(exchange: GameMQ.ExchangeName,
                                 routingKey: GameMQ.RoutingKeys.GameStarted(player.RoomCode),
                                 body: body);
-
-            _channel.BasicPublish(
-                exchange: ClientBroadcastMQ.ExchangeName,
-                routingKey: ClientBroadcastMQ.RoutingKeys.GameStarted(player.RoomCode),
-                body: body);
 
             return true;
         }

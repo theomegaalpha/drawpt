@@ -1,4 +1,5 @@
-﻿using DrawPT.Common.Models;
+﻿using DrawPT.Common.Interfaces.Game;
+using DrawPT.Common.Models;
 
 namespace DrawPT.Common.Interfaces
 {
@@ -18,5 +19,7 @@ namespace DrawPT.Common.Interfaces
         Task<List<Player>> GetRoomPlayersAsync(string roomCode);
         Task AddPlayerToRoom(string roomCode, Player player);
         Task RemovePlayerFromRoom(string roomCode, Player player);
+        Task<IGameState?> GetGameState(string roomCode);
+        Task SetGameState(IGameState gameState);
     }
 }

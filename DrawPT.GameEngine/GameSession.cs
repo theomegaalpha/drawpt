@@ -7,17 +7,20 @@ namespace DrawPT.GameEngine;
 public class GameSession : IGameSession
 {
     private readonly IGameCommunicationService _gameCommunicationService;
-    private readonly ICacheService _cacheService;
+    private readonly IGameStateService _gameStateService;
     private readonly IQuestionService _questionService;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<GameSession> _logger;
 
     public GameSession(
         ICacheService cacheService,
         IQuestionService questionService,
+        IGameStateService gameStateService,
         IGameCommunicationService gameCommunicationService,
         ILogger<GameSession> logger)
     {
         _cacheService = cacheService;
+        _gameStateService = gameStateService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
         _logger = logger;
@@ -26,13 +29,13 @@ public class GameSession : IGameSession
     public async Task PlayGameAsync(string roomCode)
     {
         // Broadcast start game message
-        // gameStateService.StartGame(roomCode);
-        await Task.Delay(10000);
+        await _gameStateService.StartGameAsync(roomCode);
+        await Task.Delay(100);
 
         for (int i = 0; i < 8; i++)
         {
-            // gameStateService.StartRound(roomCode, i);
-            await Task.Delay(10000);
+            await _gameStateService.StartRoundAsync(roomCode, i+1);
+            await Task.Delay(100);
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);

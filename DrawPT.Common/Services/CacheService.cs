@@ -1,4 +1,5 @@
 ﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
@@ -56,6 +57,24 @@ namespace DrawPT.Common.Services
                 return;
 
             _cache.Remove($"room:{roomCode}");
+        }
+
+        public Task<IGameState?> GetGameState(string roomCode)
+        {
+            var gameStateJson = _cache.GetString($"gameState:{roomCode}");
+            if (gameStateJson is null)
+            {
+                return Task.FromResult<IGameState?>(null);
+            }
+            var gameState = JsonSerializer.Deserialize<IGameState>(gameStateJson);
+            return Task.FromResult(gameState);
+        }
+
+        public async Task SetGameState(IGameState gameState)
+        {
+            var gameStateJson = JsonSerializer.Serialize(gameState);
+            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
+            await _cache.SetStringAsync($"gameState:{gameState.RoomCode}", gameStateJson, options);
         }
 
         public async Task<bool> RoomExistsAsync(string code)

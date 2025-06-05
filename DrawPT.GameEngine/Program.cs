@@ -24,6 +24,7 @@ services.AddTransient<IPlayerManager, PlayerManager>();
 services.AddTransient<IThemeService, ThemeService>();
 services.AddTransient<IQuestionService, QuestionService>();
 services.AddTransient<IGameCommunicationService, GameCommunicationService>();
+services.AddTransient<IGameStateService, GameStateService>();
 services.AddTransient<IGameSession, GameSession>();
 services.AddTransient<ReferenceRepository>();
 
