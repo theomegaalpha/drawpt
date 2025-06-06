@@ -1,6 +1,8 @@
+using DrawPT.Common.Configuration;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
+using System.Text.Json;
 
 namespace DrawPT.GameEngine;
 
@@ -29,17 +31,19 @@ public class GameSession : IGameSession
     public async Task PlayGameAsync(string roomCode)
     {
         // Broadcast start game message
-        await _gameStateService.StartGameAsync(roomCode);
+        var gameState = await _gameStateService.StartGameAsync(roomCode);
+        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction, gameState);
         await Task.Delay(100);
 
         for (int i = 0; i < 8; i++)
         {
-            await _gameStateService.StartRoundAsync(roomCode, i+1);
+            gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, gameState);
             await Task.Delay(100);
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
-            var selectedTheme = await _gameCommunicationService.AskPlayerTheme(players.ElementAt(i%players.Count), 30);
+            var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
             
             // ask all players for their answers
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
@@ -47,7 +51,7 @@ public class GameSession : IGameSession
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
             foreach (var player in players)
             {
-                playerAnswers.Add(_gameCommunicationService.AskPlayerQuestion(player, question, 30));
+                playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
             }
 
             // empty game check

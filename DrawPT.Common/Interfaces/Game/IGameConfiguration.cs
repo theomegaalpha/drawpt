@@ -1,8 +1,12 @@
+using DrawPT.Common.Models.Game;
+using System.Text.Json.Serialization;
+
 namespace DrawPT.Common.Interfaces.Game
 {
     /// <summary>
     /// Configuration settings for a game
     /// </summary>
+    [JsonDerivedType(typeof(GameConfiguration), typeDiscriminator: "GameConfiguration")]
     public interface IGameConfiguration
     {
         /// <summary>

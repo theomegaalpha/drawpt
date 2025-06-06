@@ -14,6 +14,7 @@ namespace DrawPT.Common.Interfaces
         Task<Player> CreatePlayerAsync();
         Task<Player> UpdatePlayerAsync(Player player);
         Task<Player?> GetPlayerSessionAsync(string connectionId);
+        Task ClearPlayerSessionAsync(string connectionId);
         Task SetPlayerSessionAsync(string connectionId, Player player);
 
         Task<List<Player>> GetRoomPlayersAsync(string roomCode);

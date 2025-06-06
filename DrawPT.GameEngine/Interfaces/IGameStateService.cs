@@ -1,10 +1,11 @@
 using DrawPT.Common.Models;
+using DrawPT.Common.Interfaces.Game;
 
 namespace DrawPT.GameEngine.Interfaces;
 
 public interface IGameStateService
 {
-    Task StartGameAsync(string roomCode);
-    Task StartRoundAsync(string roomCode, int roundNumber);
-    Task EndGameAsync(string roomCode);
+    Task<IGameState> StartGameAsync(string roomCode);
+    Task<IGameState> StartRoundAsync(string roomCode, int roundNumber);
+    Task<IGameState> EndGameAsync(string roomCode);
 }

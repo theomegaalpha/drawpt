@@ -1,6 +1,7 @@
 ﻿using DrawPT.Common.Interfaces;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
+using DrawPT.Common.Models.Game;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
@@ -66,7 +67,15 @@ namespace DrawPT.Common.Services
             {
                 return Task.FromResult<IGameState?>(null);
             }
-            var gameState = JsonSerializer.Deserialize<IGameState>(gameStateJson);
+            IGameState? gameState;
+            try
+            {
+                gameState = JsonSerializer.Deserialize<GameState>(gameStateJson);
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidOperationException("Failed to deserialize game state.", ex);
+            }
             return Task.FromResult(gameState);
         }
 
@@ -117,12 +126,17 @@ namespace DrawPT.Common.Services
         /// <returns></returns>
         public async Task<Player?> GetPlayerSessionAsync(string connectionId)
         {
-            var playerJson = await _cache.GetStringAsync("connectionId:" + connectionId.ToString());
+            var playerJson = await _cache.GetStringAsync($"connectionId:{connectionId}");
             if (playerJson is null)
                 return null;
 
             var player = JsonSerializer.Deserialize<Player>(playerJson);
             return player;
+        }
+
+        public async Task ClearPlayerSessionAsync(string connectionId)
+        {
+            await _cache.RemoveAsync("connectionId:" + connectionId);
         }
 
         /// <summary>
@@ -135,7 +149,7 @@ namespace DrawPT.Common.Services
         {
             var playerJson = JsonSerializer.Serialize(player);
             var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync("connectionId:" + connectionId.ToString(), playerJson, options);
+            await _cache.SetStringAsync($"connectionId:{connectionId}", playerJson, options);
         }
 
         public async Task<List<Player>> GetRoomPlayersAsync(string roomCode)

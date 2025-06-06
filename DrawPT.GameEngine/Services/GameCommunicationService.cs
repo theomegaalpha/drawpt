@@ -45,7 +45,7 @@ public class GameCommunicationService : IGameCommunicationService
         _logger.LogDebug($"[{roomCode}] Broadcasted game event: {gameAction} with message: {message}");
     }
 
-    public async Task<string> AskPlayerTheme(Player player, int timeoutInSeconds)
+    public async Task<string> AskPlayerThemeAsync(Player player, int timeoutInSeconds)
     {
         var themes = _themeService.GetRandomThemes();
         var themesJson = JsonSerializer.Serialize(themes);
@@ -60,7 +60,7 @@ public class GameCommunicationService : IGameCommunicationService
         return selectedTheme;
     }
 
-    public async Task<PlayerAnswer> AskPlayerQuestion(Player player, GameQuestion question, int timeoutInSeconds)
+    public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
         var questionJson = JsonSerializer.Serialize(question);
         var routingKey = GameEngineRequestMQ.RoutingKeys.AskQuestion(player.ConnectionId);
@@ -76,16 +76,21 @@ public class GameCommunicationService : IGameCommunicationService
         }
 
         var answer = new PlayerAnswer();
+
         if (answerBase == null)
         {
             _logger.LogDebug($"[{player.RoomCode}] No answer given by player {player.Id} within the timeout period.");
             answer.Reason = "No answer provided within the timeout period.";
-            return answer;
+        }
+        else
+        {
+            answer.IsGambling = answerBase.IsGambling;
+            answer.Guess = answerBase.Guess;
         }
 
         answer.ConnectionId = player.ConnectionId;
-        answer.IsGambling = answerBase.IsGambling;
-        answer.Guess = answerBase.Guess;
+
+        BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
         return answer;
     }
 
@@ -138,10 +143,5 @@ public class GameCommunicationService : IGameCommunicationService
         _pendingRequests.TryRemove(correlationId, out _);
         _logger.LogDebug("No response received from client within the timeout period.");
         return string.Empty;
-    }
-
-    public Task BroadcastGameEvent(string roomCode, string message)
-    {
-        return Task.CompletedTask;
     }
 }

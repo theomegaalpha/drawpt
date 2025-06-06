@@ -40,7 +40,7 @@ namespace DrawPT.Api.Hubs
             _consumer = new EventingBasicConsumer(_channel);
             _consumer.Received += async (model, ea) =>
             {
-                var body = ea.Body.ToArray();
+                byte[] body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 var routingKey = ea.RoutingKey;
 
@@ -218,25 +218,33 @@ namespace DrawPT.Api.Hubs
             player.ConnectionId = Context.ConnectionId;
             await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
             await _cache.AddPlayerToRoom(roomCode, player);
+            
+            var gameState = await _cache.GetGameState(roomCode);
+            if (gameState == null)
+                gameState = new GameState() { RoomCode = roomCode, HostPlayerId = playerId };
+            await _cache.SetGameState(gameState);
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
 
             // Start consuming from all client broadcast messages
-            var broadcastQueueName = _channel.QueueDeclare(queue: "", exclusive: true, autoDelete: true, durable: false).QueueName; // Server-generated name
-            _channel.QueueBind(
-                queue: broadcastQueueName,
-                exchange: GameEngineBroadcastMQ.ExchangeName,
-                routingKey: GameEngineBroadcastMQ.RoutingKey(roomCode)
-            );
-            _channel.BasicConsume(queue: broadcastQueueName,
-                                autoAck: true,
-                                consumer: _consumer);
-            _channel.QueueDeclare(
-                queue: GameEngineRequestMQ.QueueName(Context.ConnectionId),
-                durable: false,
-                exclusive: false,
-                autoDelete: true
-            );
+            if (gameState.HostPlayerId == playerId)
+            {
+                var broadcastQueueName = _channel.QueueDeclare(queue: "", exclusive: true, autoDelete: true, durable: false).QueueName; // Server-generated name
+                _channel.QueueBind(
+                    queue: broadcastQueueName,
+                    exchange: GameEngineBroadcastMQ.ExchangeName,
+                    routingKey: GameEngineBroadcastMQ.RoutingKey(roomCode)
+                );
+                _channel.BasicConsume(queue: broadcastQueueName,
+                                    autoAck: true,
+                                    consumer: _consumer);
+                _channel.QueueDeclare(
+                    queue: GameEngineRequestMQ.QueueName(Context.ConnectionId),
+                    durable: false,
+                    exclusive: false,
+                    autoDelete: true
+                );
+            }
             // Bind to catch ALL client interaction messages with any number of segments
             _channel.QueueBind(GameEngineRequestMQ.QueueName(Context.ConnectionId),
                 GameEngineRequestMQ.ExchangeName, GameEngineRequestMQ.RoutingKey(Context.ConnectionId));
@@ -291,6 +299,7 @@ namespace DrawPT.Api.Hubs
                 basicProperties: null,
                 body: body);
 
+            await _cache.ClearPlayerSessionAsync(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
 
