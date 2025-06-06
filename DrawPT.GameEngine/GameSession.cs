@@ -88,7 +88,8 @@ public class GameSession : IGameSession
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
             var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
-            
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerThemeSelectedAction, selectedTheme);
+
             // ask all players for their answers
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
             question.RoundNumber = i + 1;

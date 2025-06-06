@@ -177,7 +177,7 @@ namespace DrawPT.Api.Hubs
 
                 case GameEngineBroadcastMQ.PlayerThemeSelectedAction:
                     var theme = JsonSerializer.Deserialize<string>(message);
-                    await _hubContext.Clients.Group(roomCode).WriteMessage($"{theme} selected!");
+                    await _hubContext.Clients.Group(roomCode).ThemeSelected(theme ?? "");
                     break;
 
                 case GameEngineBroadcastMQ.GameStartedAction:
