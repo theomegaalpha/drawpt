@@ -25,9 +25,9 @@ public class GameEventListener : BackgroundService
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Declare exchange and queue
-        _channel.ExchangeDeclare(ApiGameMQ.ExchangeName, ExchangeType.Topic);
-        _channel.QueueDeclare(ApiGameMQ.QueueName);
-        _channel.QueueBind(ApiGameMQ.QueueName, ApiGameMQ.ExchangeName, ApiGameMQ.RoutingKey);
+        _channel.ExchangeDeclare(ApiMasterMQ.ExchangeName, ExchangeType.Topic);
+        _channel.QueueDeclare(ApiMasterMQ.QueueName);
+        _channel.QueueBind(ApiMasterMQ.QueueName, ApiMasterMQ.ExchangeName, ApiMasterMQ.RoutingKey);
 
         // Set up consumer
         var consumer = new EventingBasicConsumer(_channel);
@@ -42,7 +42,7 @@ public class GameEventListener : BackgroundService
             _logger.LogInformation($"Message content: {message}");
 
             // Handle game started event
-            if (routingKey.EndsWith(ApiGameMQ.GameStart))
+            if (routingKey.EndsWith(ApiMasterMQ.GameStartedAction))
             {
                 _logger.LogInformation($"Game started event received for room: {roomCode}");
 
@@ -52,7 +52,7 @@ public class GameEventListener : BackgroundService
         };
 
         _channel.BasicConsume(
-            queue: ApiGameMQ.QueueName,
+            queue: ApiMasterMQ.QueueName,
             autoAck: true,
             consumer: consumer);
 

@@ -35,6 +35,9 @@ namespace DrawPT.Api.Hubs
             // Set up RabbitMQ channel
             _channel = rabbitMqConnection.CreateModel();
             _channel.ExchangeDeclare(GameEngineBroadcastMQ.ExchangeName, ExchangeType.Topic);
+            _channel.ExchangeDeclare(GameEngineRequestMQ.ExchangeName, ExchangeType.Topic);
+            _channel.ExchangeDeclare(ApiMasterMQ.ExchangeName, ExchangeType.Topic);
+            _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
             // Set up consumer
             _consumer = new EventingBasicConsumer(_channel);
@@ -62,8 +65,6 @@ namespace DrawPT.Api.Hubs
             #endregion
 
             #region interaction setup
-            _channel.ExchangeDeclare(GameEngineRequestMQ.ExchangeName, ExchangeType.Topic);
-            _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
             _interactionConsumer = new EventingBasicConsumer(_channel);
             _interactionConsumer.Received += async (model, ea) =>
@@ -95,6 +96,13 @@ namespace DrawPT.Api.Hubs
                     try
                     {
                         var themes = JsonSerializer.Deserialize<List<string>>(message);
+                        var player = await _cache.GetPlayerSessionAsync(connectionId);
+                        if (player == null)
+                        {
+                            _logger.LogError($"Player with connection ID {connectionId} not found in cache!");
+                            return;
+                        }
+                        await _hubContext.Clients.GroupExcept(player.RoomCode, connectionId).ThemeSelection(themes ?? []);
                         response = await client.AskTheme(themes ?? [], themeTimoutTokenSource.Token);
                         response = JsonSerializer.Serialize(response);
                     }
@@ -143,18 +151,6 @@ namespace DrawPT.Api.Hubs
             _logger.LogInformation("Started consuming from client_broadcast queue");
         }
 
-        public void SendResponse(string responsePayload, string correlationId, string replyQueue)
-        {
-            var properties = _channel.CreateBasicProperties();
-            properties.CorrelationId = correlationId; // Match the correlation ID
-
-            var responseBytes = Encoding.UTF8.GetBytes(responsePayload);
-            _channel.BasicPublish(exchange: "",
-                                  routingKey: replyQueue,
-                                  basicProperties: properties,
-                                  body: responseBytes);
-        }
-
         private async Task HandleClientBroadcast(string roomCode, string action, string message)
         {
             switch (action)
@@ -177,6 +173,11 @@ namespace DrawPT.Api.Hubs
                         return;
                     }
                     await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(playerResults.PlayerId, playerResults.Score);
+                    break;
+
+                case GameEngineBroadcastMQ.PlayerThemeSelectedAction:
+                    var theme = JsonSerializer.Deserialize<string>(message);
+                    await _hubContext.Clients.Group(roomCode).WriteMessage($"{theme} selected!");
                     break;
 
                 case GameEngineBroadcastMQ.GameStartedAction:
@@ -275,8 +276,8 @@ namespace DrawPT.Api.Hubs
 
             var message = JsonSerializer.Serialize(new GameConfiguration());
             var body = Encoding.UTF8.GetBytes(message);
-            _channel.BasicPublish(exchange: ApiGameMQ.ExchangeName,
-                                routingKey: ApiGameMQ.RoutingKeys.GameStarted(player.RoomCode),
+            _channel.BasicPublish(exchange: ApiMasterMQ.ExchangeName,
+                                routingKey: ApiMasterMQ.RoutingKeys.GameStarted(player.RoomCode),
                                 body: body);
 
             return true;
@@ -292,14 +293,7 @@ namespace DrawPT.Api.Hubs
                 return;
             }
 
-            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));
-            _channel.BasicPublish(
-                exchange: GameEngineBroadcastMQ.ExchangeName,
-                routingKey: GameEngineBroadcastMQ.RoutingKeys.PlayerLeft(player.RoomCode),
-                basicProperties: null,
-                body: body);
-
-            await _cache.ClearPlayerSessionAsync(Context.ConnectionId);
+            await _hubContext.Clients.GroupExcept(player.RoomCode, player.ConnectionId).PlayerLeft(player);
             await base.OnDisconnectedAsync(exception);
         }
 

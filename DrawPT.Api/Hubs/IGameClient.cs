@@ -15,6 +15,12 @@ namespace DrawPT.Api.Hubs
         Task SuccessfullyJoined(string connectionId);
         Task WriteMessage(string message);
 
+
+
+        Task ThemeSelection(List<string> themes);
+        Task ThemeSelected(string theme);
+
+
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
     }

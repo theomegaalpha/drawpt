@@ -10,6 +10,8 @@ namespace DrawPT.Common.Configuration
         public const string PlayerLeftAction = "player_left";
         public const string PlayerAnsweredAction = "player_answered";
         public const string PlayerScoreUpdateAction = "player_score_update";
+        public const string PlayerThemeSelectedAction = "player_theme_selected";
+        public const string PlayerGamblingAction = "player_gambling";
 
         public const string GameStartedAction = "game_started";
         public const string RoundStartedAction = "round_started";
@@ -29,6 +31,9 @@ namespace DrawPT.Common.Configuration
 
             public static string PlayerAnswered(string roomCode) => $"game_engine.{roomCode}.{PlayerAnsweredAction}";
             public static string PlayerScoreUpdate(string roomCode) => $"game_engine.{roomCode}.{PlayerScoreUpdateAction}";
+            public static string PlayerThemeSelected(string roomCode) => $"game_engine.{roomCode}.{PlayerThemeSelectedAction}";
+            public static string PlayerGambling(string roomCode) => $"game_engine.{roomCode}.{PlayerGamblingAction}";
+
             public static string WriteMessage(string roomCode) => $"game_engine.{roomCode}.{WriteMessageAction}";
 
             public static string PlayerJoined(string roomCode) => $"game_engine.{roomCode}.{PlayerJoinedAction}";

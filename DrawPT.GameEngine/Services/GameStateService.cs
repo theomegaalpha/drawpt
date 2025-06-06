@@ -1,5 +1,4 @@
-﻿using DrawPT.Common.Configuration;
-using DrawPT.Common.Interfaces;
+﻿using DrawPT.Common.Interfaces;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;

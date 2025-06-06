@@ -22,6 +22,7 @@ onMounted(async () => {
     })
 
     service.on('playerLeft', (player: Player) => {
+      console.log(`${player.username} has left the game.`)
       addGameNotification(`${player.username} has left the game.`)
       removePlayer(player)
     })
