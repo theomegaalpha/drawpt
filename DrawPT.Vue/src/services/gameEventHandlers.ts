@@ -51,7 +51,8 @@ export function registerBaseGameHubEvents() {
 
   service.on('roundEnded', (roundResult: RoundResults) => {
     stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)
-    stores.gameStateStore.handleRoundEndedEvent(roundResult)
+    stores.scoreboardStore.addRoundResult(roundResult)
+    stores.gameStateStore.handleBroadcastRoundResultsEvent(roundResult)
   })
 
   service.on('broadcastFinalResults', (results: any) /* Specify type for results */ => {
