@@ -218,8 +218,12 @@ namespace DrawPT.Api.Hubs
             var gameState = await _cache.GetGameState(roomCode);
             if (gameState == null)
             {
-                _logger.LogWarning($"Game state for room {roomCode} not found!");
-                return;
+                gameState = new GameState
+                {
+                    RoomCode = roomCode,
+                    Players = new (),
+                    HostPlayerId = new Guid(userId)
+                };
             }
 
             if (gameState.Players.Count >= gameState.GameConfiguration.MaxPlayers)
@@ -232,12 +236,13 @@ namespace DrawPT.Api.Hubs
             var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
             if (player == null)
             {
-                _logger.LogWarning($"Player with user ID {userId} not found in cache!");
-                return;
+                player = await _cache.CreatePlayerAsync();
+                player.Id = Guid.Parse(userId);
             }
             player.RoomCode = roomCode;
             player.ConnectionId = Context.ConnectionId;
             await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
+            await _cache.UpdatePlayerAsync(player);
 
             // Check if player already exists in the room
             var playerInRoom = gameState.Players.FirstOrDefault(p => p == player.Id);
@@ -248,9 +253,6 @@ namespace DrawPT.Api.Hubs
                 return;
             }
 
-            // If game is empty, set the host player ID
-            if (gameState.HostPlayerId == Guid.Empty)
-                gameState.HostPlayerId = Guid.Parse(userId);
             gameState.Players.Add(player.Id);
             await _cache.SetGameState(gameState);
 
@@ -263,14 +265,20 @@ namespace DrawPT.Api.Hubs
         }
 
 
-        public async Task JoinGame(string roomCode, Guid playerId)
+        public async Task JoinGame(string roomCode)
         {
             // check if user is allowed to be in the room
-            var player = await _cache.GetPlayerAsync(playerId);
-            if (player == null)
+            var playerIdClaim = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (playerIdClaim == null)
+            {
+                _logger.LogError("user_id not found in claim while joining a room!");
+                await Clients.Caller.ErrorJoiningRoom();
                 return;
+            }
 
-            if (await _cache.GetPlayerSessionAsync(Context.ConnectionId) == null)
+            var playerId = Guid.Parse(playerIdClaim);
+            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+            if (player == null)
                 return;
 
             var players = await _cache.GetRoomPlayersAsync(roomCode);

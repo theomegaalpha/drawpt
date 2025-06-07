@@ -3,55 +3,41 @@ import { onMounted, onUnmounted } from 'vue'
 import service from '@/services/signalRService'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
-import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
-import type { Player } from '@/models/player'
-import type { GameState } from '@/models/gameModels'
+import {
+  registerBaseGameHubEvents,
+  unregisterBaseGameHubEvents
+} from '@/services/gameEventHandlers'
+import { registerRoomHubEvents, unregisterRoomHubEvents } from '@/services/roomEventHandlers'
 
-const { updateGameResults } = useScoreboardStore()
-const { player: you, updateConnectionId } = usePlayerStore()
-const { room, startGame, addPlayer, removePlayer } = useRoomStore()
-const { addGameNotification } = useNotificationStore()
+const playerStore = usePlayerStore()
+const roomStore = useRoomStore()
+const notificationStore = useNotificationStore()
 
 onMounted(async () => {
-  service.startConnection('/gamehub').then(async () => {
-    service.invoke('joinGame', room.code, you.id)
+  try {
+    await service.startConnection('/gamehub')
+    registerBaseGameHubEvents()
+    registerRoomHubEvents()
 
-    service.on('playerJoined', (player: Player) => {
-      if (player.id !== you.id) addGameNotification(`${player.username} has joined the game!`)
-      addPlayer(player)
-    })
-
-    service.on('playerLeft', (player: Player) => {
-      console.log(`${player.username} has left the game.`)
-      addGameNotification(`${player.username} has left the game.`)
-      removePlayer(player)
-    })
-
-    service.on('successfullyJoined', (connectionId) => {
-      addGameNotification('Welcome to the party!')
-      updateConnectionId(connectionId)
-    })
-
-    service.on('gameStarted', (gameState: GameState) => {
-      console.log('Game has started!', gameState)
-      startGame()
-      addGameNotification('Game has started!')
-    })
-
-    service.on('broadcastFinalResults', (results) => {
-      addGameNotification('The results are in!!!')
-      updateGameResults(results)
-    })
-
-    service.on('writeMessage', (message) => {
-      console.log('Received message:', message)
-      addGameNotification(message)
-    })
-  })
+    if (roomStore.room && roomStore.room.code && playerStore.player && playerStore.player.id) {
+      service.invoke('joinGame', roomStore.room.code, playerStore.player.id)
+    } else {
+      console.warn('Room code or player ID missing, cannot join game. Ensure stores are populated.')
+      notificationStore.addGameNotification(
+        'Could not join game: missing room or player info.',
+        true
+      )
+    }
+  } catch (err) {
+    console.error('SignalR connection failed in GameComms:', err)
+    notificationStore.addGameNotification('Failed to connect to the game server.', true)
+  }
 })
 
 onUnmounted(() => {
+  unregisterBaseGameHubEvents()
+  unregisterRoomHubEvents()
   service.stopConnection()
 })
 </script>

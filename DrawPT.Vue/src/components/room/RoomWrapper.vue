@@ -6,16 +6,17 @@ import GameComms from '@/components/room/game/GameComms.vue'
 import GameNotifications from '@/components/room/game/GameNotifications.vue'
 import GameResults from '@/components/room/game/postgame/GameResults.vue'
 
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
+import { useRoomJoinStore } from '@/stores/roomJoinStore'
 import api from '@/services/api'
 
 const { room } = useRoomStore()
 const { player, updatePlayer } = usePlayerStore()
 const { gameResults, clearScoreboard } = useScoreboardStore()
-const setUsername = ref(false)
+const { successfullyJoined } = useRoomJoinStore()
 
 onMounted(() => {
   api.getPlayer().then((res) => {
@@ -29,8 +30,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <SetUsername v-model="setUsername" v-if="!setUsername && player.id" />
-  <div v-if="setUsername && player.id">
+  <SetUsername v-model="successfullyJoined" v-if="!successfullyJoined" />
+  <div v-if="successfullyJoined && player.id">
     <GameComms />
     <GameNotifications />
 

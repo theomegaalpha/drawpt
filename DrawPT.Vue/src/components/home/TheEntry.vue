@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import api from '@/services/api'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
-const roomCode = ref('')
+const roomCodeInput = ref('') // Renamed from roomCode to avoid conflict with potential prop/var from route
 const guess = ref('')
 const showTooltip = ref(false)
 
@@ -25,20 +25,39 @@ const isAuthenticated = computed(() => {
 })
 
 const router = useRouter()
-const joinRoom = (code: string) => {
-  code = code.toUpperCase()
-  updateRoomCode(code)
-  router.push(`/room`)
+const route = useRoute() // Added to access current route
+
+const joinRoom = (codeToJoin: string) => {
+  if (!codeToJoin || codeToJoin.trim().length === 0) {
+    console.warn('Attempted to join with an empty room code.')
+    // Optionally, add a user notification here
+    return
+  }
+  const upperCaseCode = codeToJoin.toUpperCase()
+  updateRoomCode(upperCaseCode)
+  // Navigate to the 'room' route, passing roomCode as a parameter.
+  // Assumes 'room' route is defined as /room/:roomCode
+  router.push({ name: 'room', params: { roomCode: upperCaseCode } })
 }
 
 const createRoom = () => {
-  api.createRoom().then((code) => {
-    joinRoom(code)
+  api.createRoom().then((newlyCreatedCode) => {
+    if (newlyCreatedCode) {
+      joinRoom(newlyCreatedCode)
+    } else {
+      console.error('Failed to create room: No room code received from API.')
+      // Optionally, add a user notification here
+    }
   })
 }
 
 onMounted(() => {
   clearRoom()
+  const queryRoomCode = route.query.roomCode as string
+  if (queryRoomCode) {
+    // If a roomCode is present in the URL query, attempt to join it automatically
+    joinRoom(queryRoomCode)
+  }
 })
 </script>
 
@@ -111,14 +130,14 @@ onMounted(() => {
                 class="flex-grow"
                 placeholder="Room Code"
                 maxlength="4"
-                v-model="roomCode"
+                v-model="roomCodeInput"
                 v-autocapitalize="true"
-                @keyup.enter="roomCode.length === 4 ? joinRoom(roomCode) : null"
+                @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
                 class="btn-primary w-auto"
-                :disabled="roomCode.length < 4"
-                @click="joinRoom(roomCode)"
+                :disabled="roomCodeInput.length < 4"
+                @click="joinRoom(roomCodeInput)"
               >
                 Join
               </button>
