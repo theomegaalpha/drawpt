@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { GameResults, GameRound } from '@/models/gameModels'
+import type { GameResults, RoundResults } from '@/models/gameModels'
 
 export const useScoreboardStore = defineStore('scoreboard', () => {
   const roundNumber = ref(0)
   const gameResults = ref({ playerResults: [] } as GameResults)
-  const roundResults = ref([] as GameRound[])
+  const roundResults = ref([] as RoundResults[])
 
   const lastRoundResults = computed(() => {
     return roundResults.value[roundResults.value.length - 1]
@@ -25,7 +25,7 @@ export const useScoreboardStore = defineStore('scoreboard', () => {
     gameResults.value.playerResults = results.playerResults
   }
 
-  function addRoundResult(round: GameRound) {
+  function addRoundResult(round: RoundResults) {
     roundResults.value.push(round)
   }
 

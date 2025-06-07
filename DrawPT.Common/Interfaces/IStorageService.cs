@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace DrawPT.Common.Interfaces
 {
     /// <summary>
@@ -8,6 +10,8 @@ namespace DrawPT.Common.Interfaces
         /// <summary>
         /// Saves an image to storage
         /// </summary>
-        Task SaveImageAsync(string imageId, string imageUrl);
+        Task<string?> SaveImageAsync(byte[] imageBytes, string blobName);
+
+        Task<bool> DownloadImageAsync(Guid id, string imageUrl);
     }
-} 
+}

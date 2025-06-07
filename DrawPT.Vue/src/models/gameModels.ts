@@ -22,9 +22,20 @@ export interface GameResults {
   playerResults: PlayerResult[]
 }
 
-export interface GameRound {
+export interface GameQuestion {
+  id: string
   roundNumber: number
-  question: PlayerQuestion
+  theme: string
+  originalPrompt: string
+  imageUrl: string
+  createdAt: string
+}
+
+export interface RoundResults {
+  id: string
+  roundNumber: number
+  theme: string
+  question: GameQuestion
   answers: PlayerAnswer[]
 }
 

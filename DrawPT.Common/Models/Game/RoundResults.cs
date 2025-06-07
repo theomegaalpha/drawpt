@@ -3,7 +3,7 @@ namespace DrawPT.Common.Models.Game
     /// <summary>
     /// Represents a single round in the game
     /// </summary>
-    public class GameRound
+    public class RoundResults
     {
         /// <summary>
         /// Unique identifier for the round
@@ -29,15 +29,5 @@ namespace DrawPT.Common.Models.Game
         /// All answers submitted for this round
         /// </summary>
         public List<PlayerAnswer> Answers { get; set; } = new();
-
-        /// <summary>
-        /// When the round started
-        /// </summary>
-        public DateTime StartTime { get; set; }
-
-        /// <summary>
-        /// When the round ended
-        /// </summary>
-        public DateTime? EndTime { get; set; }
     }
 }

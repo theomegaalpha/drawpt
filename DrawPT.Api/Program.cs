@@ -1,4 +1,3 @@
-using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
 using DrawPT.Api.Hubs;
 using DrawPT.Api.Services;
@@ -7,9 +6,7 @@ using DrawPT.Common.Services;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
-using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
-using Supabase.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,18 +74,10 @@ builder.Services.AddTransient<ProfileService>();
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
-//builder.Services.AddTransient<AIClient>();
-builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
 builder.Services.AddTransient<CacheService>();
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
-//builder.Services.AddSingleton<GameCollection>();
-//builder.Services.AddSingleton<IGameFactory, GameFactory>();
-//builder.Services.AddOptions<GameOptions>()
-//                .BindConfiguration("Game");
-
-//builder.Services.AddScoped<Game>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()

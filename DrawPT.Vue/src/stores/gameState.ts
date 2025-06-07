@@ -1,6 +1,6 @@
 // src/stores/gameState.ts
 import { defineStore } from 'pinia'
-import type { PlayerQuestion, GameRound } from '@/models/gameModels'
+import type { PlayerQuestion, RoundResults } from '@/models/gameModels'
 import { useScoreboardStore } from './scoreboard'
 
 export const useGameStateStore = defineStore('gameState', {
@@ -35,7 +35,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.selectableThemeOptionsFromSignalR = [] // Ensure selection options are cleared
       // Notification is handled by gameEventHandlers or notificationStore directly
     },
-    handleBroadcastRoundResultsEvent(gameRound: GameRound) {
+    handleBroadcastRoundResultsEvent(roundResults: RoundResults) {
       this.shouldShowResults = true
       // Potentially update other relevant state from gameRound if needed
       // e.g., this.currentRoundNumber = gameRound.roundNumber;

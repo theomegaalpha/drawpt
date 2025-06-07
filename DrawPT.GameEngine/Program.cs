@@ -10,14 +10,25 @@ using DrawPT.Common.Interfaces.Game;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var configuration = new ConfigurationBuilder()
+       .SetBasePath(AppContext.BaseDirectory)
+       .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+       .AddEnvironmentVariables()
+       .Build();
+
 builder.AddServiceDefaults();
+builder.Services.AddSingleton<IConfiguration>(configuration);
+
 builder.AddRabbitMQClient(connectionName: "messaging");
-builder.AddAzureBlobClient(connectionName: "storage");
+builder.AddAzureBlobClient(connectionName: "blobs");
 builder.AddRedisDistributedCache(connectionName: "cache");
+builder.AddAzureOpenAIClient(connectionName: "openai");
 
 var services = builder.Services;
 services.AddHostedService<GameEventListener>();
+services.AddTransient<GeminiImageGenerator>();
 services.AddTransient<IAIService, AIService>();
+services.AddTransient<IAssessmentService, AssessmentService>();
 services.AddTransient<ICacheService, CacheService>();
 services.AddTransient<IStorageService, StorageService>();
 services.AddTransient<IPlayerManager, PlayerManager>();

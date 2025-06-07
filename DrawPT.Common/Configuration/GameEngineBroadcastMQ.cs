@@ -16,7 +16,7 @@ namespace DrawPT.Common.Configuration
         public const string GameStartedAction = "game_started";
         public const string RoundStartedAction = "round_started";
         public const string AssessingAnswersAction = "assessing_answers";
-        public const string RoundEndedAction = "round_ended";
+        public const string RoundResultsAction = "round_results";
         public const string GameEndedAction = "game_ended";
 
         public const string WriteMessageAction = "write_message";
@@ -25,7 +25,7 @@ namespace DrawPT.Common.Configuration
             public static string GameStarted(string roomCode) => $"game_engine.{roomCode}.{GameStartedAction}";
             public static string RoundStarted(string roomCode) => $"game_engine.{roomCode}.{RoundStartedAction}";
             public static string AssessingAnswers(string roomCode) => $"game_engine.{roomCode}.{AssessingAnswersAction}";
-            public static string RoundEnded(string roomCode) => $"game_engine.{roomCode}.{RoundEndedAction}";
+            public static string RoundResults(string roomCode) => $"game_engine.{roomCode}.{RoundResultsAction}";
             public static string GameEnded(string roomCode) => $"game_engine.{roomCode}.{GameEndedAction}";
 
 

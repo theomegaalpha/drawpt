@@ -13,6 +13,7 @@ namespace DrawPT.GameEngine;
 public class GameSession : IGameSession
 {
     private readonly IGameCommunicationService _gameCommunicationService;
+    private readonly IAssessmentService _assessmentService;
     private readonly IGameStateService _gameStateService;
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
@@ -25,6 +26,7 @@ public class GameSession : IGameSession
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
+        IAssessmentService assessmentService,
         IGameCommunicationService gameCommunicationService,
         
         ILogger<GameSession> logger)
@@ -34,6 +36,7 @@ public class GameSession : IGameSession
         _gameStateService = gameStateService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
+        _assessmentService = assessmentService;
         _logger = logger;
 
 
@@ -82,7 +85,7 @@ public class GameSession : IGameSession
         for (int i = 0; i < 8; i++)
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, gameState);
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, i + 1);
             await Task.Delay(100);
 
             // ask player for theme
@@ -109,12 +112,35 @@ public class GameSession : IGameSession
             foreach (var answer in playerAnswers.Select(t => t.Result))
                 answers.Add(answer);
 
-            // broadcast assessing answers message to players
+
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.AssessingAnswersAction);
+
+            List<Task<PlayerAnswer>> assessedAnswers = new(players.Count);
+            foreach (var answer in answers)
+            {
+                // assess answer
+                var assessedAnswer = await _assessmentService.AssessAnswerAsync(question.OriginalPrompt, answer);
+                answer.Score = assessedAnswer.Score;
+                answer.Reason = assessedAnswer.Reason;
+                assessedAnswers.Add(Task.FromResult(answer));
+            }
+            await Task.WhenAll(assessedAnswers);
+
+            RoundResults results = new()
+            {
+                RoundNumber = i + 1,
+                Theme = selectedTheme,
+                Question = question,
+                Answers = assessedAnswers.Select(t => t.Result).ToList(),
+
+            };
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, results);
+            await Task.Delay(10000);
 
             _logger.LogDebug($"[{roomCode}] Round {i + 1} answers collected: {answers.Count}");
             // scoringService
             // broadcast round scores to players
-            // await _gameCommunicationService
+            //await _gameCommunicationService.BroadcastRoundScoresAsync(roomCode, answers);
         }
 
         // gameStateService.EndGame(roomCode);

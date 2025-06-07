@@ -186,16 +186,16 @@ namespace DrawPT.Api.Hubs
                     break;
 
                 case GameEngineBroadcastMQ.RoundStartedAction:
-                    var round = JsonSerializer.Deserialize<GameRound>(message);
-                    await _hubContext.Clients.Group(roomCode).RoundStarted(round!);
+                    var round = JsonSerializer.Deserialize<RoundResults>(message);
+                    await _hubContext.Clients.Group(roomCode).RoundStarted(round?.RoundNumber ?? 0);
                     break;
 
                 case GameEngineBroadcastMQ.AssessingAnswersAction:
                     await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing player scores...");
                     break;
 
-                case GameEngineBroadcastMQ.RoundEndedAction:
-                    var endedRound = JsonSerializer.Deserialize<GameRound>(message);
+                case GameEngineBroadcastMQ.RoundResultsAction:
+                    var endedRound = JsonSerializer.Deserialize<RoundResults>(message);
                     await _hubContext.Clients.Group(roomCode).RoundEnded(endedRound!);
                     break;
 

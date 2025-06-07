@@ -1,9 +1,10 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Azure.Storage.Blobs;
+using DrawPT.Common.Interfaces;
 
-namespace DrawPT.Api.Services
+namespace DrawPT.Common.Services
 {
-    public class StorageService
+    public class StorageService : IStorageService
     {
         private readonly string _storageContainerName = "images";
         private readonly BlobServiceClient _blobServiceClient;
@@ -13,7 +14,7 @@ namespace DrawPT.Api.Services
             _blobServiceClient = blobServiceClient;
         }
 
-        public async Task<string?> UploadImageAsync(byte[] imageBytes, string blobName)
+        public async Task<string?> SaveImageAsync(byte[] imageBytes, string blobName)
         {
             if (imageBytes == null || imageBytes.Length == 0)
             {
@@ -44,7 +45,7 @@ namespace DrawPT.Api.Services
             }
         }
 
-        public async Task<bool> DownloadImage(Guid id, string imageUrl)
+        public async Task<bool> DownloadImageAsync(Guid id, string imageUrl)
         {
             try
             {
@@ -59,7 +60,7 @@ namespace DrawPT.Api.Services
                 response.EnsureSuccessStatusCode();
                 using var imageStream = await response.Content.ReadAsStreamAsync();
 
-                //await blobClient.UploadAsync(imageStream, true);
+                await blobClient.UploadAsync(imageStream, true);
             }
             catch (Exception ex)
             {

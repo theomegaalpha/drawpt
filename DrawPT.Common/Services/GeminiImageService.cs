@@ -1,9 +1,10 @@
-﻿using DrawPT.Api.Services;
+﻿using DrawPT.Common.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DrawPT.Api.AI
+namespace DrawPT.Common.Services
 {
     public class GeminiRequestPayload
     {
@@ -73,9 +74,9 @@ namespace DrawPT.Api.AI
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string apiEndpoint;
-        private readonly StorageService _storageService;
+        private readonly IStorageService _storageService;
 
-        public GeminiImageGenerator(IConfiguration configuration, StorageService storageService)
+        public GeminiImageGenerator(IConfiguration configuration, IStorageService storageService)
         {
             apiEndpoint = configuration.GetValue<string>("ConnectionStrings:gemini") ?? throw new InvalidOperationException("Gemini API endpoint not configured.");
             _storageService = storageService;
@@ -153,7 +154,7 @@ namespace DrawPT.Api.AI
 
                 byte[] imageBytes = Convert.FromBase64String(base64Image);
                 string blobName = $"gemini-image-{Guid.NewGuid()}.png";
-                string? imageUrl = await _storageService.UploadImageAsync(imageBytes, blobName);
+                string? imageUrl = await _storageService.SaveImageAsync(imageBytes, blobName);
 
                 if (imageUrl != null)
                 {
@@ -165,16 +166,6 @@ namespace DrawPT.Api.AI
                     Console.WriteLine("Failed to upload image to blob storage.");
                     return null;
                 }
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine($"Request error: {e.Message}");
-                return null;
-            }
-            catch (JsonException e)
-            {
-                Console.WriteLine($"JSON parsing error: {e.Message}");
-                return null;
             }
             catch (Exception e)
             {
