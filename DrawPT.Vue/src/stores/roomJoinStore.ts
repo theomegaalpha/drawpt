@@ -4,7 +4,6 @@ import { useNotificationStore } from './notifications'
 interface RoomJoinState {
   isLoading: boolean
   canSetUsername: boolean
-  successfullyJoined: boolean
   joinError: string | null
 }
 
@@ -12,7 +11,6 @@ export const useRoomJoinStore = defineStore('roomJoin', {
   state: (): RoomJoinState => ({
     isLoading: false,
     canSetUsername: false,
-    successfullyJoined: false,
     joinError: null
   }),
   actions: {
@@ -34,14 +32,6 @@ export const useRoomJoinStore = defineStore('roomJoin', {
         notificationStore.addGameNotification(error, true)
       }
     },
-    setSuccessfullyJoined(success: boolean) {
-      this.successfullyJoined = success
-      if (success) {
-        this.isLoading = false
-        this.canSetUsername = true
-        this.joinError = null
-      }
-    },
     reset() {
       this.isLoading = false
       this.canSetUsername = false
@@ -54,6 +44,7 @@ export const useRoomJoinStore = defineStore('roomJoin', {
       this.setJoinError('You appear to be already in this room or another session is active.')
     },
     handleNavigateToRoom() {
+      console.log('Navigating to room...')
       const notificationStore = useNotificationStore()
       notificationStore.addGameNotification(
         'Connected to room. Please set or confirm your username.',

@@ -2,7 +2,6 @@
 import SetUsername from '@/components/room/SetUsername.vue'
 import Lobby from '@/components/room/Lobby.vue'
 import Game from '@/components/room/game/Game.vue'
-import GameComms from '@/components/room/game/GameComms.vue'
 import GameNotifications from '@/components/room/game/GameNotifications.vue'
 import GameResults from '@/components/room/game/postgame/GameResults.vue'
 
@@ -10,34 +9,59 @@ import { onMounted, onUnmounted } from 'vue'
 import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
+import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoinStore'
 import api from '@/services/api'
+import service from '@/services/signalRService'
+import {
+  registerBaseGameHubEvents,
+  unregisterBaseGameHubEvents
+} from '@/services/gameEventHandlers'
 
-const { room } = useRoomStore()
-const { player, updatePlayer } = usePlayerStore()
-const { gameResults, clearScoreboard } = useScoreboardStore()
-const { successfullyJoined } = useRoomJoinStore()
+const roomStore = useRoomStore()
+const playerStore = usePlayerStore()
+const scoreboardStore = useScoreboardStore()
+const notificationStore = useNotificationStore()
+const roomJoinStore = useRoomJoinStore()
 
-onMounted(() => {
+onMounted(async () => {
+  roomJoinStore.reset()
+  scoreboardStore.clearScoreboard()
+  roomStore.setSuccessfullyJoined(false)
+
   api.getPlayer().then((res) => {
-    updatePlayer(res)
+    playerStore.updatePlayer(res)
   })
+
+  try {
+    if (!service.isConnected) {
+      await service.startConnection('/gamehub')
+      notificationStore.addGameNotification('Connected to game server.', false)
+    }
+    registerBaseGameHubEvents()
+  } catch (err) {
+    console.error('SignalR connection failed in RoomWrapper:', err)
+    notificationStore.addGameNotification('Failed to connect to the game server.', true)
+  }
 })
 
 onUnmounted(() => {
-  clearScoreboard()
+  scoreboardStore.clearScoreboard()
+  unregisterBaseGameHubEvents()
+  if (service.isConnected) {
+    service.stopConnection()
+    notificationStore.addGameNotification('Disconnected from game server.', false)
+  }
 })
 </script>
 
 <template>
-  <SetUsername v-model="successfullyJoined" v-if="!successfullyJoined" />
-  <div v-if="successfullyJoined && player.id">
-    <GameComms />
-    <GameNotifications />
-
-    <GameResults v-if="gameResults.playerResults.length > 0" />
+  <GameNotifications />
+  <SetUsername v-if="!roomStore.successfullyJoined" />
+  <div v-if="roomStore.successfullyJoined && playerStore.player?.id">
+    <GameResults v-if="scoreboardStore.gameResults.playerResults.length > 0" />
     <div v-else>
-      <Lobby v-if="!room.isGameStarted" />
+      <Lobby v-if="!roomStore.room.isGameStarted" />
       <Game v-else />
     </div>
   </div>

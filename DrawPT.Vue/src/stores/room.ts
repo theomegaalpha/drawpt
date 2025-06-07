@@ -18,6 +18,11 @@ export const useRoomStore = defineStore('room', () => {
   } as Room)
 
   const players = computed((): Player[] => room.value.players || [])
+  const successfullyJoined = ref(false)
+
+  function setSuccessfullyJoined(success: boolean) {
+    successfullyJoined.value = success
+  }
 
   function updateRoomCode(code: string) {
     room.value.code = code
@@ -48,15 +53,18 @@ export const useRoomStore = defineStore('room', () => {
     room.value.isPrivate = false
     room.value.currentRound = 0
     room.value.totalRounds = 7
+    successfullyJoined.value = false
   }
 
   return {
+    setSuccessfullyJoined,
     updateRoomCode,
     clearRoom,
     startGame,
     addPlayer,
     removePlayer,
     room,
-    players
+    players,
+    successfullyJoined
   }
 })

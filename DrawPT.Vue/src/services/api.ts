@@ -19,7 +19,7 @@ const Api = {
   },
   updatePlayer: async (player: Player): Promise<void> => {
     const token = await getAccessToken()
-    fetch(`/api/player`, {
+    await fetch(`/api/player`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

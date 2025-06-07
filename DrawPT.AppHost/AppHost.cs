@@ -85,7 +85,8 @@ builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
     .WithReference(rabbitmq)
     .WithReference(redis)
     .WaitFor(rabbitmq)
-    .WaitFor(redis);
+    .WaitFor(redis)
+    .WaitForCompletion(migrationService);
 
 builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(rabbitmq)

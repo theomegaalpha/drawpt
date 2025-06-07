@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import service from '@/services/signalRService'
+import service from '@/services/signalRService' // Still needed for invoke
 import { useNotificationStore } from '@/stores/notifications'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomJoinStore } from '@/stores/roomJoinStore'
-import { registerRoomEventHandlers, removeRoomEventHandlers } from '@/services/roomEventHandlers'
+import { registerRoomHubEvents, unregisterRoomHubEvents } from '@/services/roomEventHandlers'
 import api from '@/services/api'
 
 const router = useRouter()
@@ -22,15 +22,13 @@ const canSetUsername = computed(() => roomJoinStore.canSetUsername)
 const isLoading = computed(() => roomJoinStore.isLoading)
 const joinError = computed(() => roomJoinStore.joinError)
 
-const connectAndRequestToJoin = async () => {
+let unsubscribeFromConnectionStatus: (() => void) | null = null
+
+const requestToJoin = async () => {
   roomJoinStore.setLoading(true)
   try {
     if (!service.isConnected) {
-      await service.startConnection('/gamehub')
-    }
-
-    if (!service.isConnected) {
-      roomJoinStore.setJoinError('Failed to establish SignalR connection.')
+      roomJoinStore.setJoinError('Connection to server not ready. Please wait or try refreshing.')
       return
     }
 
@@ -38,18 +36,19 @@ const connectAndRequestToJoin = async () => {
       service.invoke('requestToJoinRoom', roomCode.value)
     } else {
       roomJoinStore.setJoinError('Room code is missing. Cannot join.')
-      router.push({ name: 'home' }) // Changed 'Home' to 'home'
+      router.push({ name: 'home' })
     }
   } catch (error) {
-    console.error('SignalR connection or initial room request error:', error)
-    roomJoinStore.setJoinError('Failed to connect or request room entry. Please try again.')
+    console.error('Error requesting to join room:', error)
+    roomJoinStore.setJoinError('Failed to request room entry. Please try again.')
   }
 }
 
 onMounted(() => {
+  roomJoinStore.reset()
   if (!roomCode.value) {
     notificationStore.addGameNotification('No room code specified.', true)
-    router.push({ name: 'home' }) // Changed 'Home' to 'home'
+    router.push({ name: 'home' })
     return
   }
   api.checkRoom(roomCode.value).then((exists) => {
@@ -57,15 +56,41 @@ onMounted(() => {
       roomJoinStore.setJoinError('😭 This game has already ended.')
     }
   })
-  roomJoinStore.reset() // Reset store state on mount
-  registerRoomEventHandlers()
-  connectAndRequestToJoin()
+
+  console.warn('SetUsername: Waiting for SignalR connection from RoomWrapper...')
+  unsubscribeFromConnectionStatus = service.onConnectionStatusChanged((isConnected) => {
+    if (isConnected) {
+      console.log('Requesting to join.')
+      registerRoomHubEvents()
+      requestToJoin()
+      if (unsubscribeFromConnectionStatus) {
+        unsubscribeFromConnectionStatus()
+        unsubscribeFromConnectionStatus = null
+      }
+    } else {
+      // This case might occur if the connection drops while waiting
+      // roomJoinStore.setJoinError('Still waiting for server connection...');
+    }
+  })
+
+  // Fallback timeout in case the connection event is missed or never occurs
+  const timeoutId = setTimeout(() => {
+    if (!service.isConnected && unsubscribeFromConnectionStatus) {
+      roomJoinStore.setJoinError('Could not connect to server in a timely manner. Please refresh.')
+      unsubscribeFromConnectionStatus()
+      unsubscribeFromConnectionStatus = null
+    }
+  }, 7000) // 7 seconds timeout
+  // Clear timeout if component unmounts or connection established
+  onUnmounted(() => clearTimeout(timeoutId))
 })
 
 onUnmounted(() => {
-  removeRoomEventHandlers()
-  // Optionally reset store state if navigating away means the join process is abandoned
-  // roomJoinStore.reset();
+  unregisterRoomHubEvents()
+  if (unsubscribeFromConnectionStatus) {
+    unsubscribeFromConnectionStatus()
+    unsubscribeFromConnectionStatus = null
+  }
 })
 
 const submitUsernameAndEnter = async () => {
@@ -76,14 +101,22 @@ const submitUsernameAndEnter = async () => {
   roomJoinStore.setLoading(true)
 
   try {
+    notificationStore.addGameNotification('huuuhhh???')
     playerStore.setUsername(username.value)
-
-    notificationStore.addGameNotification(`Welcome, ${username.value}! Entering room...`, false)
-    roomJoinStore.setLoading(false)
-    service.invoke('joinGame', roomCode.value)
+    console.log('Submitting username:', playerStore.player.username)
+    api
+      .updatePlayer(playerStore.player)
+      .then(() => {
+        service.invoke('joinGame', roomCode.value)
+      })
+      .catch((error) => {
+        console.error('Error updating username:', error)
+        roomJoinStore.setJoinError('Failed to finalize username. Please try again.')
+        return
+      })
   } catch (error) {
-    console.error('Error submitting username or navigating to game room:', error)
-    roomJoinStore.setJoinError('Failed to finalize username or enter room. Please try again.')
+    console.error('Error submitting username or invoking joinGame:', error)
+    roomJoinStore.setJoinError('Failed to finalize username or join game. Please try again.')
   }
 }
 </script>

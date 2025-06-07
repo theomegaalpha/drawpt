@@ -39,7 +39,7 @@ export function registerBaseGameHubEvents() {
     console.log('Successfully joined the game with connection ID:', connectionId)
     stores.notificationStore.addGameNotification('Welcome to the party!')
     stores.playerStore.updateConnectionId(connectionId)
-    stores.roomJoinStore.setSuccessfullyJoined(true)
+    stores.roomStore.setSuccessfullyJoined(true)
   })
 
   service.on('gameStarted', (gameState: GameState) => {
