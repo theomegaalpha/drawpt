@@ -33,7 +33,7 @@ const requestToJoin = async () => {
     }
 
     if (roomCode.value) {
-      service.invoke('requestToJoinRoom', roomCode.value)
+      service.invoke('requestToJoinGame', roomCode.value)
     } else {
       roomJoinStore.setJoinError('Room code is missing. Cannot join.')
       router.push({ name: 'home' })
@@ -101,19 +101,8 @@ const submitUsernameAndEnter = async () => {
   roomJoinStore.setLoading(true)
 
   try {
-    notificationStore.addGameNotification('huuuhhh???')
     playerStore.setUsername(username.value)
-    console.log('Submitting username:', playerStore.player.username)
-    api
-      .updatePlayer(playerStore.player)
-      .then(() => {
-        service.invoke('joinGame', roomCode.value)
-      })
-      .catch((error) => {
-        console.error('Error updating username:', error)
-        roomJoinStore.setJoinError('Failed to finalize username. Please try again.')
-        return
-      })
+    service.invoke('joinGame', roomCode.value, username.value)
   } catch (error) {
     console.error('Error submitting username or invoking joinGame:', error)
     roomJoinStore.setJoinError('Failed to finalize username or join game. Please try again.')

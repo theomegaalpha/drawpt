@@ -206,7 +206,7 @@ namespace DrawPT.Api.Hubs
             }
         }
 
-        public async Task RequestToJoinRoom(string roomCode)
+        public async Task RequestToJoinGame(string roomCode)
         {
             var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
             if (userId == null)
@@ -265,7 +265,7 @@ namespace DrawPT.Api.Hubs
         }
 
 
-        public async Task JoinGame(string roomCode)
+        public async Task JoinGame(string roomCode, string username)
         {
             // check if user is allowed to be in the room
             var playerIdClaim = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
@@ -289,6 +289,10 @@ namespace DrawPT.Api.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
             _logger.LogInformation($"Player {playerId} joined room {roomCode} with connection {Context.ConnectionId}");
             
+            player.RoomCode = roomCode;
+            player.Username = username;
+            await _cache.UpdatePlayerAsync(player);
+
             var gameState = await _cache.GetGameState(roomCode);
             if (gameState == null)
             {
