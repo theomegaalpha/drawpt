@@ -7,7 +7,5 @@
         IGameConfiguration GameConfiguration { get; set; }
         int TotalRounds { get; set; }
         Guid HostPlayerId { get; set; }
-        List<Guid> Players { get; set; }
-
     }
 }

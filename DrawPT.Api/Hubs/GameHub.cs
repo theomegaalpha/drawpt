@@ -221,12 +221,12 @@ namespace DrawPT.Api.Hubs
                 gameState = new GameState
                 {
                     RoomCode = roomCode,
-                    Players = new (),
                     HostPlayerId = new Guid(userId)
                 };
             }
 
-            if (gameState.Players.Count >= gameState.GameConfiguration.MaxPlayers)
+            var players = await _cache.GetRoomPlayersAsync(roomCode);
+            if (players.Count >= gameState.GameConfiguration.MaxPlayers)
             {
                 _logger.LogInformation($"Player {userId} is requesting to join room {roomCode}");
                 await Clients.Caller.RoomIsFull();
@@ -245,19 +245,15 @@ namespace DrawPT.Api.Hubs
             await _cache.UpdatePlayerAsync(player);
 
             // Check if player already exists in the room
-            var playerInRoom = gameState.Players.FirstOrDefault(p => p == player.Id);
-            if (playerInRoom != Guid.Empty)
+            var playerInRoom = players.FirstOrDefault(p => p.Id == player.Id);
+            if (playerInRoom != null)
             {
                 _logger.LogInformation($"Player {player.Id} already exists in room {roomCode}!");
                 await Clients.Caller.AlreadyInRoom();
                 return;
             }
 
-            gameState.Players.Add(player.Id);
             await _cache.SetGameState(gameState);
-
-            // Add player to room cache
-            // TODO: might be redundant,  may need to remove from gamestate
             await _cache.AddPlayerToRoom(roomCode, player);
 
             // Notify the client that they can join the room
@@ -371,6 +367,8 @@ namespace DrawPT.Api.Hubs
             }
 
             await _hubContext.Clients.GroupExcept(player.RoomCode, player.ConnectionId).PlayerLeft(player);
+            await _cache.RemovePlayerFromRoom(player.RoomCode, player);
+            await _cache.ClearPlayerSessionAsync(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
 

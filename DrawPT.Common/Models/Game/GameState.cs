@@ -7,16 +7,8 @@ namespace DrawPT.Common.Models.Game
         public string RoomCode { get; set; } = string.Empty;
         public int CurrentRound { get; set; } = 0;
         public int TotalRounds { get; set; } = 8;
-        public IGameConfiguration GameConfiguration { get; set; }
+        public IGameConfiguration GameConfiguration { get; set; } = new GameConfiguration();
         public Guid HostPlayerId { get; set; }
-        public List<Guid> Players { get; set; } = new ();
-
-        public GameState(GameConfiguration gameConfiguration)
-        {
-            GameConfiguration = gameConfiguration;
-        }
-
-        public GameState() : this(new GameConfiguration()) { }
     }
 
     public enum GameStatus

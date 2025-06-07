@@ -159,14 +159,14 @@ namespace DrawPT.Common.Services
             {
                 return new List<Player>();
             }
-            return JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new List<Player>();
+            return JsonSerializer.Deserialize<List<Player>>(playersJson) ?? [];
         }
 
         public async Task AddPlayerToRoom(string roomCode, Player player)
         {
             var playersJson = await _cache.GetStringAsync($"room:{roomCode}:players");
-            var players = string.IsNullOrEmpty(playersJson) ? new List<Player>() : JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new List<Player>();
-            if (players.Contains(player))
+            List<Player> players = string.IsNullOrEmpty(playersJson) ? new () : JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new ();
+            if (players.Any(p => p.Id == player.Id))
                 return; // Player already exists in the room
 
             players.Add(player);
@@ -177,11 +177,19 @@ namespace DrawPT.Common.Services
         public async Task RemovePlayerFromRoom(string roomCode, Player player)
         {
             var playersJson = await _cache.GetStringAsync($"room:{roomCode}:players");
-            var players = string.IsNullOrEmpty(playersJson) ? new List<Player>() : JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new List<Player>();
-            if (!players.Contains(player))
+            List<Player> players = string.IsNullOrEmpty(playersJson) ? new() : JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new();
+            if (!players.Any(p => p.Id == player.Id))
                 return; // Player already doesn't exist in the room
 
-            players.Remove(player);
+            players.RemoveAll(p => p.Id == player.Id);
+
+            if (players.Count == 0)
+            {
+                // If no players left, remove the room
+                await _cache.RemoveAsync($"room:{roomCode}:players");
+                await _cache.RemoveAsync($"room:{roomCode}");
+                return;
+            }
             var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
             await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(players), options);
         }

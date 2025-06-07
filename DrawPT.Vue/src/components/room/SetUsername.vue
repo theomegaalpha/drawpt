@@ -51,10 +51,14 @@ onMounted(() => {
     router.push({ name: 'home' })
     return
   }
-  api.checkRoom(roomCode.value).then((exists) => {
-    if (!exists) {
-      roomJoinStore.setJoinError('😭 This game has already ended.')
-    }
+  api.getPlayer().then((res) => {
+    playerStore.updatePlayer(res)
+    username.value = res.username || ''
+    api.checkRoom(roomCode.value).then((exists) => {
+      if (!exists) {
+        roomJoinStore.setJoinError('😭 This game has already ended.')
+      }
+    })
   })
 
   console.warn('SetUsername: Waiting for SignalR connection from RoomWrapper...')
