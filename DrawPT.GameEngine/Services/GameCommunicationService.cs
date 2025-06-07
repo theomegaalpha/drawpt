@@ -6,6 +6,7 @@ using DrawPT.GameEngine.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
@@ -62,6 +63,9 @@ public class GameCommunicationService : IGameCommunicationService
 
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
+
         var questionJson = JsonSerializer.Serialize(question);
         var routingKey = GameEngineRequestMQ.RoutingKeys.AskQuestion(player.ConnectionId);
         var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
@@ -88,12 +92,24 @@ public class GameCommunicationService : IGameCommunicationService
             answer.Guess = answerBase.Guess;
         }
 
+        stopwatch.Stop();
+        double elapsedTime = stopwatch.Elapsed.TotalSeconds;
+        answer.BonusPoints = CalculateBonusPoints(elapsedTime);
         answer.ConnectionId = player.ConnectionId;
 
         BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
         return answer;
     }
 
+    int CalculateBonusPoints(double elapsedTime)
+    {
+        if (elapsedTime <= 3)
+            return 5;
+        if (elapsedTime >= 15)
+            return 0;
+        // Linear decrease from 5 to 0 between 3 and 15 seconds
+        return (int)Math.Ceiling(5 * (1 - (elapsedTime - 3) / 12));
+    }
 
     private async Task<string> RequestUserInputAsync(string routingKey, string requestPayload, string connectionId, int timeoutMilliseconds)
     {

@@ -26,11 +26,15 @@ Response format (excluding curly braces): '[{Theme}] {Creative image prompt}'";
 Evaluation Criteria:
 Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
 
-Strong Conceptual & Sentiment Match (15-19 Points): The guess conveys the same emotional tone and core meaning, even if the wording is different.
+Very Strong Conceptual & Sentiment Match (15-19 Points): The guess conveys the same emotional tone and core meaning, matching on some words.
 
-Moderate Conceptual Overlap (10-14 Points): The guess captures important aspects of the phrase—such as key themes, related emotions, or partial word matches—but deviates in structure.
+Strong Conceptual & Sentiment Match (11-14 Points): The guess conveys the same emotional tone and core meaning, even if the wording is different.
 
-Weak Connection (5-9 Points): The guess contains elements that vaguely relate to the original phrase but alters meaning significantly.
+Moderate Conceptual Overlap (8-10 Points): The guess captures important aspects of the phrase—such as key themes, related emotions, or partial word matches—but deviates in structure.
+
+Weak Connection (4-7 Points): The guess contains elements that vaguely relate to the original phrase but alters meaning significantly.
+
+Very Weak Connection (1-3 Points): The guess contains trace elements that can arguably relate to the original phrase.
 
 Unrelated (0 Points): The guess has no meaningful connection in words, sentiment, or concept.
 
@@ -45,9 +49,9 @@ json
         'Guess': '<contestant's guessed phrase>',
         'Score': '<integer from 0 to 20>',
         'Reason': '<explanation for the given score>',
-        'IsGambling': false,
-        'BonusPoints': 0,
-        'SubmittedAt': null
+        'IsGambling': <boolean>,
+        'BonusPoints': <integer from 0 to 5 of original scoring>,
+        'SubmittedAt': <string>
     }
 ]
 The response must always be a JSON array, even when evaluating a single contestant.
@@ -125,8 +129,6 @@ Now, the original phrase is:";
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
-            return await GenerateFakeGameQuestionAsync(theme);
-
             var prompt = await GenerateImagePromptAsync(theme);
             var imageUrl = await GenerateImageAsync(prompt);
             return new GameQuestion()

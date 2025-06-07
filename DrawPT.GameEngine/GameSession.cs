@@ -124,12 +124,7 @@ public class GameSession : IGameSession
                 Answers = assessedAnswers
             };
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, roundResults);
-            await Task.Delay(10000);
-
-            _logger.LogDebug($"[{roomCode}] Round {i + 1} answers collected: {answers.Count}");
-            // scoringService
-            // broadcast round scores to players
-            //await _gameCommunicationService.BroadcastRoundScoresAsync(roomCode, answers);
+            await Task.Delay(15000);
         }
 
         // gameStateService.EndGame(roomCode);
