@@ -115,26 +115,15 @@ public class GameSession : IGameSession
 
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.AssessingAnswersAction);
 
-            List<Task<PlayerAnswer>> assessedAnswers = new(players.Count);
-            foreach (var answer in answers)
-            {
-                // assess answer
-                var assessedAnswer = await _assessmentService.AssessAnswerAsync(question.OriginalPrompt, answer);
-                answer.Score = assessedAnswer.Score;
-                answer.Reason = assessedAnswer.Reason;
-                assessedAnswers.Add(Task.FromResult(answer));
-            }
-            await Task.WhenAll(assessedAnswers);
-
-            RoundResults results = new()
+            var assessedAnswers = await _assessmentService.AssessAnswersAsync(question.OriginalPrompt, answers);
+            var roundResults = new RoundResults
             {
                 RoundNumber = i + 1,
                 Theme = selectedTheme,
                 Question = question,
-                Answers = assessedAnswers.Select(t => t.Result).ToList(),
-
+                Answers = assessedAnswers
             };
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, results);
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, roundResults);
             await Task.Delay(10000);
 
             _logger.LogDebug($"[{roomCode}] Round {i + 1} answers collected: {answers.Count}");

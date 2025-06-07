@@ -15,10 +15,12 @@ namespace DrawPT.Common.Services
         private readonly ImageClient _imageClient;
         private readonly GeminiImageGenerator _geminiImageGenerator;
 
-        string _imagePrompt = @"You are a very creative player of a game that's trying to use AI to generate a digital art picture.
-            Given a theme, please generate a short and unique prompt about anything you want that would produce a cool picture.
-            Response format excluding curcly braces:  '[{Theme goes here}] {Response goes here}'
-            Keep your response short while keeping the creativity and aligned to the theme provided.";
+        string _imagePrompt = @"You are a highly imaginative player in an AI-driven digital art game.
+Given a theme, generate a visually compelling prompt that will produce a stunning yet clear image—avoiding overly abstract concepts.
+Keep the response short and concrete, ensuring the generated image remains recognizable and engaging.
+Introduce variety while maintaining alignment to the given theme to make guessing fun and dynamic.
+
+Response format (excluding curly braces): '[{Theme}] {Creative image prompt}'";
         private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
 
 Evaluation Criteria:
@@ -36,16 +38,18 @@ Strict Response Format:
 Return results as a JSON array where each contestant's data follows this structure:
 
 json
-{
-    'Id': '<unique identifier>'
-    'ConnectionId': '<unique identifier>'
-    'Guess': '<contestant's guessed phrase>'
-    'Score': '<integer from 0 to 20>'
-    'Reason': '<explanation for the given score>'
-    'IsGambling': false
-    'BonusPoints': 0
-    'SubmittedAt': null
-}
+[
+    {
+        'Id': '<unique identifier of original Player ID>',
+        'ConnectionId': '<unique identifier of original Connection ID>',
+        'Guess': '<contestant's guessed phrase>',
+        'Score': '<integer from 0 to 20>',
+        'Reason': '<explanation for the given score>',
+        'IsGambling': false,
+        'BonusPoints': 0,
+        'SubmittedAt': null
+    }
+]
 The response must always be a JSON array, even when evaluating a single contestant.
 
 Ensure explanations ('Reason') are concise yet sufficiently justify the assigned score.
@@ -60,21 +64,16 @@ Now, the original phrase is:";
             _geminiImageGenerator = geminiImageGenerator;
         }
 
-        public async Task<PlayerAnswer> AssessAnswerAsync(string originalPrompt, PlayerAnswer answer)
+        public async Task<List<PlayerAnswer>> AssessAnswerAsync(string originalPrompt, List<PlayerAnswer> answers)
         {
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(_assessmentPrompt + originalPrompt),
-                new UserChatMessage(JsonSerializer.Serialize(answer.Guess))
+                new UserChatMessage(JsonSerializer.Serialize(answers))
             };
 
-            if (string.IsNullOrEmpty(answer.Reason))
-            {
-                answer.Reason = "No reason provided.";
-                answer.Score = 0;
-                answer.BonusPoints = 0;
-                return answer;
-            }
+            if (answers.Count == 0)
+                return answers;
 
             try
             {
@@ -95,35 +94,33 @@ Now, the original phrase is:";
                 {
                     if (completion.Content.Count == 0)
                     {
-                        Console.WriteLine("No content in response.");
-                        answer.Reason = "Problem assessing answer.";
-                        answer.Score = 20;
-                        return answer;
+                        answers.ForEach(a => {
+                            a.Reason = "Problem assing scores.";
+                            a.Score = 20;
+                        });
                     }
                     var jsonResponse = completion.Content[0].Text.ToString() ?? "{}";
-                    var playerAnswer = JsonSerializer.Deserialize<PlayerAnswer>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    if (playerAnswer == null)
+                    var playerAnswers = JsonSerializer.Deserialize<List<PlayerAnswer>>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (playerAnswers == null)
                     {
-                        Console.WriteLine("Deserialization returned null.");
-                        answer.Reason = "Problem assessing answer.";
-                        answer.Score = 20;
-                        return answer;
+                        answers.ForEach(a => {
+                            a.Reason = "Problem assing scores.";
+                            a.Score = 20;
+                        });
+                        return answers;
                     }
-                    answer.Reason = playerAnswer.Reason ?? "No reason provided.";
-                    answer.Score = playerAnswer.Score >= 0 && playerAnswer.Score <= 20 ? playerAnswer.Score : 0; // Ensure score is within bounds
-                    return answer;
-                }
-                else
-                {
-                    Console.WriteLine("No response received.");
-                    return new PlayerAnswer() { Reason = "No response from AI." };
+                    return playerAnswers;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            return new PlayerAnswer() { Reason = "An error occurred while assessing the answer." };
+            answers.ForEach(a => {
+                a.Reason = "Problem assing scores.";
+                a.Score = 20;
+            });
+            return answers;
         }
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)

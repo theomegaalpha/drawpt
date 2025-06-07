@@ -16,7 +16,7 @@ namespace DrawPT.Common.Interfaces
         /// <summary>
         /// Assesses player answers for a round
         /// </summary>
-        Task<PlayerAnswer> AssessAnswerAsync(string originalPrompt, PlayerAnswer answer);
-
+        Task<List<PlayerAnswer>> AssessAnswerAsync(string originalPrompt, List<PlayerAnswer> answers);
+        
     }
 } 

@@ -16,14 +16,14 @@ namespace DrawPT.Common.Services
         /// </summary>
         /// <param name="answer">The player's answer to assess.</param>
         /// <returns>A task that represents the asynchronous operation, containing the assessed player answer.</returns>
-        public async Task<PlayerAnswer> AssessAnswerAsync(string originalPrompt, PlayerAnswer answer)
+        public async Task<List<PlayerAnswer>> AssessAnswersAsync(string originalPrompt, List<PlayerAnswer> answers)
         {
-            if (answer == null)
+            if (answers == null || answers.Count == 0)
             {
-                throw new ArgumentNullException(nameof(answer));
+                throw new ArgumentNullException(nameof(answers));
             }
-            // Call the AI service to assess the answer
-            return await _aiService.AssessAnswerAsync(originalPrompt, answer);
+            // Call the AI service to assess the answers
+            return await _aiService.AssessAnswerAsync(originalPrompt, answers);
         }
     }
 }
