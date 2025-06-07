@@ -20,6 +20,9 @@ export interface GameState {
 
 export interface GameResults {
   playerResults: PlayerResult[]
+  totalRounds: number
+  wasCompleted: boolean
+  endedAt: string
 }
 
 export interface GameQuestion {

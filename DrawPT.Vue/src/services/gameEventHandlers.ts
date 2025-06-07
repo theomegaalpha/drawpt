@@ -8,7 +8,7 @@ import { useRoomJoinStore } from '@/stores/roomJoinStore'
 import { useGameStateStore } from '@/stores/gameState'
 
 import type { Player } from '@/models/player'
-import type { GameState, RoundResults } from '@/models/gameModels' // Assuming GameRound type exists or will be defined
+import type { GameState, RoundResults, GameResults } from '@/models/gameModels'
 
 // Helper to easily access stores within handlers
 const getStores = () => ({
@@ -49,15 +49,16 @@ export function registerBaseGameHubEvents() {
     // stores.gameStateStore.initializeGameState(gameState);
   })
 
-  service.on('roundEnded', (roundResult: RoundResults) => {
+  service.on('roundResults', (roundResult: RoundResults) => {
     stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)
     stores.scoreboardStore.addRoundResult(roundResult)
     stores.gameStateStore.handleBroadcastRoundResultsEvent(roundResult)
   })
 
-  service.on('broadcastFinalResults', (results: any) /* Specify type for results */ => {
+  service.on('broadcastFinalResults', (results: GameResults) => {
     stores.notificationStore.addGameNotification('The results are in!!!')
     stores.scoreboardStore.updateGameResults(results)
+    stores.gameStateStore.handleEndGameEvent()
   })
 
   service.on('writeMessage', (message: string) => {
@@ -94,6 +95,7 @@ export function unregisterBaseGameHubEvents() {
   service.off('writeMessage')
   service.off('themeSelection')
   service.off('themeSelected')
+  service.off('roundResults')
   service.off('broadcastRoundResults')
   service.off('awardBonusPoints')
 }

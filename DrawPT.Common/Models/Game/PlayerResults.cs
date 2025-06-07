@@ -10,9 +10,6 @@ namespace DrawPT.Common.Models.Game
         /// </summary>
         public Guid PlayerId { get; set; } = Guid.NewGuid();
 
-        /// <summary>
-        /// Player's display name
-        /// </summary>
         public string Username { get; set; } = string.Empty;
 
         /// <summary>

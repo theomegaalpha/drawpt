@@ -14,9 +14,9 @@ namespace DrawPT.Api.Hubs
         Task PlayerLeft(Player player);
         Task PlayerScoreUpdated(Guid playerId, int newScore);
         Task GameStarted(GameConfiguration configuration);
-        Task GameEnded(GameResults results);
+        Task BroadcastFinalResults(GameResults results);
         Task RoundStarted(int roundNumber);
-        Task RoundEnded(RoundResults round);
+        Task RoundResults(RoundResults round);
         Task SuccessfullyJoined(string connectionId);
         Task WriteMessage(string message);
 

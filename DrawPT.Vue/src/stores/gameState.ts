@@ -80,6 +80,15 @@ export const useGameStateStore = defineStore('gameState', {
       // This might trigger an optimistic update or simply wait for server confirmation via 'themeSelected' event
       this.selectableThemeOptionsFromSignalR = [] // Clear options after selection
       // The actual `service.invoke('SelectTheme', theme)` would happen in Game.vue's promise resolution
+    },
+    handleEndGameEvent() {
+      this.shouldShowResults = true
+      this.currentImageUrl = ''
+      this.themeOptionsFromSignalR = []
+      this.selectableThemeOptionsFromSignalR = []
+      this.currentBonusPoints = 0
+      this.isGuessLocked = true
+      this.currentRoundNumber = 0
     }
   }
 })

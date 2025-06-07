@@ -24,6 +24,8 @@ namespace DrawPT.Common.Models.Game
         /// </summary>
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public Guid PlayerId { get; set; } = Guid.Empty;
+
         /// <summary>
         /// The player's connection ID
         /// </summary>

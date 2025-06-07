@@ -4,7 +4,12 @@ import type { GameResults, RoundResults } from '@/models/gameModels'
 
 export const useScoreboardStore = defineStore('scoreboard', () => {
   const roundNumber = ref(0)
-  const gameResults = ref({ playerResults: [] } as GameResults)
+  const gameResults = ref({
+    playerResults: [],
+    totalRounds: 8,
+    endedAt: '',
+    wasCompleted: true
+  } as GameResults)
   const roundResults = ref([] as RoundResults[])
 
   const lastRoundResults = computed(() => {
@@ -14,6 +19,7 @@ export const useScoreboardStore = defineStore('scoreboard', () => {
   function clearScoreboard() {
     roundNumber.value = 0
     gameResults.value.playerResults = []
+    gameResults.value.wasCompleted = false
     roundResults.value = []
   }
 
@@ -21,12 +27,17 @@ export const useScoreboardStore = defineStore('scoreboard', () => {
     roundNumber.value = round
   }
 
-  function updateGameResults(results: GameResults) {
-    gameResults.value.playerResults = results.playerResults
-  }
-
   function addRoundResult(round: RoundResults) {
     roundResults.value.push(round)
+  }
+
+  function updateGameResults(results: GameResults) {
+    gameResults.value = results || {
+      playerResults: [],
+      totalRounds: 8,
+      endedAt: '',
+      wasCompleted: true
+    }
   }
 
   return {

@@ -82,7 +82,10 @@ public class GameSession : IGameSession
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction, gameState);
         await Task.Delay(100);
 
-        for (int i = 0; i < 8; i++)
+        List<RoundResults> allRoundResults = new();
+        List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
+
+        for (int i = 0; i < 1; i++)
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, i + 1);
@@ -90,6 +93,9 @@ public class GameSession : IGameSession
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
+            // add players that are missing from original list into originalPlayers
+            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
+                originalPlayers.Add(player);
             var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerThemeSelectedAction, selectedTheme);
 
@@ -123,12 +129,32 @@ public class GameSession : IGameSession
                 Question = question,
                 Answers = assessedAnswers
             };
+            allRoundResults.Add(roundResults);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, roundResults);
             await Task.Delay(15000);
         }
 
-        // gameStateService.EndGame(roomCode);
-        // broadcast end game scores to players
+        var finalGameState = await _gameStateService.EndGameAsync(roomCode);
+
+        var allAnswers = allRoundResults.SelectMany(r => r.Answers);
+        var playerScores = allAnswers
+            .GroupBy(a => a.PlayerId)
+            .ToDictionary(
+                g => g.Key,
+                g => new PlayerResults
+                {
+                    PlayerId = g.Key,
+                    Score = g.Sum(a => a.Score + a.BonusPoints),
+                    Username = originalPlayers.FirstOrDefault(p => p.Id == g.Key)?.Username ?? "Unknown",
+                }
+            );
+        var finalScores = new GameResults
+        {
+            PlayerResults = playerScores.Values.ToList(),
+            WasCompleted = true,
+            TotalRounds = gameState.TotalRounds
+        };
+        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameResultsAction, finalScores);
     }
 
 

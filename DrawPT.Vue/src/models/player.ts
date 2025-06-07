@@ -6,5 +6,5 @@ export interface Player {
 }
 
 export interface PlayerResult extends Player {
-  finalScore: number
+  score: number
 }

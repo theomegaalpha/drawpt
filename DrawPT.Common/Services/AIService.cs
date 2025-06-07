@@ -44,7 +44,8 @@ Return results as a JSON array where each contestant's data follows this structu
 json
 [
     {
-        'Id': '<unique identifier of original Player ID>',
+        'Id': '<unique identifier>',
+        'PlayerId': '<unique identifier of original Player ID>',
         'ConnectionId': '<unique identifier of original Connection ID>',
         'Guess': '<contestant's guessed phrase>',
         'Score': '<integer from 0 to 20>',

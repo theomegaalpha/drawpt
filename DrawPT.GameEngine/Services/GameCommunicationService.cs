@@ -96,6 +96,7 @@ public class GameCommunicationService : IGameCommunicationService
         double elapsedTime = stopwatch.Elapsed.TotalSeconds;
         answer.BonusPoints = CalculateBonusPoints(elapsedTime);
         answer.ConnectionId = player.ConnectionId;
+        answer.PlayerId = player.Id;
 
         BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
         return answer;
