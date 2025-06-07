@@ -206,23 +206,88 @@ namespace DrawPT.Api.Hubs
             }
         }
 
-        public async Task JoinGame(string roomCode, Guid playerId)
+        public async Task RequestToJoinRoom(string roomCode)
         {
-            // Add player to SignalR group
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
-            _logger.LogInformation($"Player {playerId} joined room {roomCode} with connection {Context.ConnectionId}");
-
-            var player = await _cache.GetPlayerAsync(playerId);
-            if (player == null)
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in claim while requesting to join a room!");
                 return;
+            }
+
+            var gameState = await _cache.GetGameState(roomCode);
+            if (gameState == null)
+            {
+                _logger.LogWarning($"Game state for room {roomCode} not found!");
+                return;
+            }
+
+            if (gameState.Players.Count >= gameState.GameConfiguration.MaxPlayers)
+            {
+                _logger.LogInformation($"Player {userId} is requesting to join room {roomCode}");
+                await Clients.Caller.RoomIsFull();
+                return;
+            }
+
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
+            if (player == null)
+            {
+                _logger.LogWarning($"Player with user ID {userId} not found in cache!");
+                return;
+            }
             player.RoomCode = roomCode;
             player.ConnectionId = Context.ConnectionId;
             await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
+
+            // Check if player already exists in the room
+            var playerInRoom = gameState.Players.FirstOrDefault(p => p == player.Id);
+            if (playerInRoom != Guid.Empty)
+            {
+                _logger.LogInformation($"Player {player.Id} already exists in room {roomCode}!");
+                await Clients.Caller.AlreadyInRoom();
+                return;
+            }
+
+            // If game is empty, set the host player ID
+            if (gameState.HostPlayerId == Guid.Empty)
+                gameState.HostPlayerId = Guid.Parse(userId);
+            gameState.Players.Add(player.Id);
+            await _cache.SetGameState(gameState);
+
+            // Add player to room cache
+            // TODO: might be redundant,  may need to remove from gamestate
             await _cache.AddPlayerToRoom(roomCode, player);
+
+            // Notify the client that they can join the room
+            await Clients.Caller.NavigateToRoom();
+        }
+
+
+        public async Task JoinGame(string roomCode, Guid playerId)
+        {
+            // check if user is allowed to be in the room
+            var player = await _cache.GetPlayerAsync(playerId);
+            if (player == null)
+                return;
+
+            if (await _cache.GetPlayerSessionAsync(Context.ConnectionId) == null)
+                return;
+
+            var players = await _cache.GetRoomPlayersAsync(roomCode);
+            if (players.FirstOrDefault(p => p.Id == playerId) == null)
+                return;
+
+            // Add player to SignalR group
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
+            _logger.LogInformation($"Player {playerId} joined room {roomCode} with connection {Context.ConnectionId}");
             
             var gameState = await _cache.GetGameState(roomCode);
             if (gameState == null)
-                gameState = new GameState() { RoomCode = roomCode, HostPlayerId = playerId };
+            {
+                _logger.LogError($"Game state for room {roomCode} not found!");
+                await Clients.Caller.ErrorJoiningRoom();
+                return;
+            }
             await _cache.SetGameState(gameState);
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(player));

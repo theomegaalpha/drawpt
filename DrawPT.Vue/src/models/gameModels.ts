@@ -1,5 +1,23 @@
 import type { PlayerResult } from './player'
 
+export interface IGameConfiguration {
+  MaxPlayers: number
+  NumberOfQuestions: number
+  QuestionTimeout: number
+  ThemeTimeout: number
+  TransitionDelay: number
+  GamblingEnabled: boolean
+}
+
+export interface GameState {
+  RoomCode: string
+  CurrentRound: number
+  GameConfiguration: IGameConfiguration
+  TotalRounds: number
+  HostPlayerId: string
+  Players: string[]
+}
+
 export interface GameResults {
   playerResults: PlayerResult[]
 }

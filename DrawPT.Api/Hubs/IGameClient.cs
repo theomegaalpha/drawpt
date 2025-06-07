@@ -5,6 +5,11 @@ namespace DrawPT.Api.Hubs
 {
     public interface IGameClient
     {
+        Task RoomIsFull();
+        Task AlreadyInRoom();
+        Task NavigateToRoom();
+        Task ErrorJoiningRoom();
+
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);
         Task PlayerScoreUpdated(Guid playerId, int newScore);

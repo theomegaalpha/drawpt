@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Room } from '@/models/room'
 import type { Player } from '@/models/player'
+import type { GameState } from '@/models/gameModels'
 
 export const useRoomStore = defineStore('room', () => {
   const room = ref({

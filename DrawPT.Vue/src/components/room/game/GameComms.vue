@@ -6,6 +6,7 @@ import { useRoomStore } from '@/stores/room'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import type { Player } from '@/models/player'
+import type { GameState } from '@/models/gameModels'
 
 const { updateGameResults } = useScoreboardStore()
 const { player: you, updateConnectionId } = usePlayerStore()
@@ -32,8 +33,8 @@ onMounted(async () => {
       updateConnectionId(connectionId)
     })
 
-    service.on('gameStarted', (config) => {
-      console.log('Game has started!', config)
+    service.on('gameStarted', (gameState: GameState) => {
+      console.log('Game has started!', gameState)
       startGame()
       addGameNotification('Game has started!')
     })
