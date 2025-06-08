@@ -10,7 +10,7 @@ import Leaderboard from './leaderboard/Leaderboard.vue'
 import { PlayIcon } from 'lucide-vue-next'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
-const roomCodeInput = ref('')
+const roomCodeInput = ref<string>('')
 const guess = ref('')
 const showTooltip = ref(false)
 
@@ -69,7 +69,7 @@ onMounted(() => {
     <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div class="bg-surface-default rounded-xl p-6 shadow-md">
         <div class="flex items-baseline gap-x-2">
-          <h2 class="text-2xl font-bold">Prompt of the Day</h2>
+          <h2 class="text-xl font-bold">Prompt of the Day</h2>
           <span class="text-lg">Hint: Dark</span>
         </div>
         <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
@@ -89,7 +89,7 @@ onMounted(() => {
       <!-- Right column wrapper for Game Options and Leaderboard -->
       <div class="flex flex-col gap-8">
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
-          <h2 class="text-color-accent mb-4 text-xl font-bold">Game Options</h2>
+          <h2 class="mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
             <div class="relative">
               <button
@@ -119,8 +119,8 @@ onMounted(() => {
               <StandardInput
                 placeholder="Room Code"
                 maxlength="4"
+                :autocapitalize="true"
                 v-model="roomCodeInput"
-                v-autocapitalize="true"
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
@@ -140,13 +140,13 @@ onMounted(() => {
           <div class="p-4">
             <h2 class="text-xl font-medium">Leaderboard</h2>
           </div>
-          <!--Leaderboard class="flex-grow" /-->
+          <Leaderboard class="flex-grow" />
         </div>
       </div>
     </div>
     <!-- Features Section -->
     <div class="bg-surface-default mb-10 rounded-xl p-8 shadow-md">
-      <h2 class="text-color-accent mb-6 text-center text-2xl font-bold">Game Features</h2>
+      <h2 class="mb-6 text-center text-2xl font-bold">Game Features</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="p-4 text-center">
           <div

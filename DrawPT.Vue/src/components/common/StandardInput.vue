@@ -6,6 +6,7 @@
       :value="modelValue"
       @input="handleInput"
       :placeholder="placeholder"
+      v-autocapitalize="autocapitalize"
       class="w-full rounded-full bg-zinc-900 px-5 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none"
       v-bind="$attrs"
     />
@@ -18,11 +19,13 @@ interface Props {
   id?: string
   placeholder?: string
   type?: string
+  autocapitalize?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   type: 'text',
-  modelValue: ''
+  modelValue: '',
+  autocapitalize: false
 })
 
 const emit = defineEmits(['update:modelValue'])
