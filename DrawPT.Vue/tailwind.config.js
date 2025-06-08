@@ -19,11 +19,24 @@ export default {
             transform: 'translateX(0)',
             opacity: '1'
           }
+        },
+        'blur-in-effect': {
+          '0%': {
+            opacity: '0.2',
+            filter: 'blur(12px)',
+            transform: 'translateY(12px)'
+          },
+          '100%': {
+            opacity: '1',
+            filter: 'blur(0px)',
+            transform: 'translateY(0px)'
+          }
         }
       },
       animation: {
         'timer-countdown': 'timer-countdown linear',
-        'slide-in': 'slide-in 0.2s ease-in forwards'
+        'slide-in': 'slide-in 0.2s ease-in forwards',
+        'blur-in': 'blur-in-effect 1.2s ease-out forwards'
       }
     }
   },
