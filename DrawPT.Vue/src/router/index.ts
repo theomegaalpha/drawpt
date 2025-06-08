@@ -24,7 +24,7 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
-      path: '/room',
+      path: '/room/:roomCode',
       name: 'room',
       component: () => import('@/views/RoomView.vue'),
       meta: { requiresAuth: true }

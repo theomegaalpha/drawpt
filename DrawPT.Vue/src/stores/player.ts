@@ -23,5 +23,12 @@ export const usePlayerStore = defineStore('player', () => {
     player.value.connectionId = connectionId
   }
 
-  return { updateConnectionId, updatePlayer, randomizeColor, player }
+  // Action to specifically update the username
+  function setUsername(newUsername: string) {
+    if (player.value) {
+      player.value.username = newUsername
+    }
+  }
+
+  return { updateConnectionId, updatePlayer, randomizeColor, player, setUsername }
 })

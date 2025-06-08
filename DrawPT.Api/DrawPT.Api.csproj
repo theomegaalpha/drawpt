@@ -13,6 +13,8 @@
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.0" />
     <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="9.3.0" />
     <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.3.0" />
+    <PackageReference Include="Aspire.RabbitMQ.Client" Version="9.3.0" />
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.5" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.5" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.23.0" />
@@ -20,16 +22,16 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.5" />
     <PackageReference Include="Microsoft.Azure.SignalR" Version="1.30.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.5" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.9.2" />
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="3.9.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.37" />
+    <PackageReference Include="Supabase" Version="1.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DrawPT.Common\DrawPT.Common.csproj" />
     <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,13 @@
 import * as signalR from '@microsoft/signalr'
+import { getAccessToken } from '@/lib/auth'
+
+// Define a callback type for connection status changes
+type ConnectionStatusCallback = (isConnected: boolean) => void
 
 export class SignalRService {
   private connection: signalR.HubConnection | null = null
   public isConnected: boolean = false
+  private statusChangeCallbacks: ConnectionStatusCallback[] = []
 
   constructor() {
     this.getConnectionStatus = this.getConnectionStatus.bind(this)
@@ -10,20 +15,45 @@ export class SignalRService {
     this.invoke = this.invoke.bind(this)
     this.on = this.on.bind(this)
     this.off = this.off.bind(this)
+    this.onConnectionStatusChanged = this.onConnectionStatusChanged.bind(this)
   }
 
-  public async startConnection(hubUrl: string, token?: string): Promise<void> {
+  private notifyStatusChange() {
+    this.statusChangeCallbacks.forEach((callback) => callback(this.isConnected))
+  }
+
+  public async startConnection(hubUrl: string): Promise<void> {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, token ? { accessTokenFactory: () => token } : {})
+      .withUrl(hubUrl, { accessTokenFactory: async () => (await getAccessToken()) || '' })
       .withAutomaticReconnect()
       .build()
+
+    // Optional: Handle reconnected and reconnected events to update isConnected
+    this.connection.onreconnected(() => {
+      console.log('SignalR Reconnected.')
+      this.isConnected = true
+      this.notifyStatusChange()
+    })
+    this.connection.onreconnecting((error) => {
+      console.log(`SignalR Reconnecting due to: ${error}`)
+      this.isConnected = false // Or a specific 'reconnecting' state
+      this.notifyStatusChange()
+    })
+    this.connection.onclose((error) => {
+      console.log(`SignalR Connection closed due to: ${error}`)
+      this.isConnected = false
+      this.notifyStatusChange()
+    })
 
     try {
       await this.connection.start()
       console.log('SignalR Connected.')
       this.isConnected = true
+      this.notifyStatusChange()
     } catch (err) {
       console.log('SignalR Connection Failed: ', err)
+      this.isConnected = false
+      this.notifyStatusChange()
     }
   }
 
@@ -40,6 +70,7 @@ export class SignalRService {
         await this.connection.stop()
         console.log('SignalR Disconnected.')
         this.isConnected = false
+        this.notifyStatusChange()
       } catch (err) {
         console.log('SignalR Disconnection Failed: ', err)
       }
@@ -65,6 +96,15 @@ export class SignalRService {
       } catch (err) {
         console.error(err)
       }
+    }
+  }
+
+  // Method to subscribe to connection status changes
+  public onConnectionStatusChanged(callback: ConnectionStatusCallback): () => void {
+    this.statusChangeCallbacks.push(callback)
+    // Return an unsubscribe function
+    return () => {
+      this.statusChangeCallbacks = this.statusChangeCallbacks.filter((cb) => cb !== callback)
     }
   }
 }

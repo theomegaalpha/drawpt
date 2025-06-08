@@ -1,30 +1,43 @@
-﻿using DrawPT.Data.Models;
-using DrawPT.Api.Services;
+﻿using DrawPT.Api.Services;
+using DrawPT.Common.Models;
+using DrawPT.Common.Interfaces;
+using DrawPT.Common.Models.Supabase;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.AspNetCore.Authorization;
+using DrawPT.Common.Services;
 
 namespace DrawPT.Api.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class PlayerController : ControllerBase
     {
         private readonly RandomService _randomService;
-        private readonly CacheService _cacheService;
+        private readonly ICacheService _cacheService;
+        private readonly ProfileService _profileService;
 
-        public PlayerController(CacheService cacheService, RandomService randomService)
+        public PlayerController(ICacheService cacheService,
+            RandomService randomService, ProfileService profileService)
         {
             _randomService = randomService;
             _cacheService = cacheService;
+            _profileService = profileService;
         }
 
         // GET: api/<PlayerController>
         [HttpGet]
         public async Task<ActionResult<Player>> Get()
         {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+                return BadRequest("User ID claim is not present.");
+
             var player = await _cacheService.CreatePlayerAsync();
             player.Username = _randomService.GenerateRandomUsername();
+            player.Id = new Guid(userId);
+            var profile = await _profileService.GetProfileAsync(new Guid(userId));
+
             return Ok(player);
         }
 
@@ -46,7 +59,12 @@ namespace DrawPT.Api.Controllers
         [HttpPost()]
         public async Task<ActionResult<Player>> Post([FromBody] Player player)
         {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+                return BadRequest("User ID claim is not present.");
+
             var updatedPlayer = await _cacheService.UpdatePlayerAsync(player);
+            await _profileService.UpdateUsernameAsync(new Guid(userId), player.Username);
             return Ok(updatedPlayer);
         }
     }

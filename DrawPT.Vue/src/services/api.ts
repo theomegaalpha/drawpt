@@ -1,51 +1,40 @@
-import type { Player, PlayerWithExpiration } from '@/models/player'
+import type { Player } from '@/models/player'
+import { getAccessToken } from '@/lib/auth'
 
 const Api = {
   getPlayer: async (): Promise<Player> => {
-    const storedPlayer = window.localStorage.getItem('storedPlayer')
-    if (storedPlayer) {
-      const playerWithExpiration = JSON.parse(storedPlayer) as PlayerWithExpiration
-      if (playerWithExpiration && new Date(playerWithExpiration.expiration) > new Date()) {
-        return playerWithExpiration as Player
+    const token = await getAccessToken()
+    const response = await fetch(`/api/player`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    }
-
-    const response = await fetch(`/api/player`)
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
       throw new Error('Failed to fetch player data')
     }
 
-    const player = await response.json()
-    const playerWithExpiration = {} as PlayerWithExpiration
-    Object.assign(playerWithExpiration, player)
-    playerWithExpiration.expiration = new Date(Date.now() + 6 * 60 * 60 * 1000)
-    window.localStorage.setItem('storedPlayer', JSON.stringify(playerWithExpiration))
-
-    return player as Player
+    return (await response.json()) as Player
   },
   updatePlayer: async (player: Player): Promise<void> => {
-    window.localStorage.removeItem('storedPlayer')
-    fetch(`/api/player`, {
+    const token = await getAccessToken()
+    await fetch(`/api/player`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(player)
     })
-      .then((_) => {
-        const playerWithExpiration = {} as PlayerWithExpiration
-        Object.assign(playerWithExpiration, player)
-        playerWithExpiration.expiration = new Date(Date.now() + 6 * 60 * 60 * 1000)
-        window.localStorage.setItem('storedPlayer', JSON.stringify(playerWithExpiration))
-      })
-      .catch((error: Error) => {
-        console.error('Failed to update player.', error)
-      })
   },
   createRoom: async (): Promise<string> => {
-    const response = await fetch(`/api/room`)
+    const token = await getAccessToken()
+    const response = await fetch(`/api/room`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)
@@ -55,7 +44,12 @@ const Api = {
     return response.text()
   },
   checkRoom: async (roomCode: string): Promise<boolean> => {
-    const response = await fetch(`/api/room/${roomCode}`)
+    const token = await getAccessToken()
+    const response = await fetch(`/api/room/${roomCode}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (!response.ok) {
       console.error(response.status, response.statusText)

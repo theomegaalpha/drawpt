@@ -1,10 +1,6 @@
-using Aspire.Hosting;
-using Aspire.Hosting.Azure;
-using Google.Protobuf.WellKnownTypes;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add SQL Server container
+// Add Azure SQL Server
 var sql = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSqlServer("sql")
     : builder.AddAzureSqlServer("sql")
@@ -15,7 +11,6 @@ var db = sql.AddDatabase("database");
 var signalr = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSignalR("signalr")
     : builder.AddConnectionString("signalr");
-//var signalr = builder.AddConnectionString("signalr");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -26,29 +21,42 @@ var storage = builder.AddAzureStorage("storage")
                      .RunAsEmulator()
                      .AddBlobs("blobs");
 
+// Add AI
 var openai = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureOpenAI("openai")
     : builder.AddConnectionString("openai");
 var gemini = builder.AddConnectionString("gemini");
 
+var rabbitmq = builder.AddRabbitMQ("messaging");
+
+var redis = builder.AddRedis("cache");
+
+var supabaseUrl = builder.AddParameter("supabase-url");
+var supabaseIssuer= builder.AddParameter("supabase-issuer");
+var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
+var supabaseSecretKey = builder.AddParameter("supabase-secret-key", true);
+var supabaseApiKey = builder.AddParameter("supabase-api-key", true);
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
     .WithReference(storage)
     .WithReference(openai)
     .WithReference(gemini)
+    .WithReference(rabbitmq)
     .WithReference(signalr)
+    .WithReference(redis)
+    .WithEnvironment("AuthenticationValidIssuer", supabaseIssuer)
+    .WithEnvironment("AuthenticationSecretKey", supabaseSecretKey)
+    .WithEnvironment("SupabaseUrl", supabaseUrl)
+    .WithEnvironment("SupabaseApiKey", supabaseApiKey)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
     .WaitForCompletion(migrationService);
 
-var supabaseUrl = builder.AddParameter("supabase-url");
-var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
-var googleClientId = builder.AddParameter("google-client-id");
-
 var customDomain = builder.AddParameter("customDomain");
 var certificateName = builder.AddParameter("certificateName");
+var googleClientId = builder.AddParameter("google-client-id");
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
@@ -66,6 +74,26 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     {
         app.ConfigureCustomDomain(customDomain, certificateName);
     });
+
+
+builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
+    .WithReference(rabbitmq)
+    .WithReference(redis)
+    .WaitFor(rabbitmq)
+    .WaitFor(redis);
+
+builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
+    .WithReference(rabbitmq)
+    .WithReference(storage)
+    .WithReference(redis)
+    .WithReference(db)
+    .WithReference(openai)
+    .WithReference(gemini)
+    .WaitFor(rabbitmq)
+    .WaitFor(storage)
+    .WaitFor(redis)
+    .WaitFor(db)
+    .WaitFor(api);
 
 
 builder.Build().Run();

@@ -3,7 +3,7 @@ import Avatar from '@/components/common/Avatar.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
 import service from '@/services/signalRService'
-import { ref } from 'vue' // Import ref
+import { ref } from 'vue'
 
 const { player } = usePlayerStore()
 const { room } = useRoomStore()
@@ -59,7 +59,7 @@ const copyRoomCodeToClipboard = () => {
     <div class="col-span-1 px-5 md:px-20 xl:px-32">
       <h2 class="mb-5 text-center text-2xl font-bold">Players</h2>
       <div
-        class="animate-slide-in mt-2 flex flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-700 dark:bg-zinc-800"
+        class="mt-2 flex animate-slide-in flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-700 dark:bg-zinc-800"
         v-for="p in room.players"
         :key="p.id"
       >

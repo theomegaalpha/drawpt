@@ -22,8 +22,8 @@ const isYou = (playerConnectionId: string) => playerConnectionId === you.connect
       <PlayerResultCard
         v-for="(answer, index) in lastRoundResults.answers"
         :answer="answer"
-        :username="players.find((p) => p.connectionId === answer.playerConnectionId)?.username"
-        :isYou="isYou(answer.playerConnectionId)"
+        :username="players.find((p) => p.connectionId === answer.connectionId)?.username"
+        :isYou="isYou(answer.connectionId)"
         :key="index"
       />
     </div>

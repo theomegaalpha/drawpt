@@ -1,19 +1,45 @@
-using DrawPT.Api.AI;
 using DrawPT.Api.Cache;
-using DrawPT.Api.Engine;
 using DrawPT.Api.Hubs;
-using DrawPT.Data.Models;
 using DrawPT.Api.Services;
+using DrawPT.Common.Interfaces;
+using DrawPT.Common.Services;
 using DrawPT.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+var bytes = Encoding.UTF8.GetBytes(builder.Configuration["AuthenticationSecretKey"]!);
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(bytes),
+        ValidAudience = builder.Configuration["AuthenticationValidAudience"],
+        ValidIssuer = builder.Configuration["AuthenticationValidIssuer"],
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Headers.Authorization.FirstOrDefault() ?? "";
+            accessToken = accessToken.Replace("Bearer ", "");
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/gamehub")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -26,23 +52,32 @@ builder.Services.AddDistributedMemoryCache();
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
+builder.AddRedisDistributedCache(connectionName: "cache");
+builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
+builder.Services.AddTransient<Supabase.Client>(sp =>
+{
+    var url = builder.Configuration["SupabaseUrl"];
+    var secretKey = builder.Configuration["SupabaseApiKey"];
+    var options = new Supabase.SupabaseOptions
+    {
+        AutoConnectRealtime = true
+    };
+    var client = new Supabase.Client(url, secretKey, options);
+    client.InitializeAsync().Wait();
+    return client;
+});
+builder.Services.AddTransient<ProfileService>();
+
 
 builder.Services.AddTransient<StorageService>();
 builder.Services.AddTransient<ImageRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
-builder.Services.AddTransient<AIClient>();
-builder.Services.AddTransient<GeminiImageGenerator>();
 builder.Services.AddTransient<RandomService>();
-builder.Services.AddSingleton<CacheService>();
+builder.Services.AddTransient<CacheService>();
+builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
-builder.Services.AddSingleton<GameCollection>();
-builder.Services.AddSingleton<IGameFactory, GameFactory>();
-builder.Services.AddOptions<GameOptions>()
-                .BindConfiguration("Game");
-
-builder.Services.AddScoped<Game>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()
