@@ -79,7 +79,7 @@ onMounted(() => {
             class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
           >
             <img
-              src="https://picsum.photos/id/237/800/800"
+              src="https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp"
               alt="AI Drawing"
               class="h-auto w-full object-contain"
             />
