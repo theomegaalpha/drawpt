@@ -63,6 +63,42 @@ onMounted(() => {
 
 <template>
   <main class="container mx-auto px-6 py-8">
+    <!-- Prompt of the Day -->
+    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div class="bg-surface-default rounded-xl p-6 shadow-md">
+        <div class="flex items-baseline gap-x-2">
+          <h2 class="text-2xl font-bold">Prompt of the Day</h2>
+          <span class="text-lg">Hint: Dark</span>
+        </div>
+        <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
+          <div
+            class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            <img
+              src="https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp"
+              alt="AI Drawing"
+              class="h-auto w-full object-contain"
+            />
+          </div>
+          <GuessInput class="mt-4" v-model="guess" :submitAction="submitGuess" />
+        </div>
+      </div>
+
+      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md">
+        <div class="p-4">
+          <h2 class="text-xl font-medium">Leaderboard</h2>
+        </div>
+        <div class="p-6">
+          <div class="overflow-hidden rounded-lg bg-gray-50 dark:bg-zinc-900">
+            <img src="https://picsum.photos/id/237/800/450" alt="Game Demo" class="h-auto w-full" />
+          </div>
+          <p class="text-color-muted mt-4">
+            Watch as AI generates drawings in real-time and players submit their guesses! The faster
+            you guess correctly, the more points you earn.
+          </p>
+        </div>
+      </div>
+    </div>
     <!-- Game Interface - Web Layout -->
     <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
       <!-- Left Column - Drawing Display -->
@@ -145,42 +181,6 @@ onMounted(() => {
 
             <button class="btn-default w-full">View Leaderboard</button>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Game Explanation & Demo -->
-    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <!-- Game Explanation -->
-      <div class="bg-surface-default rounded-xl p-6 shadow-md">
-        <h2 class="text-color-accent mb-4 text-2xl font-bold">How to Play</h2>
-        <div class="prose prose-indigo dark:prose-invert text-color-default">
-          <p class="text-lg">
-            AI is the artist! Guess what it drew based on unique and tricky prompts. Test your
-            skills and challenge yourself!
-          </p>
-          <ul class="mt-4">
-            <li>AI generates a drawing based on a secret prompt</li>
-            <li>You have to guess that prompt based on the generated drawing</li>
-            <li>Score points for how close you are to the original prompt</li>
-            <li>Earn bonus points for being fast</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Game Demo -->
-      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md">
-        <div class="bg-surface-accent p-4 text-white">
-          <h2 class="text-xl font-medium">See How It Works</h2>
-        </div>
-        <div class="p-6">
-          <div class="overflow-hidden rounded-lg bg-gray-50 dark:bg-zinc-900">
-            <img src="https://picsum.photos/id/237/800/450" alt="Game Demo" class="h-auto w-full" />
-          </div>
-          <p class="text-color-muted mt-4">
-            Watch as AI generates drawings in real-time and players submit their guesses! The faster
-            you guess correctly, the more points you earn.
-          </p>
         </div>
       </div>
     </div>
