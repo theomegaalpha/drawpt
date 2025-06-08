@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import ImageLoader from '@/components/room/game/midround/ImageLoader.vue'
+import ViewThemes from '../room/game/midround/ViewThemes.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen items-center justify-center">
-    <ImageLoader />
+    <ViewThemes :themes="slugs" />
   </div>
 </template>
 
@@ -12,4 +12,5 @@ import ImageLoader from '@/components/room/game/midround/ImageLoader.vue'
 export default {
   name: 'ImageLoaderTest'
 }
+const slugs = ['typescript', 'javascript', 'dart', 'java', 'react']
 </script>
