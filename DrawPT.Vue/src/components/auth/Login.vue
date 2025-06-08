@@ -50,6 +50,23 @@
           {{ error }}
         </div>
 
+        <!-- Resend Confirmation Email Button -->
+        <div v-if="showResendButton">
+          <div class="text-center text-sm">
+            <button
+              type="button"
+              @click="handleResendConfirmation"
+              :disabled="loading"
+              class="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              Resend confirmation email
+            </button>
+          </div>
+          <div v-if="resendMessage" class="text-center text-sm text-green-500">
+            {{ resendMessage }}
+          </div>
+        </div>
+
         <!-- Google Sign-In Button Container -->
         <div class="text-center">
           <div class="g_id_signin"></div>
@@ -76,24 +93,57 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const resendMessage = ref('')
+const showResendButton = ref(false)
 
 const handleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
+    showResendButton.value = false // Reset on new login attempt
 
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value
     })
 
-    if (signInError) throw signInError
+    if (signInError) {
+      if (signInError.message === 'Email not confirmed') {
+        showResendButton.value = true
+      }
+      throw signInError
+    }
 
     if (data.user) {
       router.push('/')
     }
   } catch (e: any) {
     error.value = e.message || 'An error occurred during sign in'
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleResendConfirmation = async () => {
+  if (!email.value) {
+    error.value = 'Please enter your email address to resend the confirmation.'
+    return
+  }
+  try {
+    loading.value = true
+    error.value = ''
+    resendMessage.value = ''
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.value
+    })
+
+    if (resendError) throw resendError
+
+    resendMessage.value = 'Confirmation email resent. Please check your inbox.'
+  } catch (e: any) {
+    error.value = e.message || 'An error occurred while resending the confirmation email.'
   } finally {
     loading.value = false
   }
