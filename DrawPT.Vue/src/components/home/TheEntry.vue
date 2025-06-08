@@ -6,9 +6,11 @@ import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
+import Leaderboard from './leaderboard/Leaderboard.vue'
+import { PlayIcon } from 'lucide-vue-next'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
-const roomCodeInput = ref('') // Renamed from roomCode to avoid conflict with potential prop/var from route
+const roomCodeInput = ref('')
 const guess = ref('')
 const showTooltip = ref(false)
 
@@ -84,56 +86,8 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md">
-        <div class="p-4">
-          <h2 class="text-xl font-medium">Leaderboard</h2>
-        </div>
-        <div class="p-6">
-          <div class="overflow-hidden rounded-lg bg-gray-50 dark:bg-zinc-900">
-            <img src="https://picsum.photos/id/237/800/450" alt="Game Demo" class="h-auto w-full" />
-          </div>
-          <p class="text-color-muted mt-4">
-            Watch as AI generates drawings in real-time and players submit their guesses! The faster
-            you guess correctly, the more points you earn.
-          </p>
-        </div>
-      </div>
-    </div>
-    <!-- Game Interface - Web Layout -->
-    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
-      <!-- Left Column - Drawing Display -->
-      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md lg:col-span-3">
-        <div class="bg-surface-accent p-4 text-white">
-          <h2 class="text-xl font-medium">Guess Today's Prompt</h2>
-          <p class="text-sm opacity-80">
-            Guess what the AI has drawn! (Hint: it's not an easy one)
-          </p>
-        </div>
-
-        <div class="p-6">
-          <div
-            class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            <img
-              src="https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp"
-              alt="AI Drawing"
-              class="h-auto w-full object-contain"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column - Game Controls -->
-      <div class="flex flex-col gap-6 lg:col-span-2">
-        <!-- Guess Input -->
-        <div class="bg-surface-default rounded-xl p-6 shadow-md">
-          <h2 class="text-color-accent mb-4 text-xl font-bold">Make Your Guess</h2>
-          <div class="space-y-4">
-            <GuessInput v-model="guess" :submitAction="submitGuess" />
-          </div>
-        </div>
-
-        <!-- Game Actions -->
+      <!-- Right column wrapper for Game Options and Leaderboard -->
+      <div class="flex flex-col gap-8">
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
           <h2 class="text-color-accent mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
@@ -161,9 +115,8 @@ onMounted(() => {
               </button>
             </div>
 
-            <div class="flex items-center space-x-2">
+            <div class="relative flex w-full">
               <StandardInput
-                class="flex-grow"
                 placeholder="Room Code"
                 maxlength="4"
                 v-model="roomCodeInput"
@@ -171,20 +124,26 @@ onMounted(() => {
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
-                class="btn-primary w-auto"
+                class="btn-primary rounded-full"
                 :disabled="roomCodeInput.length < 4"
                 @click="joinRoom(roomCodeInput)"
               >
-                Join
+                <PlayIcon class="h-4 w-4" />
               </button>
             </div>
-
-            <button class="btn-default w-full">View Leaderboard</button>
           </div>
+        </div>
+
+        <div
+          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
+        >
+          <div class="p-4">
+            <h2 class="text-xl font-medium">Leaderboard</h2>
+          </div>
+          <!--Leaderboard class="flex-grow" /-->
         </div>
       </div>
     </div>
-
     <!-- Features Section -->
     <div class="bg-surface-default mb-10 rounded-xl p-8 shadow-md">
       <h2 class="text-color-accent mb-6 text-center text-2xl font-bold">Game Features</h2>
