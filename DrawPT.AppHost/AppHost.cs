@@ -1,3 +1,5 @@
+using Azure.Provisioning.Storage;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure SQL Server
@@ -18,8 +20,17 @@ var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("mig
 
 // Add Azure Blob Storage
 var storage = builder.AddAzureStorage("storage")
-                     .RunAsEmulator()
-                     .AddBlobs("blobs");
+    .ConfigureInfrastructure(infra =>
+    {
+        var storageAccount = infra.GetProvisionableResources()
+                                  .OfType<StorageAccount>()
+                                  .Single();
+
+        storageAccount.AccessTier = StorageAccountAccessTier.Hot;
+        storageAccount.AllowBlobPublicAccess = true;
+    })
+    .RunAsEmulator()
+    .AddBlobs("blobs");
 
 // Add AI
 var openai = builder.ExecutionContext.IsPublishMode
