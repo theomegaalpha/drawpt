@@ -8,6 +8,7 @@ export const useGameStateStore = defineStore('gameState', {
     themeOptionsFromSignalR: [] as string[],
     selectableThemeOptionsFromSignalR: [] as string[], // For when the current player needs to select a theme
     currentImageUrl: '' as string,
+    showImageLoader: false,
     shouldShowResults: false,
     currentBonusPoints: 0,
     isGuessLocked: true,
@@ -25,6 +26,7 @@ export const useGameStateStore = defineStore('gameState', {
     // Called by gameEventHandlers.ts for non-interactive events
     handleThemeSelectionEvent(themes: string[]) {
       this.currentImageUrl = ''
+      this.showImageLoader = false
       this.shouldShowResults = false
       this.themeOptionsFromSignalR = themes
       this.selectableThemeOptionsFromSignalR = [] // Clear selectable themes if general theme info comes in
@@ -32,13 +34,13 @@ export const useGameStateStore = defineStore('gameState', {
     handleThemeSelectedEvent(theme: string) {
       // A theme has been selected (by anyone, or by this player via askTheme)
       this.themeOptionsFromSignalR = []
-      this.selectableThemeOptionsFromSignalR = [] // Ensure selection options are cleared
-      // Notification is handled by gameEventHandlers or notificationStore directly
+      this.selectableThemeOptionsFromSignalR = []
+      this.showImageLoader = true
+      console.log('handle theme selected event is now', this.showImageLoader)
     },
     handleBroadcastRoundResultsEvent(roundResults: RoundResults) {
       this.shouldShowResults = true
-      // Potentially update other relevant state from gameRound if needed
-      // e.g., this.currentRoundNumber = gameRound.roundNumber;
+      this.showImageLoader = false
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points
@@ -50,16 +52,17 @@ export const useGameStateStore = defineStore('gameState', {
     prepareForThemeSelection(themes: string[]) {
       this.currentImageUrl = ''
       this.shouldShowResults = false
+      this.showImageLoader = false
       this.themeOptionsFromSignalR = [] // Clear general theme display
       this.selectableThemeOptionsFromSignalR = themes
       this.isGuessLocked = true // Lock guess while selecting theme
     },
     prepareForQuestion(question: PlayerQuestion) {
       this.shouldShowResults = false
+      this.showImageLoader = false
       this.isGuessLocked = false // Unlock guess input
       this.currentImageUrl = question.imageUrl || ''
       this.currentRoundNumber = question.roundNumber // Keep track of current round
-      // Scoreboard store's setRound can be called from Game.vue or here
       const scoreboardStore = useScoreboardStore()
       scoreboardStore.setRound(question.roundNumber)
     },
@@ -89,6 +92,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.currentRoundNumber = 0
+      this.showImageLoader = false
     }
   }
 })
