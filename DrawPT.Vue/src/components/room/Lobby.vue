@@ -35,17 +35,17 @@ const copyRoomCodeToClipboard = () => {
 </script>
 
 <template>
-  <FlickeringGrid>
+  <FlickeringGrid color="rgb(197, 162, 255)" darkModeColor="rgb(100, 100, 100)">
     <main
       class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 space-x-4 p-10 md:grid-cols-2"
     >
       <div class="col-span-1 p-10 text-center">
         <h1 class="mb-5 text-4xl font-bold">DrawPT</h1>
-        <h2 class="mb-3 text-2xl">Welcome, {{ player.username }}</h2>
+        <h2 class="mb-2 text-2xl">Welcome, {{ player.username }}</h2>
         <p class="mb-2 text-lg">Waiting for other players to join...</p>
         <button
           v-if="room.players.length > 0 && room.players[0].id === player.id"
-          class="flex-item my-5 w-40 rounded-md border-2 border-none bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600 disabled:bg-blue-300 disabled:text-zinc-400 dark:bg-blue-600 dark:text-zinc-800 dark:hover:bg-blue-700 dark:disabled:bg-blue-300"
+          class="btn-primary my-5 px-10"
           @click="startGame"
         >
           Start Game

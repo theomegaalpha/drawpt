@@ -22,6 +22,7 @@ interface Props {
   height?: number // Custom height for the canvas
   className?: string // Additional classes for the container div
   maxOpacity?: number
+  darkModeColor?: string // Color for dark mode
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
   gridGap: 6,
   flickerChance: 0.3,
   color: 'rgb(0, 0, 0)',
+  darkModeColor: 'rgb(255, 255, 255)',
   className: '',
   maxOpacity: 0.3
 })
@@ -37,6 +39,7 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
 const isInView = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
+const isDarkMode = ref(false)
 
 let animationFrameId: number = 0
 let gridParams: ReturnType<typeof setupCanvasInternal> | undefined
@@ -44,6 +47,13 @@ let resizeObserver: ResizeObserver
 let intersectionObserver: IntersectionObserver
 let lastTime = 0
 let ctx: CanvasRenderingContext2D | null = null
+
+// Watch for dark mode changes
+const checkDarkMode = () => {
+  isDarkMode.value =
+    window.matchMedia('(prefers-color-scheme: dark)').matches ||
+    document.documentElement.classList.contains('dark')
+}
 
 const memoizedColor = computed(() => {
   const toRGBA = (colorVal: string) => {
@@ -59,7 +69,7 @@ const memoizedColor = computed(() => {
     const [r, g, b] = Array.from(tempCtx.getImageData(0, 0, 1, 1).data)
     return `rgba(${r}, ${g}, ${b},`
   }
-  return toRGBA(props.color)
+  return toRGBA(isDarkMode.value ? props.darkModeColor : props.color)
 })
 
 const setupCanvasInternal = (
@@ -160,6 +170,27 @@ onMounted(() => {
     return
   }
 
+  // Initial dark mode check
+  checkDarkMode()
+
+  // Watch for dark mode changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        checkDarkMode()
+        // Redraw the grid with new colors
+        if (gridParams && ctx) {
+          drawGrid(ctx, gridParams)
+        }
+      }
+    })
+  })
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+
   const localCtx = canvas.getContext('2d')
   if (!localCtx) {
     console.error('FlickeringGrid: Failed to get 2D rendering context.')
@@ -209,6 +240,7 @@ onMounted(() => {
       gridGap: props.gridGap,
       maxOpacity: props.maxOpacity,
       color: props.color,
+      darkModeColor: props.darkModeColor,
       width: props.width,
       height: props.height,
       flickerChance: props.flickerChance
