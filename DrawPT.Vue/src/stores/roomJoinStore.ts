@@ -45,11 +45,6 @@ export const useRoomJoinStore = defineStore('roomJoin', {
     },
     handleNavigateToRoom() {
       console.log('Navigating to room...')
-      const notificationStore = useNotificationStore()
-      notificationStore.addGameNotification(
-        'Connected to room. Please set or confirm your username.',
-        false
-      )
       this.setCanSetUsername(true)
       this.setLoading(false)
     },
