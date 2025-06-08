@@ -53,6 +53,13 @@ const createRoom = () => {
   })
 }
 
+const scrollToPrompt = () => {
+  const element = document.getElementById('prompt-of-the-day')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 onMounted(() => {
   clearRoom()
   const queryRoomCode = route.query.roomCode as string
@@ -65,8 +72,28 @@ onMounted(() => {
 
 <template>
   <main class="container mx-auto px-6 py-8">
-    <!-- Prompt of the Day -->
-    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <!-- Hero Section -->
+    <div class="mb-10 px-6 py-16 text-center">
+      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
+        AI Draws, You Decipher — Are You Up for the Challenge?
+      </h1>
+      <p class="text-color-default mx-auto max-w-2xl text-lg">
+        Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
+        creations based on complex phrases.
+      </p>
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">
+        Can you outguess the algorithm?
+      </p>
+      <div>
+        <button
+          class="btn-primary text-lg font-semibold shadow-md transition duration-300"
+          @click="scrollToPrompt"
+        >
+          Play Now
+        </button>
+      </div>
+    </div>
+    <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div class="bg-surface-default rounded-xl p-6 shadow-md">
         <div class="flex items-baseline gap-x-2">
           <h2 class="text-xl font-bold">Prompt of the Day</h2>
