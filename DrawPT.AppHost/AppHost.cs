@@ -1,7 +1,3 @@
-using Aspire.Hosting;
-using Aspire.Hosting.Azure;
-using Google.Protobuf.WellKnownTypes;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure SQL Server
@@ -35,12 +31,11 @@ var rabbitmq = builder.AddRabbitMQ("messaging");
 
 var redis = builder.AddRedis("cache");
 
-
-var supabaseUrl = builder.AddParameter("supabaseUrl");
-var supabaseIssuer= builder.AddParameter("supabaseIssuer");
-var supabaseAnonKey = builder.AddParameter("supabaseAnonKey");
-var supabaseSecretKey = builder.AddParameter("supabaseSecretKey", true);
-var supabaseApiKey = builder.AddParameter("supabaseApiKey", true);
+var supabaseUrl = builder.AddParameter("supabase-url");
+var supabaseIssuer= builder.AddParameter("supabase-issuer");
+var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
+var supabaseSecretKey = builder.AddParameter("supabase-secret-key", true);
+var supabaseApiKey = builder.AddParameter("supabase-api-key", true);
 // Add DrawPT.Api project to Aspire setup
 var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(db)
@@ -50,10 +45,10 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(rabbitmq)
     .WithReference(signalr)
     .WithReference(redis)
-    .WithEnvironment("Authentication:ValidIssuer", supabaseIssuer)
-    .WithEnvironment("Authentication:SecretKey", supabaseSecretKey)
-    .WithEnvironment("Supabase:Url", supabaseUrl)
-    .WithEnvironment("Supabase:ApiKey", supabaseApiKey)
+    .WithEnvironment("AuthenticationValidIssuer", supabaseIssuer)
+    .WithEnvironment("AuthenticationSecretKey", supabaseSecretKey)
+    .WithEnvironment("SupabaseUrl", supabaseUrl)
+    .WithEnvironment("SupabaseApiKey", supabaseApiKey)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
@@ -61,7 +56,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
 
 var customDomain = builder.AddParameter("customDomain");
 var certificateName = builder.AddParameter("certificateName");
-var googleClientId = builder.AddParameter("googleClientId");
+var googleClientId = builder.AddParameter("google-client-id");
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)

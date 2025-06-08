@@ -11,15 +11,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretKey"]!);
+var bytes = Encoding.UTF8.GetBytes(builder.Configuration["AuthenticationSecretKey"]!);
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(bytes),
-        ValidAudience = builder.Configuration["Authentication:ValidAudience"],
-        ValidIssuer = builder.Configuration["Authentication:ValidIssuer"],
+        ValidAudience = builder.Configuration["AuthenticationValidAudience"],
+        ValidIssuer = builder.Configuration["AuthenticationValidIssuer"],
     };
 
     options.Events = new JwtBearerEvents
@@ -58,8 +58,8 @@ builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
 builder.Services.AddTransient<Supabase.Client>(sp =>
 {
-    var url = builder.Configuration["Supabase:Url"];
-    var secretKey = builder.Configuration["Supabase:ApiKey"];
+    var url = builder.Configuration["SupabaseUrl"];
+    var secretKey = builder.Configuration["SupabaseApiKey"];
     var options = new Supabase.SupabaseOptions
     {
         AutoConnectRealtime = true
