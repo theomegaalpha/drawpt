@@ -85,7 +85,7 @@ public class GameSession : IGameSession
         List<RoundResults> allRoundResults = new();
         List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
 
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < gameState.TotalRounds; i++)
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, i + 1);
@@ -131,7 +131,7 @@ public class GameSession : IGameSession
             };
             allRoundResults.Add(roundResults);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, roundResults);
-            await Task.Delay(15000);
+            await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
         }
 
         var finalGameState = await _gameStateService.EndGameAsync(roomCode);
