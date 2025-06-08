@@ -73,7 +73,7 @@ onMounted(() => {
 <template>
   <main class="container mx-auto px-6 py-8">
     <!-- Hero Section -->
-    <div class="animate-blur-in mb-10 px-6 py-16 text-center">
+    <div class="mb-10 animate-blur-in px-6 py-16 text-center">
       <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
         AI Draws, You Decipher — Are You Up for the Challenge?
       </h1>
@@ -93,7 +93,7 @@ onMounted(() => {
     <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div class="bg-surface-default rounded-xl p-6 shadow-md">
         <div class="flex items-baseline gap-x-2">
-          <h2 class="text-xl font-bold">Prompt of the Day</h2>
+          <h2 class="text-xl font-bold">Guess Today's Prompt</h2>
           <span class="text-lg">Hint: Dark</span>
         </div>
         <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
@@ -148,11 +148,11 @@ onMounted(() => {
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
-                class="btn-primary ml-2 rounded-full"
+                class="btn-primary ml-2 flex rounded-full px-6"
                 :disabled="roomCodeInput.length < 4"
                 @click="joinRoom(roomCodeInput)"
               >
-                <PlayIcon class="h-4 w-4" />
+                Join
               </button>
             </div>
           </div>
