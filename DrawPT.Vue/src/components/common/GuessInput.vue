@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
 import { MicIcon, SendIcon } from 'lucide-vue-next'
+import StandardInput from './StandardInput.vue'
 
 const props = defineProps<{
   modelValue: string
@@ -9,6 +10,14 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:modelValue'])
+
+// Computed property to handle v-model logic for GuessInput
+const inputValue = computed({
+  get: () => props.modelValue,
+  set: (value) => {
+    emit('update:modelValue', value)
+  }
+})
 
 const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
 
@@ -25,31 +34,21 @@ const handleRecordButtonMouseUp = () => {
 }
 
 watch(transcribedText, (newText) => {
-  if (newText && newText !== '') {
-    emit('update:modelValue', newText)
+  if (newText !== undefined && newText !== null && newText !== inputValue.value) {
+    inputValue.value = newText
   }
 })
 
-const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  emit('update:modelValue', target.value)
-}
-
 const localSubmitGuess = () => {
-  props.submitAction(props.modelValue)
+  props.submitAction(inputValue.value)
 }
 </script>
 
 <template>
   <div class="relative flex w-full">
     <div class="relative w-full">
-      <input
-        type="text"
-        placeholder="Guess the prompt"
-        :value="modelValue"
-        @input="handleInput"
-        class="w-full rounded-full bg-zinc-900 px-5 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none"
-      />
+      <!-- Use inputValue for v-model on StandardInput. -->
+      <StandardInput placeholder="Guess the prompt" v-model="inputValue" />
       <button
         @mousedown="handleRecordButtonMouseDown"
         @mouseup="handleRecordButtonMouseUp"
@@ -62,7 +61,7 @@ const localSubmitGuess = () => {
     </div>
     <button
       class="btn-primary ml-2 rounded-full"
-      :disabled="modelValue === ''"
+      :disabled="inputValue === ''"
       @click="localSubmitGuess"
     >
       <SendIcon class="h-4 w-4" />

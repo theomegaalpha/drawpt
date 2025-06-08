@@ -151,7 +151,7 @@ onMounted(() => {
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
-                class="btn-primary rounded-full"
+                class="btn-primary ml-2 rounded-full"
                 :disabled="roomCodeInput.length < 4"
                 @click="joinRoom(roomCodeInput)"
               >

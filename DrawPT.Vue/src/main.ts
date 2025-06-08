@@ -11,7 +11,8 @@ app.use(createPinia())
 app.use(router)
 
 app.directive('autocapitalize', {
-  updated(el) {
+  updated(el, directive) {
+    if (directive.value === false) return
     el.value = el.value.toUpperCase()
   }
 })
