@@ -36,7 +36,7 @@ export default {
       animation: {
         'timer-countdown': 'timer-countdown linear',
         'slide-in': 'slide-in 0.2s ease-in forwards',
-        'blur-in': 'blur-in-effect 1.2s ease-out forwards'
+        'blur-in': 'blur-in-effect 0.5s ease-out forwards'
       }
     }
   },

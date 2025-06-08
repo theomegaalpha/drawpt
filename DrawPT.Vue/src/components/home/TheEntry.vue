@@ -73,22 +73,19 @@ onMounted(() => {
 <template>
   <main class="container mx-auto px-6 py-8">
     <!-- Hero Section -->
-    <div class="mb-10 px-6 py-16 text-center">
-      <h1 class="text-color-accent animate-blur-in mb-4 text-4xl font-bold md:text-5xl">
+    <div class="animate-blur-in mb-10 px-6 py-16 text-center">
+      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
         AI Draws, You Decipher — Are You Up for the Challenge?
       </h1>
-      <p class="text-color-default animate-blur-in mx-auto max-w-2xl text-lg">
+      <p class="text-color-default mx-auto max-w-2xl text-lg">
         Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
         creations based on complex phrases.
       </p>
-      <p class="text-color-default animate-blur-in mx-auto mb-8 max-w-2xl text-lg">
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">
         Can you outguess the algorithm?
       </p>
       <div>
-        <button
-          class="btn-primary animate-blur-in text-lg font-semibold shadow-md"
-          @click="scrollToPrompt"
-        >
+        <button class="btn-primary text-lg font-semibold shadow-md" @click="scrollToPrompt">
           Play Now
         </button>
       </div>
