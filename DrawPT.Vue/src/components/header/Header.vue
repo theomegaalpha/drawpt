@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue' // Added ref
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { MenuIcon, XIcon } from 'lucide-vue-next' // Added MenuIcon and XIcon
 
+const router = useRouter()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => {
   return !!authStore.user
@@ -13,6 +15,11 @@ const isMobileMenuOpen = ref(false) // State for mobile menu
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const handleLogout = async () => {
+  await authStore.signOut()
+  router.push('/')
 }
 </script>
 
@@ -58,12 +65,12 @@ const toggleMobileMenu = () => {
                 </router-link>
               </li>
               <li v-if="isAuthenticated">
-                <router-link
-                  to="/logout"
-                  class="text-muted-foreground hover:text-accent-foreground block duration-150"
+                <div
+                  @click="handleLogout"
+                  class="text-muted-foreground hover:text-accent-foreground block cursor-pointer duration-150"
                 >
-                  <span>Logout</span>
-                </router-link>
+                  <span>Log out</span>
+                </div>
               </li>
               <li v-else>
                 <router-link
