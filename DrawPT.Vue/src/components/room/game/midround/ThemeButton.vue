@@ -5,7 +5,7 @@
   >
     <!-- Star animations -->
     <div
-      class="animate-star-movement-bottom absolute bottom-[-11px] right-[-250%] z-0 h-[50%] w-[300%] rounded-full opacity-20 dark:opacity-70"
+      class="animate-star-movement-bottom absolute bottom-[-11px] right-[-250%] h-[50%] w-[300%] rounded-full opacity-20 dark:opacity-50"
       :style="{
         background: `radial-gradient(circle, ${effectiveStarColor}, transparent 10%)`,
         animationDuration: props.speed

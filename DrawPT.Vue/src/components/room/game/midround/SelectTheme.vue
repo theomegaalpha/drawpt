@@ -26,7 +26,14 @@ const handleClick = (theme: string) => {
   <div class="text-center text-xl font-bold">
     <h1 class="mb-8 text-2xl font-bold">Select a theme:</h1>
     <div v-for="(theme, index) in props.themes" :key="index" @click="handleClick(theme)">
-      <div>
+      <div
+        class="animate-blur-in cursor-default"
+        :style="{
+          animationDelay: `${index * 50}ms`,
+          animationPlayState: animationsReadyToPlay ? 'running' : 'paused',
+          animationFillMode: 'backwards'
+        }"
+      >
         <ThemeButton>{{ theme }}</ThemeButton>
       </div>
     </div>
