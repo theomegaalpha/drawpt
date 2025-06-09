@@ -81,9 +81,7 @@ onMounted(() => {
         Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
         creations based on complex phrases.
       </p>
-      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">
-        Can you outguess the algorithm?
-      </p>
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">Can you beat the algorithm?</p>
       <div>
         <button class="btn-primary text-lg font-semibold shadow-md" @click="scrollToPrompt">
           Play Now
