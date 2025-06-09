@@ -43,6 +43,11 @@ const joinRoom = (codeToJoin: string) => {
 }
 
 const createRoom = () => {
+  if (!isAuthenticated.value) {
+    router.push({ name: 'login' })
+    return
+  }
+
   api.createRoom().then((newlyCreatedCode) => {
     if (newlyCreatedCode) {
       joinRoom(newlyCreatedCode)
@@ -126,15 +131,13 @@ onMounted(() => {
               </button>
               <div
                 v-if="showTooltip"
-                class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md bg-gray-800 px-3 py-2 text-sm text-white shadow-lg dark:bg-black dark:text-gray-200"
+                class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
               >
                 Coming soon!
               </div>
             </div>
             <div class="relative">
-              <button class="btn-default w-full" :disabled="!isAuthenticated" @click="createRoom()">
-                Create Room
-              </button>
+              <button class="btn-default w-full" @click="createRoom()">Create Room</button>
             </div>
 
             <div class="relative flex w-full">

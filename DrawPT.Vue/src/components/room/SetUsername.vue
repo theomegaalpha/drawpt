@@ -140,7 +140,7 @@ const submitUsernameAndEnter = async () => {
         <button
           type="submit"
           :disabled="!canSetUsername || isLoading || !username.trim()"
-          class="btn-primary w-full"
+          class="btn-default w-full"
         >
           <span v-if="isLoading && canSetUsername">Joining...</span>
           <span v-else>Join Room</span>
