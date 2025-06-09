@@ -1,10 +1,7 @@
 <template>
   <component
     :is="props.as"
-    :class="[
-      'group relative inline-block overflow-hidden rounded-[20px] py-[1px]', // Added 'group'
-      props.class // Use the prop for external classes
-    ]"
+    class="group relative inline-block overflow-hidden rounded-[20px] py-[1px]"
   >
     <!-- Star animations -->
     <div
@@ -41,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue' // Added imports
+import { computed, onMounted, ref } from 'vue' // Added imports
 
 const props = defineProps({
   as: {
@@ -78,9 +75,8 @@ onMounted(() => {
 
 const effectiveStarColor = computed(() => {
   if (props.color === 'white') {
-    // Check if it's the default color
-    return isDarkMode.value ? 'white' : 'black' // 'black' for light theme, 'white' for dark
+    return isDarkMode.value ? 'white' : 'black'
   }
-  return props.color // Use user-provided color otherwise
+  return props.color
 })
 </script>
