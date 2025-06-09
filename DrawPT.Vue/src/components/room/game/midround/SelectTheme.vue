@@ -25,18 +25,18 @@ const handleClick = (theme: string) => {
 <template>
   <div class="text-center text-xl font-bold">
     <h1 class="-mt-8 text-2xl font-bold">Select a Theme</h1>
-    <div className="w-[40rem] mb-16 relative">
+    <div class="relative mb-16 w-[40rem]">
       <div
-        className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-indigo-500 to-transparent h-[2px] w-3/4 blur-sm"
+        class="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
       />
       <div
-        className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-indigo-500 to-transparent h-px w-3/4"
+        class="absolute inset-x-20 top-0 h-px w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
       />
       <div
-        className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-sky-500 to-transparent h-[5px] w-1/4 blur-sm"
+        class="absolute inset-x-60 top-0 h-[5px] w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent blur-sm"
       />
       <div
-        className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-sky-500 to-transparent h-px w-1/4"
+        class="absolute inset-x-60 top-0 h-px w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent"
       />
     </div>
     <div v-for="(theme, index) in props.themes" :key="index" @click="handleClick(theme)">
