@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onBeforeMounted, watch } from 'vue'
 import { useLeaderboardStore } from '@/stores/leaderboard'
 
 const leaderboardStore = useLeaderboardStore()
@@ -69,7 +69,7 @@ const activeTabPlayers = computed(() => {
   return activeTab.value === 'daily' ? leaderboardStore.dailies : leaderboardStore.playerResults
 })
 
-onMounted(async () => {
+onBeforeMounted(async () => {
   // Fetch initial data for the active tab
   await fetchTabData()
 })

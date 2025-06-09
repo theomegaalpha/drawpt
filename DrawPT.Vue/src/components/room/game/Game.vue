@@ -6,7 +6,7 @@ import ViewThemes from './midround/ViewThemes.vue'
 import GameTimer from './midround/GameTimer.vue'
 import ImageLoader from './midround/ImageLoader.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { computed, onBeforeMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useGameStateStore } from '@/stores/gameState' // Import the new store
@@ -99,7 +99,7 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
   })
 }
 
-onMounted(() => {
+onBeforeMounted(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askTheme', async (themes: string[]) => {
     themeSelectionInput.value = '' // Reset local UI state for theme selection

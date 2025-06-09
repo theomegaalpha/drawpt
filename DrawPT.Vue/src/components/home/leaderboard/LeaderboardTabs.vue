@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch, ref } from 'vue'
+import { computed, onBeforeMounted, watch, ref } from 'vue'
 import { useLeaderboardStore } from '@/stores/leaderboard'
 import PlayerListItem from './PlayerListItem.vue'
 
@@ -56,7 +56,7 @@ const setActiveTab = (tabId: string) => {
   activeTab.value = tabId
 }
 
-onMounted(async () => {
+onBeforeMounted(async () => {
   // Fetch initial data for the active tab
   await fetchTabData()
 })
