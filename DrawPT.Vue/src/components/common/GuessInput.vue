@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
-import StandardInput from '@/components/common/StandardInput.vue'
+import { MicIcon, SendIcon } from 'lucide-vue-next'
+import StandardInput from './StandardInput.vue'
 
 const props = defineProps<{
   modelValue: string
@@ -9,6 +10,14 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:modelValue'])
+
+// Computed property to handle v-model logic for GuessInput
+const inputValue = computed({
+  get: () => props.modelValue,
+  set: (value) => {
+    emit('update:modelValue', value)
+  }
+})
 
 const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
 
@@ -25,45 +34,41 @@ const handleRecordButtonMouseUp = () => {
 }
 
 watch(transcribedText, (newText) => {
-  if (newText && newText !== '') {
-    emit('update:modelValue', newText)
+  if (newText !== undefined && newText !== null && newText !== inputValue.value) {
+    inputValue.value = newText
   }
 })
 
-const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  emit('update:modelValue', target.value)
-}
-
 const localSubmitGuess = () => {
-  props.submitAction(props.modelValue)
+  props.submitAction(inputValue.value)
 }
 </script>
 
 <template>
-  <div class="mt-2 flex items-center rounded-lg shadow">
-    <StandardInput
-      class="flex-grow rounded border border-gray-300 px-2 py-1 text-black shadow-inner"
-      placeholder="Type or hold 🎤 to speak"
-      :modelValue="props.modelValue"
-      @keyup.enter="localSubmitGuess"
-      @input="handleInput"
-    />
+  <div class="relative flex w-full">
+    <div class="relative w-full">
+      <!-- Use inputValue for v-model on StandardInput. -->
+      <StandardInput
+        placeholder="Guess the prompt"
+        v-model="inputValue"
+        @keyup.enter="localSubmitGuess"
+      />
+      <button
+        @mousedown="handleRecordButtonMouseDown"
+        @mouseup="handleRecordButtonMouseUp"
+        @mouseleave="handleRecordButtonMouseUp"
+        class="absolute right-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors hover:text-white"
+        aria-label="Use microphone"
+      >
+        <MicIcon class="h-5 w-5" />
+      </button>
+    </div>
     <button
-      class="btn ml-2"
-      :class="{
-        'border-green-700 bg-green-500 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500':
-          !isListening,
-        'border-red-700 bg-red-500 text-white hover:bg-red-700': isListening
-      }"
-      @mousedown="handleRecordButtonMouseDown"
-      @mouseup="handleRecordButtonMouseUp"
-      @mouseleave="handleRecordButtonMouseUp"
+      class="btn-primary ml-2 rounded-full"
+      :disabled="inputValue === ''"
+      @click="localSubmitGuess"
     >
-      {{ isListening ? '...' : '🎤' }}
-    </button>
-    <button class="btn-primary ml-2" :disabled="modelValue === ''" @click="localSubmitGuess">
-      Submit
+      <SendIcon class="h-4 w-4" />
     </button>
   </div>
 </template>

@@ -6,9 +6,11 @@ import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
+import Leaderboard from './leaderboard/Leaderboard.vue'
+import { PlayIcon } from 'lucide-vue-next'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
-const roomCodeInput = ref('') // Renamed from roomCode to avoid conflict with potential prop/var from route
+const roomCodeInput = ref<string>('')
 const guess = ref('')
 const showTooltip = ref(false)
 
@@ -41,6 +43,11 @@ const joinRoom = (codeToJoin: string) => {
 }
 
 const createRoom = () => {
+  if (!isAuthenticated.value) {
+    router.push({ name: 'login' })
+    return
+  }
+
   api.createRoom().then((newlyCreatedCode) => {
     if (newlyCreatedCode) {
       joinRoom(newlyCreatedCode)
@@ -49,6 +56,13 @@ const createRoom = () => {
       // Optionally, add a user notification here
     }
   })
+}
+
+const scrollToPrompt = () => {
+  const element = document.getElementById('prompt-of-the-day')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
 }
 
 onMounted(() => {
@@ -63,43 +77,46 @@ onMounted(() => {
 
 <template>
   <main class="container mx-auto px-6 py-8">
-    <!-- Game Interface - Web Layout -->
-    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5">
-      <!-- Left Column - Drawing Display -->
-      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md lg:col-span-3">
-        <div class="bg-surface-accent p-4 text-white">
-          <h2 class="text-xl font-medium">Guess Today's Prompt</h2>
-          <p class="text-sm opacity-80">
-            Guess what the AI has drawn! (Hint: it's not an easy one)
-          </p>
+    <!-- Hero Section -->
+    <div class="mb-10 animate-blur-in px-6 py-16 text-center">
+      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
+        AI Draws, You Decipher — Are You Up for the Challenge?
+      </h1>
+      <p class="text-color-default mx-auto max-w-2xl text-lg">
+        Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
+        creations based on complex phrases.
+      </p>
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">Can you beat the algorithm?</p>
+      <div>
+        <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
+          Play Now
+        </button>
+      </div>
+    </div>
+    <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div class="bg-surface-default rounded-xl p-6 shadow-md">
+        <div class="flex items-baseline gap-x-2">
+          <h2 class="text-xl font-bold">Guess Today's Prompt</h2>
+          <span class="text-lg">Hint: Dark</span>
         </div>
-
-        <div class="p-6">
+        <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
           <div
             class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
           >
             <img
-              src="https://picsum.photos/id/237/800/800"
+              src="https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp"
               alt="AI Drawing"
               class="h-auto w-full object-contain"
             />
           </div>
+          <GuessInput class="mt-4" v-model="guess" :submitAction="submitGuess" />
         </div>
       </div>
 
-      <!-- Right Column - Game Controls -->
-      <div class="flex flex-col gap-6 lg:col-span-2">
-        <!-- Guess Input -->
+      <!-- Right column wrapper for Game Options and Leaderboard -->
+      <div class="flex flex-col gap-8">
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
-          <h2 class="text-color-accent mb-4 text-xl font-bold">Make Your Guess</h2>
-          <div class="space-y-4">
-            <GuessInput v-model="guess" :submitAction="submitGuess" />
-          </div>
-        </div>
-
-        <!-- Game Actions -->
-        <div class="bg-surface-default rounded-xl p-6 shadow-md">
-          <h2 class="text-color-accent mb-4 text-xl font-bold">Game Options</h2>
+          <h2 class="mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
             <div class="relative">
               <button
@@ -114,80 +131,47 @@ onMounted(() => {
               </button>
               <div
                 v-if="showTooltip"
-                class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md bg-gray-800 px-3 py-2 text-sm text-white shadow-lg dark:bg-black dark:text-gray-200"
+                class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
               >
                 Coming soon!
               </div>
             </div>
             <div class="relative">
-              <button class="btn-primary w-full" :disabled="!isAuthenticated" @click="createRoom()">
-                Create Room
-              </button>
+              <button class="btn-default w-full" @click="createRoom()">Create Room</button>
             </div>
 
-            <div class="flex items-center space-x-2">
+            <div class="relative flex w-full">
               <StandardInput
-                class="flex-grow"
                 placeholder="Room Code"
                 maxlength="4"
+                :autocapitalize="true"
                 v-model="roomCodeInput"
-                v-autocapitalize="true"
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
-                class="btn-primary w-auto"
+                class="btn-default ml-2 flex rounded-full px-6"
                 :disabled="roomCodeInput.length < 4"
                 @click="joinRoom(roomCodeInput)"
               >
                 Join
               </button>
             </div>
-
-            <button class="btn-default w-full">View Leaderboard</button>
           </div>
+        </div>
+
+        <div
+          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
+        >
+          <div class="p-4">
+            <h2 class="text-xl font-medium">Leaderboard</h2>
+          </div>
+          <Leaderboard class="flex-grow" />
         </div>
       </div>
     </div>
-
-    <!-- Game Explanation & Demo -->
-    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <!-- Game Explanation -->
-      <div class="bg-surface-default rounded-xl p-6 shadow-md">
-        <h2 class="text-color-accent mb-4 text-2xl font-bold">How to Play</h2>
-        <div class="prose prose-indigo dark:prose-invert text-color-default">
-          <p class="text-lg">
-            AI is the artist! Guess what it drew based on unique and tricky prompts. Test your
-            skills and challenge yourself!
-          </p>
-          <ul class="mt-4">
-            <li>AI generates a drawing based on a secret prompt</li>
-            <li>You have to guess that prompt based on the generated drawing</li>
-            <li>Score points for how close you are to the original prompt</li>
-            <li>Earn bonus points for being fast</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Game Demo -->
-      <div class="bg-surface-default overflow-hidden rounded-xl shadow-md">
-        <div class="bg-surface-accent p-4 text-white">
-          <h2 class="text-xl font-medium">See How It Works</h2>
-        </div>
-        <div class="p-6">
-          <div class="overflow-hidden rounded-lg bg-gray-50 dark:bg-zinc-900">
-            <img src="https://picsum.photos/id/237/800/450" alt="Game Demo" class="h-auto w-full" />
-          </div>
-          <p class="text-color-muted mt-4">
-            Watch as AI generates drawings in real-time and players submit their guesses! The faster
-            you guess correctly, the more points you earn.
-          </p>
-        </div>
-      </div>
-    </div>
-
     <!-- Features Section -->
     <div class="bg-surface-default mb-10 rounded-xl p-8 shadow-md">
-      <h2 class="text-color-accent mb-6 text-center text-2xl font-bold">Game Features</h2>
+      <h2 class="mb-6 text-center text-2xl font-bold">Game Features</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="p-4 text-center">
           <div

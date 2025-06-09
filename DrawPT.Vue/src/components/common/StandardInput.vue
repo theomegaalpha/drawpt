@@ -1,13 +1,16 @@
 <template>
-  <input
-    :id="id"
-    :type="type"
-    :value="modelValue"
-    @input="handleInput"
-    :placeholder="placeholder"
-    class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 file:border-0 file:bg-transparent file:text-sm file:font-medium focus:ring-2 focus:ring-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-100 dark:placeholder-zinc-500 dark:ring-offset-zinc-950 dark:focus:ring-indigo-400"
-    v-bind="$attrs"
-  />
+  <div class="relative w-full">
+    <input
+      :id="id"
+      :type="type"
+      :value="modelValue"
+      @input="handleInput"
+      :placeholder="placeholder"
+      v-autocapitalize="autocapitalize"
+      class="w-full rounded-full border border-gray-300 bg-zinc-100 px-5 py-3 pr-12 placeholder-zinc-500 focus:outline-none dark:border-gray-700/50 dark:bg-zinc-900 dark:text-white"
+      v-bind="$attrs"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -16,11 +19,13 @@ interface Props {
   id?: string
   placeholder?: string
   type?: string
+  autocapitalize?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   type: 'text',
-  modelValue: ''
+  modelValue: '',
+  autocapitalize: false
 })
 
 const emit = defineEmits(['update:modelValue'])

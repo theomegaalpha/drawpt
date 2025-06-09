@@ -163,6 +163,7 @@ const submitGuess = async (valueFromInput: string) => {
 </script>
 
 <template>
+  <ImageLoader v-if="gameStateStore.showImageLoader" />
   <GameTimer
     :max-time="timeoutForTheme"
     v-if="selectableThemeOptions.length > 0"
@@ -180,13 +181,10 @@ const submitGuess = async (valueFromInput: string) => {
       />
       <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
 
-      <div>
-        <ImageLoader
-          v-if="imageUrl === '' && selectableThemeOptions.length === 0 && themeOptions.length === 0"
-        />
+      <div class="mb-2">
         <img
-          v-else-if="imageUrl !== ''"
-          class="aspect-auto max-h-[720px] max-w-[1048px] object-contain"
+          v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
+          class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
           :src="imageUrl"
         />
       </div>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import TheEntry from '@/components/home/TheEntry.vue'
-import Banner from '@/components/banner/Banner.vue'
+import Header from '@/components/header/Header.vue'
 </script>
 
 <template>
   <div class="min-h-screen">
-    <Banner />
+    <Header />
     <main className="flex flex-col items-center">
       <TheEntry />
     </main>
