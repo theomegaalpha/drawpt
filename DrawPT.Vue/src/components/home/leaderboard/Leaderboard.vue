@@ -34,14 +34,14 @@
         </div>
         <div class="bg-muted h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
           <img
-            :src="player.avatarUrl"
+            :src="player.color"
             :alt="`${player.username}'s avatar`"
             class="h-full w-full object-cover"
             @error="handleImageError"
           />
         </div>
         <div class="ml-4 flex-1">
-          <h3 class="font-medium">{{ player.name }}</h3>
+          <h3 class="font-medium">{{ player.username }}</h3>
         </div>
         <div class="text-lg font-bold">
           {{ player.score }}
@@ -80,8 +80,8 @@ const fetchTabData = async () => {
       await leaderboardStore.fetchDailies()
     }
   } else {
-    if (leaderboardStore.gameResults.length === 0) {
-      await leaderboardStore.fetchGameResults()
+    if (leaderboardStore.dailies.length === 0) {
+      await leaderboardStore.fetchDailies()
     }
   }
 }
