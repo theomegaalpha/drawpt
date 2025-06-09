@@ -181,10 +181,10 @@ const submitGuess = async (valueFromInput: string) => {
       />
       <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
 
-      <div>
+      <div class="mb-2">
         <img
           v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
-          class="aspect-auto max-h-[720px] max-w-[1048px] object-contain"
+          class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
           :src="imageUrl"
         />
       </div>

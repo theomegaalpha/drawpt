@@ -48,7 +48,11 @@ const localSubmitGuess = () => {
   <div class="relative flex w-full">
     <div class="relative w-full">
       <!-- Use inputValue for v-model on StandardInput. -->
-      <StandardInput placeholder="Guess the prompt" v-model="inputValue" />
+      <StandardInput
+        placeholder="Guess the prompt"
+        v-model="inputValue"
+        @keyup.enter="localSubmitGuess"
+      />
       <button
         @mousedown="handleRecordButtonMouseDown"
         @mouseup="handleRecordButtonMouseUp"
