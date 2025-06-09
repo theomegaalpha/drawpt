@@ -83,7 +83,7 @@ onMounted(() => {
       </p>
       <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">Can you beat the algorithm?</p>
       <div>
-        <button class="btn-primary text-lg font-semibold shadow-md" @click="scrollToPrompt">
+        <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
           Play Now
         </button>
       </div>
@@ -132,7 +132,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="relative">
-              <button class="btn-primary w-full" :disabled="!isAuthenticated" @click="createRoom()">
+              <button class="btn-default w-full" :disabled="!isAuthenticated" @click="createRoom()">
                 Create Room
               </button>
             </div>
@@ -146,7 +146,7 @@ onMounted(() => {
                 @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
               />
               <button
-                class="btn-primary ml-2 flex rounded-full px-6"
+                class="btn-default ml-2 flex rounded-full px-6"
                 :disabled="roomCodeInput.length < 4"
                 @click="joinRoom(roomCodeInput)"
               >
