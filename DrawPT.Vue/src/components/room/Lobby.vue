@@ -58,10 +58,10 @@ const copyRoomCodeToClipboard = () => {
           {{ isCopied ? 'Copied!' : room.code }}
         </h2>
       </div>
-      <div class="col-span-1 px-5 md:px-20 xl:px-32">
+      <div class="col-span-1 cursor-default px-5 md:px-20 xl:px-32">
         <h2 class="mb-5 text-center text-2xl font-bold">Players</h2>
         <div
-          class="mt-2 flex animate-slide-in flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-700 dark:bg-zinc-800"
+          class="mt-2 flex animate-slide-in flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-900 dark:bg-black"
           v-for="p in room.players"
           :key="p.id"
         >
@@ -69,7 +69,7 @@ const copyRoomCodeToClipboard = () => {
           <p class="ml-2 xl:ml-4">{{ p.username }}</p>
         </div>
         <div
-          class="mt-2 flex flex-row items-center rounded-lg border border-zinc-200 bg-zinc-100 p-2 shadow dark:border-zinc-600 dark:bg-zinc-700"
+          class="mt-2 flex flex-row items-center rounded-lg border border-zinc-200 bg-zinc-100 p-2 shadow dark:border-zinc-900 dark:bg-zinc-900"
           v-for="p in 8 - room.players.length"
           :key="p"
         >
