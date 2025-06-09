@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import ViewThemes from '../room/game/midround/ViewThemes.vue'
+import SelectTheme from '../room/game/midround/SelectTheme.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen items-center justify-center">
-    <ViewThemes :themes="slugs" />
+    <SelectTheme :themes="slugs" />
   </div>
 </template>
 

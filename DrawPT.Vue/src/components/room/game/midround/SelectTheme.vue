@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { defineEmits } from 'vue'
+import ThemeButton from './ThemeButton.vue'
+import { defineEmits, ref, onMounted } from 'vue'
 const props = defineProps({
   themes: {
     type: Array<string>,
     required: true
   }
+})
+const animationsReadyToPlay = ref(false)
+
+onMounted(() => {
+  // Ensure the DOM has updated with initial paused state before trying to play
+  requestAnimationFrame(() => {
+    animationsReadyToPlay.value = true
+  })
 })
 
 const emit = defineEmits(['themeSelected'])
@@ -14,15 +23,12 @@ const handleClick = (theme: string) => {
 </script>
 
 <template>
-  <div class="font-bold">
-    <h1 class="text-2xl font-bold">Select a theme:</h1>
-    <div
-      v-for="(theme, index) in props.themes"
-      :key="index"
-      @click="handleClick(theme)"
-      class="shimmer-glow m-2 cursor-pointer rounded-md border border-gray-400 p-2"
-    >
-      {{ theme }}
+  <div class="text-center text-xl font-bold">
+    <h1 class="mb-8 text-2xl font-bold">Select a theme:</h1>
+    <div v-for="(theme, index) in props.themes" :key="index" @click="handleClick(theme)">
+      <div>
+        <ThemeButton>{{ theme }}</ThemeButton>
+      </div>
     </div>
   </div>
 </template>
