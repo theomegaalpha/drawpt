@@ -50,6 +50,7 @@ export interface PlayerAnswerBase {
 export interface PlayerAnswer {
   id: string
   connectionId: string
+  username: string
   guess: string
   score: number
   bonusPoints: number
