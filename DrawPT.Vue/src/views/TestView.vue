@@ -15,7 +15,7 @@ var result = {
     originalPrompt:
       ' A lone survivor in tattered clothing stands atop a crumbling skyscraper, overlooking a vast city overrun by twisted, overgrown vines and rusted vehicles under a smoky orange sky.',
     imageUrl:
-      'http://127.0.0.1:58918/devstoreaccount1/images/gemini-image-31a1b010-bfb8-496f-8c5f-1cab69c8a0ed.png',
+      'https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp',
     createdAt: '2025-06-09T15:07:57.2106036Z'
   },
   answers: [

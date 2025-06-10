@@ -30,7 +30,7 @@ onBeforeMount(() => {
       <div class="h-full w-full"></div>
       <div
         class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
-        :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400'"
+        :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
         :style="{ width: `calc(${percentage}vw)` }"
       ></div>
     </div>
