@@ -28,11 +28,27 @@ onMounted(() => {
       :class="faded ? 'opacity-30' : 'opacity-100'"
       :src="lastRoundResults.question.imageUrl"
     />
-    <div class="relative z-10 flex flex-col items-center justify-center py-4">
-      <div
-        class="mb-12 flex flex-col rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
-      >
-        <h2>Original Prompt: {{ lastRoundResults.question.originalPrompt }}</h2>
+    <div class="relative z-10 flex flex-col items-center justify-center py-8">
+      <div class="mb-12 flex flex-col items-center">
+        <h2
+          class="rounded-lg border border-black/30 bg-gray-500/10 p-4 px-6 text-lg backdrop-blur dark:border-white/20 dark:bg-white/10"
+        >
+          {{ lastRoundResults.question.originalPrompt }}
+        </h2>
+        <div class="relative mb-16 w-[40rem]">
+          <div
+            class="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
+          />
+          <div
+            class="absolute inset-x-20 top-0 h-px w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
+          />
+          <div
+            class="absolute inset-x-60 top-0 h-[5px] w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent blur-sm"
+          />
+          <div
+            class="absolute inset-x-60 top-0 h-px w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent"
+          />
+        </div>
       </div>
       <PlayerResultCard
         v-for="(answer, index) in lastRoundResults.answers"
