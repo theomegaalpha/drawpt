@@ -19,6 +19,7 @@
     "@microsoft/signalr": "^8.0.0",
     "@supabase/supabase-js": "^2.49.8",
     "lucide-vue-next": "^0.513.0",
+    "motion-v": "^1.2.1",
     "pinia": "^2.3.1",
     "postprocessing": "^6.37.4",
     "three": "^0.177.0",

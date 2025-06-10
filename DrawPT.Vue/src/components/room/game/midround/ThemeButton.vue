@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMounted, ref } from 'vue' // Added imports
+import { computed, onBeforeMount, ref } from 'vue' // Added imports
 
 const props = defineProps({
   as: {
@@ -68,7 +68,7 @@ const checkDarkMode = () => {
     document.documentElement.classList.contains('dark')
 }
 
-onBeforeMounted(() => {
+onBeforeMount(() => {
   checkDarkMode() // Initial check
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkDarkMode)
 })

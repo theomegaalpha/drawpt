@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ThemeButton from './ThemeButton.vue'
-import { defineEmits, ref, onBeforeMounted } from 'vue'
+import { defineEmits, ref, onBeforeMount } from 'vue'
 const props = defineProps({
   themes: {
     type: Array<string>,
@@ -9,7 +9,7 @@ const props = defineProps({
 })
 const animationsReadyToPlay = ref(false)
 
-onBeforeMounted(() => {
+onBeforeMount(() => {
   // Ensure the DOM has updated with initial paused state before trying to play
   requestAnimationFrame(() => {
     animationsReadyToPlay.value = true
