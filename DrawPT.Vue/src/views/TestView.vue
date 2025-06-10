@@ -2,8 +2,6 @@
 import { onBeforeMount } from 'vue'
 import RoundResults from '@/components/room/game/postround/RoundResults.vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
-import { motion } from 'motion-v'
-import ShimmerAnimation from '@/components/common/ShimmerAnimation.vue'
 
 const { lastRoundResults, addRoundResult } = useScoreboardStore()
 onBeforeMount(() => {
@@ -41,28 +39,4 @@ onBeforeMount(() => {
 
 <template>
   <RoundResults v-if="lastRoundResults?.question !== null" />
-  <ShimmerAnimation>
-    <motion.div
-      :initial="{ opacity: 0.0, y: 40 }"
-      :whileInView="{ opacity: 0.5, y: 0 }"
-      :transition="{
-        delay: 0.3,
-        duration: 0.8,
-        ease: 'easeInOut'
-      }"
-      class="relative flex flex-col items-center justify-center gap-4 px-4"
-    >
-      <div class="text-center text-3xl font-bold md:text-7xl dark:text-white">
-        Background lights are cool you know.
-      </div>
-      <div class="py-4 text-base font-extralight md:text-4xl dark:text-neutral-200">
-        And this, is chemical burn.
-      </div>
-      <button
-        class="w-fit rounded-full bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
-      >
-        Debug now
-      </button>
-    </motion.div>
-  </ShimmerAnimation>
 </template>

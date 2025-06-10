@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const containerClasses = computed(() => {
   let classes =
-    'relative flex flex-col h-[100vh] w-[100vw] items-center justify-center bg-zinc-50 dark:bg-black transition-bg'
+    'fixed inset-0 bg-zinc-50 dark:bg-black transition-bg' // Changed to fixed, full viewport, removed flex and z-index
   if (props.class) {
     classes += ` ${props.class}`
   }
@@ -35,7 +35,7 @@ const gradientClasses = computed(() => {
     after:[background-size:200%,_100%]
     after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
     pointer-events-none
-    absolute -inset-[10px] opacity-50 will-change-transform`
+    absolute -inset-[10px] opacity-40 dark:opacity-10 will-change-transform` // Ensure no z-index here, parent div handles layering
   if (props.showRadialGradient) {
     baseClasses += ` [mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
   }
@@ -44,15 +44,12 @@ const gradientClasses = computed(() => {
 </script>
 
 <template>
-  <main>
-    <div :class="containerClasses" v-bind="$attrs">
-      <div class="absolute inset-0 overflow-hidden">
-        <div :class="gradientClasses"></div>
-      </div>
-      <slot></slot>
-      <!-- For children content -->
+  <div :class="containerClasses" v-bind="$attrs">
+    <div class="absolute inset-0 -z-10 overflow-hidden"> <!-- Shimmer effect container, behind slot -->
+      <div :class="gradientClasses"></div>
     </div>
-  </main>
+    <slot></slot> <!-- Content will be rendered here, on top of the shimmer -->
+  </div>
 </template>
 
 <style scoped>
