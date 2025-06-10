@@ -24,13 +24,13 @@ onMounted(() => {
   <div class="fixed inset-4 overflow-hidden">
     <img
       v-if="lastRoundResults.question.imageUrl !== ''"
-      class="absolute left-1/2 top-1/2 z-0 max-h-[70vh] max-w-[1048px] -translate-x-1/2 -translate-y-1/2 transition-opacity delay-100 duration-1000"
-      :class="faded ? 'opacity-50' : 'opacity-100'"
+      class="absolute left-1/2 top-1/2 z-0 max-h-[70vh] max-w-[1048px] -translate-x-1/2 -translate-y-1/2 rounded-lg transition-opacity delay-100 duration-1000"
+      :class="faded ? 'opacity-30' : 'opacity-100'"
       :src="lastRoundResults.question.imageUrl"
     />
-    <div class="relative z-10 flex flex-col items-center justify-center">
+    <div class="relative z-10 flex flex-col items-center justify-center py-4">
       <div
-        class="mt-2 flex flex-col rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
+        class="mb-12 flex flex-col rounded-lg border border-gray-200 bg-white p-2 shadow dark:border-gray-700 dark:bg-gray-800"
       >
         <h2>Original Prompt: {{ lastRoundResults.question.originalPrompt }}</h2>
       </div>

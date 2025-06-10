@@ -26,10 +26,10 @@ const avatarColor = computed(() => {
 
 <template>
   <div class="mt-4 flex w-[70vw] items-center">
-    <div class="flex w-full p-5">
+    <div class="flex w-full">
       <div class="mr-4 w-full cursor-pointer flex-col" @click="showReason = !showReason">
         <div
-          class="relative z-10 ml-4 flex w-full items-center rounded-lg p-4 px-6 backdrop-blur dark:bg-white/10"
+          class="relative z-10 ml-4 flex w-full items-center rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur dark:bg-white/10"
         >
           <div class="flex items-center space-x-2">
             <div
@@ -49,7 +49,10 @@ const avatarColor = computed(() => {
           <div class="flex items-center">
             <span>{{ answer.score }}</span>
             <span class="-mb-2 ml-1 text-xs">pts</span>
-            <span v-if="answer.bonusPoints > 0" class="ml-1 font-semibold text-green-400">
+            <span
+              v-if="answer.bonusPoints > 0"
+              class="ml-1 font-semibold text-green-500 dark:text-green-400"
+            >
               +{{ answer.bonusPoints }}
             </span>
           </div>
@@ -57,7 +60,7 @@ const avatarColor = computed(() => {
         <div
           v-if="answer.reason"
           :class="[
-            'ml-4 flex w-full rounded-lg p-4 px-6 backdrop-blur dark:bg-white/10',
+            'ml-4 flex w-full rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur dark:bg-white/10',
             'relative z-0 transition-all duration-300 ease-in-out',
             showReason ? 'mt-1 opacity-100' : '-mt-10 opacity-40'
           ]"
