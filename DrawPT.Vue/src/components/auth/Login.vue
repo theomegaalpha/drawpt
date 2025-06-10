@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onBeforeMount, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import type { GoogleCredentialResponse } from '@/types/google'
@@ -217,7 +217,7 @@ const initializeGoogleSignIn = () => {
   }
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   try {
     await loadGoogleScript()
     // Wait a bit for the script to fully initialize

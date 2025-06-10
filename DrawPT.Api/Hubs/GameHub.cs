@@ -104,7 +104,6 @@ namespace DrawPT.Api.Hubs
                         }
                         await _hubContext.Clients.GroupExcept(player.RoomCode, connectionId).ThemeSelection(themes ?? []);
                         response = await client.AskTheme(themes ?? [], themeTimoutTokenSource.Token);
-                        response = JsonSerializer.Serialize(response);
                     }
                     catch
                     {

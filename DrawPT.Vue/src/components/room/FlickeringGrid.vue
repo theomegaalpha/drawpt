@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onBeforeMount, onUnmounted, watch } from 'vue'
 
 interface Props {
   squareSize?: number
@@ -161,7 +161,7 @@ const updateCanvasSizeAndSetup = () => {
   }
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   const canvas = canvasRef.value
   const container = containerRef.value
 

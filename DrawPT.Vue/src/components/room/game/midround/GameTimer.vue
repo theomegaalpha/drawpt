@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 const props = defineProps({
   maxTime: {
     type: Number,
@@ -14,7 +14,7 @@ var percentage = computed(() => {
   return (timer.value / maxTime) * 100
 })
 
-onMounted(() => {
+onBeforeMount(() => {
   const interval = setInterval(() => {
     timer.value -= 1000
     if (timer.value <= 0) {
@@ -26,13 +26,31 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="h-3 relative overflow-hidden bg-gray-200">
-      <div class="w-full h-full bg-gray-200"></div>
+    <div class="relative h-6 overflow-hidden bg-gray-200 dark:bg-gray-600/80">
+      <div class="h-full w-full"></div>
       <div
-        class="h-full w-full transition-all duration-1000 ease-linear left-0 absolute top-0 transition-10"
+        class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
         :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400'"
-        :style="{ width: percentage + '%' }"
+        :style="{ width: `calc(${percentage}vw)` }"
       ></div>
+    </div>
+    <div id="glow" class="w-vw relative">
+      <div
+        class="absolute left-1/2 top-0 h-[2px] w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-green-500 to-transparent blur-sm transition-all duration-1000 ease-linear"
+        :class="percentage <= 20 ? 'via-red-400' : 'via-green-400'"
+      />
+      <div
+        class="absolute left-1/2 top-0 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-green-500 to-transparent transition-all duration-1000 ease-linear"
+        :class="percentage <= 20 ? 'via-red-400' : 'via-green-400'"
+      />
+      <div
+        class="absolute left-1/2 top-0 h-[5px] w-1/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-sky-300 to-transparent blur-sm transition-all duration-1000 ease-linear"
+      />
+      <div
+        class="absolute left-1/2 top-0 h-px w-1/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-sky-300 to-transparent transition-all duration-1000 ease-linear"
+      />
     </div>
   </div>
 </template>
+
+<style scoped></style>

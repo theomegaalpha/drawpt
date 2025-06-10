@@ -1,9 +1,19 @@
+import flattenColorPalette from 'tailwindcss/lib/util/flattenColorPalette.js'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
       keyframes: {
+        aurora: {
+          from: {
+            backgroundPosition: '50% 50%, 50% 50%'
+          },
+          to: {
+            backgroundPosition: '350% 50%, 350% 50%'
+          }
+        },
         'timer-countdown': {
           '100%': { width: '100%' },
           '40%': { width: '40%', 'background-color': '#FF5F15' },
@@ -42,6 +52,7 @@ export default {
         }
       },
       animation: {
+        aurora: 'aurora 60s linear infinite',
         'timer-countdown': 'timer-countdown linear',
         'slide-in': 'slide-in 0.2s ease-in forwards',
         'blur-in': 'blur-in-effect 0.5s ease-out forwards',
@@ -50,5 +61,21 @@ export default {
       }
     }
   },
-  plugins: []
+  plugins: [addVariablesForColors]
+}
+
+function addVariablesForColors({ addBase, theme }) {
+  const palette = theme('colors')
+  const flatPalette =
+    typeof flattenColorPalette === 'function'
+      ? flattenColorPalette(palette)
+      : flattenColorPalette.default(palette) // Try .default if flattenColorPalette itself is not a function
+
+  let newVars = Object.fromEntries(
+    Object.entries(flatPalette).map(([key, val]) => [`--${key}`, val])
+  )
+
+  addBase({
+    ':root': newVars
+  })
 }

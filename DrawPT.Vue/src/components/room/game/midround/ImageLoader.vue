@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { defineComponent, ref, onBeforeMount, onBeforeUnmount, watch } from 'vue'
 import * as THREE from 'three'
 import {
   BloomEffect,
@@ -1341,7 +1341,7 @@ export default defineComponent({
     // Add resize observer to handle container size changes
     let resizeObserver: ResizeObserver | null = null
 
-    onMounted(() => {
+    onBeforeMount(() => {
       if (typeof ResizeObserver !== 'undefined') {
         resizeObserver = new ResizeObserver((entries) => {
           for (const entry of entries) {

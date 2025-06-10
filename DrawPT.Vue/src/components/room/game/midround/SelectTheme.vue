@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ThemeButton from './ThemeButton.vue'
-import { defineEmits, ref, onMounted } from 'vue'
+import { defineEmits, ref, onBeforeMount } from 'vue'
 const props = defineProps({
   themes: {
     type: Array<string>,
@@ -9,7 +9,7 @@ const props = defineProps({
 })
 const animationsReadyToPlay = ref(false)
 
-onMounted(() => {
+onBeforeMount(() => {
   // Ensure the DOM has updated with initial paused state before trying to play
   requestAnimationFrame(() => {
     animationsReadyToPlay.value = true
@@ -24,7 +24,21 @@ const handleClick = (theme: string) => {
 
 <template>
   <div class="text-center text-xl font-bold">
-    <h1 class="mb-8 text-2xl font-bold">Select a theme:</h1>
+    <h1 class="-mt-8 text-2xl font-bold">Select a Theme</h1>
+    <div class="relative mb-16 w-[40rem]">
+      <div
+        class="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
+      />
+      <div
+        class="absolute inset-x-20 top-0 h-px w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
+      />
+      <div
+        class="absolute inset-x-60 top-0 h-[5px] w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent blur-sm"
+      />
+      <div
+        class="absolute inset-x-60 top-0 h-px w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent"
+      />
+    </div>
     <div v-for="(theme, index) in props.themes" :key="index" @click="handleClick(theme)">
       <div
         class="animate-blur-in cursor-default"

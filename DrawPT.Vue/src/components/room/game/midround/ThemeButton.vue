@@ -5,7 +5,7 @@
   >
     <!-- Star animations -->
     <div
-      class="animate-star-movement-bottom absolute bottom-[-11px] right-[-250%] h-[50%] w-[300%] rounded-full opacity-20 dark:opacity-50"
+      class="absolute bottom-[-11px] right-[-250%] h-[50%] w-[300%] animate-star-movement-bottom rounded-full opacity-20 dark:opacity-50"
       :style="{
         background: `radial-gradient(circle, ${effectiveStarColor}, transparent 10%)`,
         animationDuration: props.speed
@@ -13,7 +13,7 @@
     ></div>
     <!-- Corrected self-closing tag -->
     <div
-      class="animate-star-movement-top absolute left-[-250%] top-[-10px] z-0 h-[50%] w-[300%] rounded-full opacity-20 dark:opacity-70"
+      class="absolute left-[-250%] top-[-10px] z-0 h-[50%] w-[300%] animate-star-movement-top rounded-full opacity-20 dark:opacity-70"
       :style="{
         background: `radial-gradient(circle, ${effectiveStarColor}, transparent 10%)`,
         animationDuration: props.speed
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue' // Added imports
+import { computed, onBeforeMount, ref } from 'vue' // Added imports
 
 const props = defineProps({
   as: {
@@ -68,7 +68,7 @@ const checkDarkMode = () => {
     document.documentElement.classList.contains('dark')
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   checkDarkMode() // Initial check
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkDarkMode)
 })
