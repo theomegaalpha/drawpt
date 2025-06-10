@@ -12,8 +12,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const containerClasses = computed(() => {
-  let classes =
-    'fixed inset-0 bg-zinc-50 dark:bg-black transition-bg' // Changed to fixed, full viewport, removed flex and z-index
+  let classes = 'fixed inset-0 bg-zinc-50 dark:bg-black transition-bg' // Changed to fixed, full viewport, removed flex and z-index
   if (props.class) {
     classes += ` ${props.class}`
   }
@@ -31,7 +30,7 @@ const gradientClasses = computed(() => {
     [background-position:50%_50%,50%_50%]
     filter blur-[10px] invert dark:invert-0
     after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)]
-    after:dark:[background-image:var(--dark-gradient),var(--aurora)]
+    after:dark:[background-image:var(--dark-gradient),var,--aurora)]
     after:[background-size:200%,_100%]
     after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
     pointer-events-none
@@ -45,10 +44,14 @@ const gradientClasses = computed(() => {
 
 <template>
   <div :class="containerClasses" v-bind="$attrs">
-    <div class="absolute inset-0 -z-10 overflow-hidden"> <!-- Shimmer effect container, behind slot -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+      <!-- Shimmer effect container, behind slot -->
       <div :class="gradientClasses"></div>
     </div>
-    <slot></slot> <!-- Content will be rendered here, on top of the shimmer -->
+    <div class="relative z-0 h-full w-full overflow-auto">
+      <slot></slot>
+    </div>
+    <!-- Content will be rendered here, on top of the shimmer -->
   </div>
 </template>
 
