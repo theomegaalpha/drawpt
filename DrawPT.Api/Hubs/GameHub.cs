@@ -311,14 +311,9 @@ namespace DrawPT.Api.Hubs
                 _channel.BasicConsume(queue: broadcastQueueName,
                                     autoAck: true,
                                     consumer: _consumer);
-                _channel.QueueDeclare(
-                    queue: GameEngineRequestMQ.QueueName(Context.ConnectionId),
-                    durable: false,
-                    exclusive: false,
-                    autoDelete: true
-                );
             }
             // Bind to catch ALL client interaction messages with any number of segments
+            _channel.QueueDeclare(GameEngineRequestMQ.QueueName(Context.ConnectionId));
             _channel.QueueBind(GameEngineRequestMQ.QueueName(Context.ConnectionId),
                 GameEngineRequestMQ.ExchangeName, GameEngineRequestMQ.RoutingKey(Context.ConnectionId));
             _channel.BasicConsume(queue: GameEngineRequestMQ.QueueName(Context.ConnectionId),
