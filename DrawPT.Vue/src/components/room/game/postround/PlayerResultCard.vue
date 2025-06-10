@@ -51,7 +51,7 @@ const avatarColor = computed(() => {
             <span class="-mb-2 ml-1 text-xs">pts</span>
             <span
               v-if="answer.bonusPoints > 0"
-              class="ml-1 font-semibold text-green-500 dark:text-green-400"
+              class="-mb-2 ml-1 animate-bounce font-semibold text-green-500 dark:text-green-400"
             >
               +{{ answer.bonusPoints }}
             </span>
