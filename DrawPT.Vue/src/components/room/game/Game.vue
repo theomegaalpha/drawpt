@@ -178,7 +178,7 @@ const submitGuess = async (valueFromInput: string) => {
     <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
     <RoundResults v-if="showResults" />
     <div v-else class="flex min-h-screen w-full items-center justify-center">
-      <div>
+      <div class="flex w-full max-w-5xl flex-col items-center px-4">
         <SelectTheme
           v-if="selectableThemeOptions.length > 0"
           :themes="selectableThemeOptions"

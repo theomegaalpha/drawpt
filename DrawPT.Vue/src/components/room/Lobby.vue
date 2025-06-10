@@ -37,7 +37,7 @@ const copyRoomCodeToClipboard = () => {
 <template>
   <FlickeringGrid color="rgb(197, 162, 255)" darkModeColor="rgb(100, 100, 100)">
     <main
-      class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 space-x-4 p-10 md:grid-cols-2"
+      class="grid min-h-screen grid-cols-1 items-center justify-center gap-3 p-10 md:grid-cols-2"
     >
       <div class="col-span-1 p-10 text-center">
         <h1 class="mb-5 text-4xl font-bold">DrawPT</h1>
@@ -58,7 +58,7 @@ const copyRoomCodeToClipboard = () => {
           {{ isCopied ? 'Copied!' : room.code }}
         </h2>
       </div>
-      <div class="col-span-1 cursor-default px-5 md:px-20 xl:px-32">
+      <div class="col-span-1 cursor-default px-4 md:px-8 xl:px-12">
         <h2 class="mb-5 text-center text-2xl font-bold">Players</h2>
         <div
           class="mt-2 flex animate-slide-in flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-900 dark:bg-black"
