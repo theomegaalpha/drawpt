@@ -164,33 +164,39 @@ const submitGuess = async (valueFromInput: string) => {
 
 <template>
   <ImageLoader v-if="gameStateStore.showImageLoader" />
-  <GameTimer
-    :max-time="timeoutForTheme"
-    v-if="selectableThemeOptions.length > 0"
-    class="fixed left-0 right-0 top-0"
-  />
-  <GameTimer :max-time="timeoutPerQuestion" v-if="!lockGuess" class="fixed left-0 right-0 top-0" />
-  <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
-  <RoundResults v-if="showResults" />
-  <main v-else class="flex min-h-screen w-full items-center justify-center">
-    <div>
-      <SelectTheme
-        v-if="selectableThemeOptions.length > 0"
-        :themes="selectableThemeOptions"
-        @themeSelected="handleThemeSelectedFromUI"
-      />
-      <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
-
-      <div class="mb-2">
-        <img
-          v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
-          class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
-          :src="imageUrl"
+  <div v-else>
+    <GameTimer
+      :max-time="timeoutForTheme"
+      v-if="selectableThemeOptions.length > 0"
+      class="fixed left-0 right-0 top-0"
+    />
+    <GameTimer
+      :max-time="timeoutPerQuestion"
+      v-if="!lockGuess"
+      class="fixed left-0 right-0 top-0"
+    />
+    <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
+    <RoundResults v-if="showResults" />
+    <div v-else class="flex min-h-screen w-full items-center justify-center">
+      <div>
+        <SelectTheme
+          v-if="selectableThemeOptions.length > 0"
+          :themes="selectableThemeOptions"
+          @themeSelected="handleThemeSelectedFromUI"
         />
-      </div>
-      <div v-if="!lockGuess">
-        <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
+        <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
+
+        <div class="mb-2">
+          <img
+            v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
+            class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
+            :src="imageUrl"
+          />
+        </div>
+        <div v-if="!lockGuess">
+          <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
+        </div>
       </div>
     </div>
-  </main>
+  </div>
 </template>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ThemeButton from './ThemeButton.vue'
 import { defineEmits, ref, onBeforeMount } from 'vue'
 const props = defineProps({
   themes: {
@@ -23,8 +22,8 @@ const handleClick = (theme: string) => {
 </script>
 
 <template>
-  <div class="text-center text-xl font-bold">
-    <h1 class="-mt-8 text-2xl font-bold">Select a Theme</h1>
+  <div class="flex min-h-screen flex-col items-center justify-center text-center text-xl font-bold">
+    <h1 class="text-2xl font-bold">Select a Theme</h1>
     <div class="relative mb-16 w-[40rem]">
       <div
         class="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
@@ -48,7 +47,16 @@ const handleClick = (theme: string) => {
           animationFillMode: 'backwards'
         }"
       >
-        <ThemeButton>{{ theme }}</ThemeButton>
+        <div
+          class="bg-surface-default shimmer-glow mb-4 animate-blur-in cursor-pointer rounded-lg px-9 py-2"
+          :style="{
+            animationDelay: `${index * 50}ms`,
+            animationPlayState: animationsReadyToPlay ? 'running' : 'paused',
+            animationFillMode: 'backwards'
+          }"
+        >
+          {{ theme }}
+        </div>
       </div>
     </div>
   </div>
@@ -74,7 +82,7 @@ const handleClick = (theme: string) => {
   width: 100%;
   height: 100%;
   background: linear-gradient(120deg, transparent, rgba(146, 148, 248, 0.4), transparent);
-  transition: all 650ms;
+  transition: all 150ms;
 }
 
 .shimmer-glow:hover:before {

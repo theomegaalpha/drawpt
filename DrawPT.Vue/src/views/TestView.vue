@@ -2,6 +2,7 @@
 import { onBeforeMount } from 'vue'
 import RoundResults from '@/components/room/game/postround/RoundResults.vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
+import SelectTheme from '@/components/room/game/midround/SelectTheme.vue'
 
 const { lastRoundResults, addRoundResult } = useScoreboardStore()
 onBeforeMount(() => {
@@ -38,5 +39,6 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <RoundResults v-if="lastRoundResults?.question !== null" />
+  <SelectTheme :themes="['fuck', 'this', 'shit', 'this', 'shit']" />
+  <RoundResults v-if="lastRoundResults?.question !== null && false" />
 </template>
