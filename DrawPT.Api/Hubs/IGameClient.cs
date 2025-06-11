@@ -8,7 +8,7 @@ namespace DrawPT.Api.Hubs
         Task RoomIsFull();
         Task AlreadyInRoom();
         Task NavigateToRoom();
-        Task ErrorJoiningRoom();
+        Task ErrorJoiningRoom(string error);
 
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);
@@ -19,6 +19,7 @@ namespace DrawPT.Api.Hubs
         Task RoundResults(RoundResults round);
         Task SuccessfullyJoined(string connectionId);
         Task WriteMessage(string message);
+        Task WriteError(string message);
 
 
 

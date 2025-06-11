@@ -124,6 +124,14 @@ const submitUsernameAndEnter = async () => {
       <h3 class="text-center text-lg font-medium">
         Room Code: <span class="font-bold">{{ roomCode }}</span>
       </h3>
+
+      <div class="pb-2">
+        <p
+          class="rounded-md border border-black/20 p-2 text-sm font-medium text-red-700 dark:border-white/10 dark:text-red-300"
+        >
+          {{ joinError }}
+        </p>
+      </div>
       <form @submit.prevent="submitUsernameAndEnter" class="space-y-2">
         <div>
           <label for="username" class="mb-1 block text-sm font-medium">Username</label>
