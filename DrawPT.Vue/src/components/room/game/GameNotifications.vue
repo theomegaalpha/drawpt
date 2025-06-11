@@ -5,10 +5,10 @@ const { gameNotifications } = notificationStore
 </script>
 
 <template>
-  <div class="fixed bottom-4 right-4">
+  <div class="fixed bottom-8 right-8">
     <transition-group
-      enter-from-class="translate-x-[150%] opacity-0"
-      leave-to-class="translate-x-[150%] opacity-0"
+      enter-from-class="-translate-x-[150%] opacity-0"
+      leave-to-class="-translate-x-[150%] opacity-0"
       enter-active-class="transition duration-300"
       leave-active-class="transition duration-300"
       tag="div"
@@ -22,8 +22,7 @@ const { gameNotifications } = notificationStore
           id="notification"
           class="mt-2 w-fit rounded-lg border border-zinc-400 bg-white p-2 px-5 transition-all duration-300 dark:border-zinc-500 dark:bg-zinc-800"
           :class="{
-            'animate-slide-in border-red-600 bg-red-200 pr-8 font-semibold text-red-800':
-              notification.isAlert
+            'border-red-600 bg-red-200 pr-8 font-semibold text-red-800': notification.isAlert
           }"
         >
           <span v-if="notification.isAlert" class="absolute right-3 top-4 flex h-3 w-3">

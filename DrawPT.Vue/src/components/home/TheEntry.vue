@@ -7,7 +7,6 @@ import { useAuthStore } from '@/stores/auth'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
-import { PlayIcon } from 'lucide-vue-next'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
 const roomCodeInput = ref<string>('')
@@ -79,17 +78,19 @@ onBeforeMount(() => {
   <main class="container mx-auto px-6 py-8">
     <!-- Hero Section -->
     <div class="mb-10 animate-blur-in px-6 py-16 text-center">
-      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
-        AI Draws, You Decipher — Are You Up for the Challenge?
-      </h1>
+      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">AI Draws, You Decipher</h1>
       <p class="text-color-default mx-auto max-w-2xl text-lg">
-        Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
-        creations based on complex phrases.
+        AI-powered Pictionary where players must decode abstract creations based on complex phrases.
       </p>
-      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">Can you beat the algorithm?</p>
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg font-semibold">
+        Can you beat the algorithm?
+      </p>
       <div>
         <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
-          Play Now
+          Daily Challenge
+        </button>
+        <button class="btn-default ml-2 text-lg font-semibold shadow-md" @click="createRoom">
+          Play Game
         </button>
       </div>
     </div>

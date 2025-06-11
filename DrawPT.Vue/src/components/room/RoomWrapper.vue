@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SetUsername from '@/components/room/SetUsername.vue'
-import Lobby from '@/components/room/Lobby.vue'
+import Lobby from '@/components/room/lobby/Lobby.vue'
 import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/game/GameNotifications.vue'
 import GameResults from '@/components/room/game/postgame/GameResults.vue'
