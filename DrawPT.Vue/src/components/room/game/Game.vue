@@ -7,7 +7,7 @@ import ViewThemes from './themescreen/ViewThemes.vue'
 import GameTimer from './GameTimer.vue'
 import ImageLoader from './loader/ImageLoader.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useGameStateStore } from '@/stores/gameState' // Import the new store
@@ -24,7 +24,6 @@ const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOpti
 const themeOptions = computed(() => gameStateStore.themeOptions) // For ViewThemes
 const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
-const showResults = computed(() => gameStateStore.shouldShowResults)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
 // --- Local state for UI interaction leading to promise resolution for SignalR ---
@@ -100,9 +99,10 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
   })
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askTheme', async (themes: string[]) => {
+    console.log('askTheme received from server:', themes)
     themeSelectionInput.value = '' // Reset local UI state for theme selection
     gameStateStore.prepareForThemeSelection(themes) // Prepare store state for theme selection
     try {
@@ -166,13 +166,13 @@ const submitGuess = async (valueFromInput: string) => {
 <template>
   <ImageLoader v-if="gameStateStore.showImageLoader" />
   <div v-else>
-    <RoundResults v-if="showResults" />
+    <RoundResults v-if="gameStateStore.shouldShowResults" />
     <SelectTheme
       v-if="gameStateStore.areThemesSelectable"
       :themes="selectableThemeOptions"
       @themeSelected="handleThemeSelectedFromUI"
     />
     <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themeOptions" />
-    <GameCanvas />
+    <GameCanvas v-if="gameStateStore.showGameCanvas" />
   </div>
 </template>

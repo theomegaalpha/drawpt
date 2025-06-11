@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import GameTimer from '../GameTimer.vue'
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
-import { useNotificationStore } from '@/stores/notifications'
+import { computed, onMounted, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState' // Import the new store
-import service from '@/services/signalRService'
+
+// DEFINE EMITS for the component
+const emit = defineEmits<{
+  (e: 'themeSelected', theme: string): void
+}>()
 
 const timeoutForTheme = 20000
 const props = defineProps({
@@ -21,68 +24,10 @@ onMounted(() => {
   })
 })
 
-const notificationStore = useNotificationStore()
-
 const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
-const themeSelectionInput = ref<string>('')
-
-// --- Refs for timeout management for interactive promises ---
-const themeTimeoutRef = ref<NodeJS.Timeout>()
-
 function handleThemeSelected(newTheme: string) {
-  themeSelectionInput.value = newTheme
-  console.log('theme selection:', newTheme)
+  emit('themeSelected', newTheme)
 }
-
-// --- Internal promise-based function for theme selection ---
-async function askForThemeInternal(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (themeTimeoutRef.value) clearTimeout(themeTimeoutRef.value)
-    let stopEffect: (() => void) | null = null
-
-    themeTimeoutRef.value = setTimeout(() => {
-      notificationStore.addGameNotification("Uh oh! Theme selection time's up!", true)
-      gameStateStore.clearSelectableThemes() // Clear options in store
-      if (stopEffect) stopEffect()
-      reject(new Error('Theme selection timed out'))
-    }, timeoutForTheme)
-
-    stopEffect = watchEffect(() => {
-      console.log('watchEffect triggered for theme selection:', themeSelectionInput.value)
-      const currentTheme = themeSelectionInput.value
-      if (currentTheme) {
-        gameStateStore.playerSelectedTheme(currentTheme)
-        gameStateStore.clearSelectableThemes()
-        clearTimeout(themeTimeoutRef.value)
-        if (stopEffect) stopEffect()
-        resolve(currentTheme)
-      }
-    })
-  })
-}
-
-onMounted(() => {
-  // Interactive SignalR handlers that expect a return value
-  service.on('askTheme', async (themes: string[]) => {
-    themeSelectionInput.value = '' // Reset local UI state for theme selection
-    gameStateStore.prepareForThemeSelection(themes) // Prepare store state for theme selection
-    try {
-      const theme = await askForThemeInternal()
-      return theme // Return selected theme to server
-    } catch (error) {
-      console.error('Error in askForTheme process:', error)
-      // Ensure a value is always returned to the server, even on error/timeout
-      return '' // Or a specific "timeout" string if the server expects it
-    }
-  })
-})
-
-onUnmounted(() => {
-  service.off('askTheme')
-
-  // Clear any active timeouts
-  if (themeTimeoutRef.value) clearTimeout(themeTimeoutRef.value)
-})
 </script>
 
 <template>

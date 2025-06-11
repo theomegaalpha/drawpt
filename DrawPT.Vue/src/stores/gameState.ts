@@ -18,7 +18,8 @@ export const useGameStateStore = defineStore('gameState', {
   }),
   getters: {
     areThemesSelectable: (state) => state.selectableThemeOptions.length > 0,
-    areThemesVisible: (state) => state.themeOptions.length > 0
+    areThemesVisible: (state) => state.themeOptions.length > 0,
+    showGameCanvas: (state) => state.currentImageUrl !== ''
   },
   actions: {
     handleThemeSelectionEvent(themes: string[]) {
