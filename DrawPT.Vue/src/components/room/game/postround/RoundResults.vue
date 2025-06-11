@@ -35,7 +35,7 @@ onMounted(() => {
         >
           {{ lastRoundResults.question.originalPrompt }}
         </h2>
-        <div class="relative mb-16 w-[40rem]">
+        <div class="relative mb-12 w-[40rem]">
           <div
             class="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
           />

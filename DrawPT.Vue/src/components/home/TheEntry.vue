@@ -79,8 +79,8 @@ onBeforeMount(() => {
     <!-- Hero Section -->
     <div class="mb-10 animate-blur-in px-6 py-16 text-center">
       <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">AI Draws, You Decipher</h1>
-      <p class="text-color-default mx-auto max-w-2xl text-lg">
-        AI-powered Pictionary where players must decode abstract creations based on complex phrases.
+      <p class="text-color-default mx-auto max-w-3xl text-lg">
+        AI-powered Pictionary where you decode abstract creations based on complex phrases.
       </p>
       <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg font-semibold">
         Can you beat the algorithm?
@@ -116,6 +116,14 @@ onBeforeMount(() => {
 
       <!-- Right column wrapper for Game Options and Leaderboard -->
       <div class="flex flex-col gap-8">
+        <div
+          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
+        >
+          <div class="p-4">
+            <h2 class="text-xl font-medium">Leaderboard</h2>
+          </div>
+          <Leaderboard class="flex-grow" />
+        </div>
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
           <h2 class="mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
@@ -158,15 +166,6 @@ onBeforeMount(() => {
               </button>
             </div>
           </div>
-        </div>
-
-        <div
-          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
-        >
-          <div class="p-4">
-            <h2 class="text-xl font-medium">Leaderboard</h2>
-          </div>
-          <Leaderboard class="flex-grow" />
         </div>
       </div>
     </div>

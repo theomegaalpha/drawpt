@@ -130,6 +130,8 @@ Now, the original phrase is:";
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
+            return await GenerateFakeGameQuestionAsync(theme);
+
             var prompt = await GenerateImagePromptAsync(theme);
             var imageUrl = await GenerateImageAsync(prompt);
             return new GameQuestion()
