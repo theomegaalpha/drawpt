@@ -2,8 +2,6 @@
 import Avatar from '@/components/common/Avatar.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
-import service from '@/services/signalRService'
-import { ref } from 'vue'
 
 const { player } = usePlayerStore()
 const { room } = useRoomStore()
@@ -32,7 +30,3 @@ const { room } = useRoomStore()
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any specific styles for PlayerList here */
-</style>

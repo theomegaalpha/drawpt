@@ -15,8 +15,6 @@ const startGame = async () => {
     console.error('Game could not be started')
   }
 }
-
-// copyRoomCodeToClipboard logic will be moved to RoomInfo.vue, but invoked from here or via event
 </script>
 
 <template>
@@ -33,12 +31,8 @@ const startGame = async () => {
         "
         @startGame="startGame"
       />
-      <!-- PlayerList will handle displaying the list of players -->
-      <PlayerList :players="roomStore.room?.players" />
+
+      <PlayerList />
     </main>
   </FlickeringGrid>
 </template>
-
-<style scoped>
-/* Styles specific to Lobby layout if any, otherwise can be removed or kept minimal */
-</style>
