@@ -5,7 +5,7 @@ import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/GameNotifications.vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 
-import { onBeforeMount, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
@@ -24,7 +24,7 @@ const scoreboardStore = useScoreboardStore()
 const notificationStore = useNotificationStore()
 const roomJoinStore = useRoomJoinStore()
 
-onBeforeMount(async () => {
+onMounted(async () => {
   roomJoinStore.reset()
   scoreboardStore.clearScoreboard()
   roomStore.setSuccessfullyJoined(false)

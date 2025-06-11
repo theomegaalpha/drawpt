@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount } from 'vue'
+import { onMounted } from 'vue'
 import RoundResults from '@/components/room/game/roundresults/RoundResults.vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
 
@@ -69,7 +69,7 @@ var result = {
     }
   ]
 }
-onBeforeMount(() => {
+onMounted(() => {
   console.log('Adding round result')
   addRoundResult(result)
 })

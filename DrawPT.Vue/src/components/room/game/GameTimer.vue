@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 const props = defineProps({
   maxTime: {
     type: Number,
@@ -14,7 +14,7 @@ var percentage = computed(() => {
   return (timer.value / maxTime) * 100
 })
 
-onBeforeMount(() => {
+onMounted(() => {
   const interval = setInterval(() => {
     timer.value -= 1000
     if (timer.value <= 0) {

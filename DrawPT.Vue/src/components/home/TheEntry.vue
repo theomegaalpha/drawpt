@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import api from '@/services/api'
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
@@ -64,7 +64,7 @@ const scrollToPrompt = () => {
   }
 }
 
-onBeforeMount(() => {
+onMounted(() => {
   clearRoom()
   const queryRoomCode = route.query.roomCode as string
   if (queryRoomCode) {

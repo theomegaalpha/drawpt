@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import GameCanvas from './canvas/GameCanvas.vue'
-import RoundResults from './roundresults/RoundResults.vue'
-import GameBonusPoints from './canvas/GameBonusPoints.vue'
-import SelectTheme from './themescreen/SelectTheme.vue'
-import ViewThemes from './themescreen/ViewThemes.vue'
-import GameTimer from './GameTimer.vue'
-import ImageLoader from './loader/ImageLoader.vue'
+import GameBonusPoints from '../canvas/GameBonusPoints.vue'
+import GameTimer from '../GameTimer.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
@@ -17,14 +12,10 @@ import type { PlayerAnswerBase, PlayerQuestion } from '@/models/gameModels'
 
 const gameStateStore = useGameStateStore()
 const notificationStore = useNotificationStore()
-const scoreboardStore = useScoreboardStore() // Already imported, ensure it's used if needed directly here
 
 // --- State from Pinia Store (via computed properties) ---
-const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
-const themeOptions = computed(() => gameStateStore.themeOptions) // For ViewThemes
 const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
-const showResults = computed(() => gameStateStore.shouldShowResults)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
 // --- Local state for UI interaction leading to promise resolution for SignalR ---
@@ -38,11 +29,6 @@ const themeTimeoutRef = ref<NodeJS.Timeout>()
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
 const timeoutPerQuestion = 40000
 const timeoutForTheme = 20000
-
-// --- Method to handle theme selection from the SelectTheme component ---
-function handleThemeSelectedFromUI(newTheme: string) {
-  themeSelectionInput.value = newTheme // This will trigger the watchEffect in askForThemeInternal
-}
 
 // --- Internal promise-based function for theme selection ---
 async function askForThemeInternal(): Promise<string> {
@@ -164,15 +150,24 @@ const submitGuess = async (valueFromInput: string) => {
 </script>
 
 <template>
-  <ImageLoader v-if="gameStateStore.showImageLoader" />
-  <div v-else>
-    <RoundResults v-if="showResults" />
-    <SelectTheme
-      v-if="gameStateStore.areThemesSelectable"
-      :themes="selectableThemeOptions"
-      @themeSelected="handleThemeSelectedFromUI"
+  <div class="flex min-h-screen w-full items-center justify-center">
+    <GameTimer
+      :max-time="timeoutPerQuestion"
+      v-if="!lockGuess"
+      class="fixed left-0 right-0 top-0"
     />
-    <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themeOptions" />
-    <GameCanvas />
+    <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
+    <div class="flex w-full max-w-5xl flex-col items-center px-4">
+      <div class="mb-2">
+        <img
+          v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
+          class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
+          :src="imageUrl"
+        />
+      </div>
+      <div v-if="!lockGuess">
+        <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
+      </div>
+    </div>
   </div>
 </template>
