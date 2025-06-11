@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import RoundResults from './postround/RoundResults.vue'
+import RoundResults from './roundresults/RoundResults.vue'
 import GameBonusPoints from './midround/GameBonusPoints.vue'
-import SelectTheme from './midround/SelectTheme.vue'
-import ViewThemes from './midround/ViewThemes.vue'
-import GameTimer from './midround/GameTimer.vue'
+import SelectTheme from './themescreen/SelectTheme.vue'
+import ViewThemes from './themescreen/ViewThemes.vue'
+import GameTimer from './GameTimer.vue'
 import ImageLoader from './midround/ImageLoader.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'

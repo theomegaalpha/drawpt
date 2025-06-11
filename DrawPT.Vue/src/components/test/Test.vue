@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SelectTheme from '../room/game/midround/SelectTheme.vue'
+import SelectTheme from '../room/game/themescreen/SelectTheme.vue'
 </script>
 
 <template>

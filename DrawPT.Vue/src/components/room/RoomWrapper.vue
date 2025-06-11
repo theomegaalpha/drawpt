@@ -3,7 +3,7 @@ import SetUsername from '@/components/room/SetUsername.vue'
 import Lobby from '@/components/room/lobby/Lobby.vue'
 import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/GameNotifications.vue'
-import GameResults from '@/components/room/game/postgame/GameResults.vue'
+import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 
 import { onBeforeMount, onUnmounted } from 'vue'
 import { useRoomStore } from '@/stores/room'
