@@ -154,22 +154,31 @@ namespace DrawPT.Common.Services
 
         public async Task<List<Player>> GetRoomPlayersAsync(string roomCode)
         {
-            var playersJson = await _cache.GetStringAsync($"room:{roomCode}:players");
-            if (string.IsNullOrEmpty(playersJson))
+            var playerIds = await _cache.GetStringAsync($"room:{roomCode}:players");
+            if (string.IsNullOrEmpty(playerIds))
             {
                 return new List<Player>();
             }
-            return JsonSerializer.Deserialize<List<Player>>(playersJson) ?? [];
+            var parsedIds = JsonSerializer.Deserialize<List<Guid>>(playerIds) ?? [];
+            var roomPlayers = new List<Player>();
+            foreach (var playerId in parsedIds)
+            {
+                var player = await GetPlayerAsync(playerId);
+                if (player != null)
+                    roomPlayers.Add(player);
+            }
+            return roomPlayers;
         }
 
         public async Task AddPlayerToRoom(string roomCode, Player player)
         {
-            var playersJson = await _cache.GetStringAsync($"room:{roomCode}:players");
-            List<Player> players = string.IsNullOrEmpty(playersJson) ? new () : JsonSerializer.Deserialize<List<Player>>(playersJson) ?? new ();
-            if (players.Any(p => p.Id == player.Id))
+            var playerIds = await _cache.GetStringAsync($"room:{roomCode}:players");
+            List<Guid> players = string.IsNullOrEmpty(playerIds) ? new () : JsonSerializer.Deserialize<List<Guid>>(playerIds) ?? new ();
+            if (players.Any(p => p == player.Id))
                 return; // Player already exists in the room
 
-            players.Add(player);
+            players.Add(player.Id);
+            await UpdatePlayerAsync(player);
             var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
             await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(players), options);
         }

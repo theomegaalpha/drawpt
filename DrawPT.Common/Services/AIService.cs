@@ -47,6 +47,7 @@ json
         'Id': '<unique identifier>',
         'PlayerId': '<unique identifier of original Player ID>',
         'ConnectionId': '<unique identifier of original Connection ID>',
+        'Username': '<contestant's username>',
         'Guess': '<contestant's guessed phrase>',
         'Score': '<integer from 0 to 20>',
         'Reason': '<explanation for the given score>',
