@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import RoundResults from './postround/RoundResults.vue'
-import GameBonusPoints from './midround/GameBonusPoints.vue'
-import SelectTheme from './midround/SelectTheme.vue'
-import ViewThemes from './midround/ViewThemes.vue'
-import GameTimer from './midround/GameTimer.vue'
-import ImageLoader from './midround/ImageLoader.vue'
+import GameCanvas from './canvas/GameCanvas.vue'
+import RoundResults from './roundresults/RoundResults.vue'
+import GameBonusPoints from './canvas/GameBonusPoints.vue'
+import SelectTheme from './themescreen/SelectTheme.vue'
+import ViewThemes from './themescreen/ViewThemes.vue'
+import GameTimer from './GameTimer.vue'
+import ImageLoader from './loader/ImageLoader.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
@@ -13,17 +14,17 @@ import { useGameStateStore } from '@/stores/gameState' // Import the new store
 import service from '@/services/signalRService'
 
 import type { PlayerAnswerBase, PlayerQuestion } from '@/models/gameModels'
+import GameResults from './gameresults/GameResults.vue'
 
 const gameStateStore = useGameStateStore()
 const notificationStore = useNotificationStore()
 const scoreboardStore = useScoreboardStore() // Already imported, ensure it's used if needed directly here
 
 // --- State from Pinia Store (via computed properties) ---
-const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptionsFromSignalR)
-const themeOptions = computed(() => gameStateStore.themeOptionsFromSignalR) // For ViewThemes
+const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
+const themeOptions = computed(() => gameStateStore.themeOptions) // For ViewThemes
 const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
-const showResults = computed(() => gameStateStore.shouldShowResults)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
 // --- Local state for UI interaction leading to promise resolution for SignalR ---
@@ -102,6 +103,7 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
 onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askTheme', async (themes: string[]) => {
+    console.log('askTheme received from server:', themes)
     themeSelectionInput.value = '' // Reset local UI state for theme selection
     gameStateStore.prepareForThemeSelection(themes) // Prepare store state for theme selection
     try {
@@ -165,38 +167,14 @@ const submitGuess = async (valueFromInput: string) => {
 <template>
   <ImageLoader v-if="gameStateStore.showImageLoader" />
   <div v-else>
-    <GameTimer
-      :max-time="timeoutForTheme"
-      v-if="selectableThemeOptions.length > 0"
-      class="fixed left-0 right-0 top-0"
+    <RoundResults v-if="gameStateStore.shouldShowResults" />
+    <SelectTheme
+      v-if="gameStateStore.areThemesSelectable"
+      :themes="selectableThemeOptions"
+      @themeSelected="handleThemeSelectedFromUI"
     />
-    <GameTimer
-      :max-time="timeoutPerQuestion"
-      v-if="!lockGuess"
-      class="fixed left-0 right-0 top-0"
-    />
-    <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
-    <RoundResults v-if="showResults" />
-    <div v-else class="flex min-h-screen w-full items-center justify-center">
-      <div>
-        <SelectTheme
-          v-if="selectableThemeOptions.length > 0"
-          :themes="selectableThemeOptions"
-          @themeSelected="handleThemeSelectedFromUI"
-        />
-        <ViewThemes v-else-if="themeOptions.length > 0" :themes="themeOptions" />
-
-        <div class="mb-2">
-          <img
-            v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
-            class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
-            :src="imageUrl"
-          />
-        </div>
-        <div v-if="!lockGuess">
-          <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
-        </div>
-      </div>
-    </div>
+    <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themeOptions" />
+    <GameCanvas v-if="gameStateStore.showGameCanvas" @guessSubmitted="submitGuess" />
+    <GameResults v-if="false" />
   </div>
 </template>

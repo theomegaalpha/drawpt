@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import service from '@/services/signalRService' // Still needed for invoke
 import { useNotificationStore } from '@/stores/notifications'
@@ -45,7 +45,7 @@ const requestToJoin = async () => {
   }
 }
 
-onBeforeMount(() => {
+onMounted(() => {
   roomJoinStore.reset()
   if (!roomCode.value) {
     notificationStore.addGameNotification('No room code specified.', true)

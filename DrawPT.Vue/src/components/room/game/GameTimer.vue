@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 const props = defineProps({
   maxTime: {
     type: Number,
@@ -14,7 +14,7 @@ var percentage = computed(() => {
   return (timer.value / maxTime) * 100
 })
 
-onBeforeMount(() => {
+onMounted(() => {
   const interval = setInterval(() => {
     timer.value -= 1000
     if (timer.value <= 0) {
@@ -30,7 +30,7 @@ onBeforeMount(() => {
       <div class="h-full w-full"></div>
       <div
         class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
-        :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400'"
+        :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
         :style="{ width: `calc(${percentage}vw)` }"
       ></div>
     </div>

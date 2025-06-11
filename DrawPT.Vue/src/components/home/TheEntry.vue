@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import api from '@/services/api'
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
-import { PlayIcon } from 'lucide-vue-next'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
 const roomCodeInput = ref<string>('')
@@ -65,7 +64,7 @@ const scrollToPrompt = () => {
   }
 }
 
-onBeforeMount(() => {
+onMounted(() => {
   clearRoom()
   const queryRoomCode = route.query.roomCode as string
   if (queryRoomCode) {
@@ -79,17 +78,19 @@ onBeforeMount(() => {
   <main class="container mx-auto px-6 py-8">
     <!-- Hero Section -->
     <div class="mb-10 animate-blur-in px-6 py-16 text-center">
-      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">
-        AI Draws, You Decipher — Are You Up for the Challenge?
-      </h1>
-      <p class="text-color-default mx-auto max-w-2xl text-lg">
-        Welcome to a game of AI-powered Pictionary where players must decode abstract machine-drawn
-        creations based on complex phrases.
+      <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">AI Draws, You Decipher</h1>
+      <p class="text-color-default mx-auto max-w-3xl text-lg">
+        AI-powered Pictionary where you decode abstract creations based on complex phrases.
       </p>
-      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg">Can you beat the algorithm?</p>
+      <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg font-semibold">
+        Can you beat the algorithm?
+      </p>
       <div>
         <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
-          Play Now
+          Daily Challenge
+        </button>
+        <button class="btn-default ml-2 text-lg font-semibold shadow-md" @click="createRoom">
+          Play Game
         </button>
       </div>
     </div>
@@ -115,6 +116,14 @@ onBeforeMount(() => {
 
       <!-- Right column wrapper for Game Options and Leaderboard -->
       <div class="flex flex-col gap-8">
+        <div
+          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
+        >
+          <div class="p-4">
+            <h2 class="text-xl font-medium">Leaderboard</h2>
+          </div>
+          <Leaderboard class="flex-grow" />
+        </div>
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
           <h2 class="mb-4 text-xl font-bold">Game Options</h2>
           <div class="space-y-3">
@@ -157,15 +166,6 @@ onBeforeMount(() => {
               </button>
             </div>
           </div>
-        </div>
-
-        <div
-          class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
-        >
-          <div class="p-4">
-            <h2 class="text-xl font-medium">Leaderboard</h2>
-          </div>
-          <Leaderboard class="flex-grow" />
         </div>
       </div>
     </div>

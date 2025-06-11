@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const props = defineProps({
   themes: {
@@ -10,7 +10,7 @@ const props = defineProps({
 
 const animationsReadyToPlay = ref(false)
 
-onBeforeMount(() => {
+onMounted(() => {
   // Ensure the DOM has updated with initial paused state before trying to play
   requestAnimationFrame(() => {
     animationsReadyToPlay.value = true

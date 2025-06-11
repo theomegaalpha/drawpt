@@ -1,28 +1,42 @@
 <script setup lang="ts">
-import { defineEmits, ref, onBeforeMount } from 'vue'
+import GameTimer from '../GameTimer.vue'
+import { computed, onMounted, ref } from 'vue'
+import { useGameStateStore } from '@/stores/gameState' // Import the new store
+
+// DEFINE EMITS for the component
+const emit = defineEmits<{
+  (e: 'themeSelected', theme: string): void
+}>()
+
+const timeoutForTheme = 20000
 const props = defineProps({
   themes: {
     type: Array<string>,
     required: true
   }
 })
+const gameStateStore = useGameStateStore()
 const animationsReadyToPlay = ref(false)
 
-onBeforeMount(() => {
-  // Ensure the DOM has updated with initial paused state before trying to play
+onMounted(() => {
   requestAnimationFrame(() => {
     animationsReadyToPlay.value = true
   })
 })
 
-const emit = defineEmits(['themeSelected'])
-const handleClick = (theme: string) => {
-  emit('themeSelected', theme)
+const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
+function handleThemeSelected(newTheme: string) {
+  emit('themeSelected', newTheme)
 }
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col items-center justify-center text-center text-xl font-bold">
+    <GameTimer
+      :max-time="timeoutForTheme"
+      v-if="selectableThemeOptions.length > 0"
+      class="fixed left-0 right-0 top-0"
+    />
     <h1 class="text-2xl font-bold">Select a Theme</h1>
     <div class="relative mb-16 w-[40rem]">
       <div
@@ -38,7 +52,7 @@ const handleClick = (theme: string) => {
         class="absolute inset-x-60 top-0 h-px w-1/4 bg-gradient-to-r from-transparent via-sky-500 to-transparent"
       />
     </div>
-    <div v-for="(theme, index) in props.themes" :key="index" @click="handleClick(theme)">
+    <div v-for="(theme, index) in props.themes" :key="index" @click="handleThemeSelected(theme)">
       <div
         class="animate-blur-in cursor-default"
         :style="{
