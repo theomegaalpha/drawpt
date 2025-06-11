@@ -38,6 +38,7 @@ export const useGameStateStore = defineStore('gameState', {
     handleBroadcastRoundResultsEvent(roundResults: RoundResults) {
       this.shouldShowResults = true
       this.showImageLoader = false
+      this.currentImageUrl = ''
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points

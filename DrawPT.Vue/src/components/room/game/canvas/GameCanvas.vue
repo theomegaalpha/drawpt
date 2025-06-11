@@ -39,11 +39,11 @@ const submitGuess = async (valueFromInput: string) => {
       <div class="mb-2">
         <img
           v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
-          class="aspect-auto max-h-[70vh] max-w-[1048px] object-contain"
+          class="aspect-auto max-h-[70vh] max-w-[1048px] rounded-lg object-contain"
           :src="imageUrl"
         />
       </div>
-      <div v-if="!lockGuess">
+      <div v-if="!lockGuess" class="w-full max-w-2xl">
         <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
       </div>
     </div>
