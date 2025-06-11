@@ -125,7 +125,7 @@ const submitUsernameAndEnter = async () => {
         Room Code: <span class="font-bold">{{ roomCode }}</span>
       </h3>
 
-      <div class="pb-2">
+      <div class="pb-2" v-if="joinError">
         <p
           class="rounded-md border border-black/20 p-2 text-sm font-medium text-red-700 dark:border-white/10 dark:text-red-300"
         >
