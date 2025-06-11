@@ -14,6 +14,7 @@ import { useGameStateStore } from '@/stores/gameState' // Import the new store
 import service from '@/services/signalRService'
 
 import type { PlayerAnswerBase, PlayerQuestion } from '@/models/gameModels'
+import GameResults from './gameresults/GameResults.vue'
 
 const gameStateStore = useGameStateStore()
 const notificationStore = useNotificationStore()
@@ -174,5 +175,6 @@ const submitGuess = async (valueFromInput: string) => {
     />
     <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themeOptions" />
     <GameCanvas v-if="gameStateStore.showGameCanvas" @guessSubmitted="submitGuess" />
+    <GameResults v-if="false" />
   </div>
 </template>

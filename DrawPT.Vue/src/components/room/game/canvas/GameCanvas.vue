@@ -5,7 +5,7 @@ import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
 
-const timeoutPerQuestion = 40000
+const timeoutPerQuestion = 30000
 const emit = defineEmits<{
   (e: 'guessSubmitted', guess: string): void
 }>()
