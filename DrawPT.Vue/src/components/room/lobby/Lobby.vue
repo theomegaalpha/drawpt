@@ -4,7 +4,7 @@ import RoomInfo from './RoomInfo.vue' // New import
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
 import service from '@/services/signalRService'
-import FlickeringGrid from '../FlickeringGrid.vue' // Adjusted path if Lobby.vue is moved
+import FlickeringGrid from './FlickeringGrid.vue' // Adjusted path if Lobby.vue is moved
 
 const playerStore = usePlayerStore() // Renamed for clarity
 const roomStore = useRoomStore() // Renamed for clarity
