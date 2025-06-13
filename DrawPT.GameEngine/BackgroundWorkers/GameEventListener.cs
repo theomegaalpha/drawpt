@@ -26,7 +26,13 @@ public class GameEventListener : BackgroundService
     {
         // Declare exchange and queue
         _channel.ExchangeDeclare(ApiMasterMQ.ExchangeName, ExchangeType.Topic);
-        _channel.QueueDeclare(ApiMasterMQ.QueueName);
+        _channel.QueueDeclare(
+            queue: ApiMasterMQ.QueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null
+        );
         _channel.QueueBind(ApiMasterMQ.QueueName, ApiMasterMQ.ExchangeName, ApiMasterMQ.RoutingKey);
 
         // Set up consumer
@@ -54,7 +60,8 @@ public class GameEventListener : BackgroundService
         _channel.BasicConsume(
             queue: ApiMasterMQ.QueueName,
             autoAck: true,
-            consumer: consumer);
+            consumer: consumer
+        );
 
         _logger.LogInformation("Started consuming from game queue");
 
