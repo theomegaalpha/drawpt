@@ -38,7 +38,7 @@ export const useVolumeStore = defineStore('volume', {
     toggleModal() {
       this.modalOpen = !this.modalOpen
     },
-    setMusicUrl(newUrl: string) {
+    setMusicUrl(newUrl: string | null) {
       this.musicUrl = newUrl
     },
     togglePlayMusic() {

@@ -57,13 +57,12 @@ export function useBackgroundMusic() {
               })
           }
         } else {
-          // isPlaying is true, but no URL is set
           console.warn(
             'Play music requested (isPlayingMusic is true), but no musicUrl is set in the store.'
           )
-          cleanupAudio() // Stop and clean up any existing audio
+          cleanupAudio()
           if (volumeStore.isPlayingMusic) {
-            volumeStore.togglePlayMusic() // Correct the store state
+            volumeStore.togglePlayMusic()
           }
         }
       } else {
@@ -96,6 +95,8 @@ export function useBackgroundMusic() {
 
   onUnmounted(() => {
     cleanupAudio()
+    volumeStore.setMusicUrl(null)
+    if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
   })
 
   return {

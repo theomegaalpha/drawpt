@@ -45,7 +45,7 @@ const closeModal = () => {
               class="mr-2.5 h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
             />
             <span class="inline-block w-[40px] text-right text-sm text-gray-600"
-              >{{ sfxVolume }}%</span
+              >{{ sfxVolumeRef }}%</span
             >
           </div>
         </div>
@@ -64,7 +64,7 @@ const closeModal = () => {
               class="mr-2.5 h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
             />
             <span class="inline-block w-[40px] text-right text-sm text-gray-600"
-              >{{ musicVolume }}%</span
+              >{{ musicVolumeRef }}%</span
             >
           </div>
         </div>
