@@ -6,9 +6,7 @@ import Header from '@/components/header/Header.vue'
 <template>
   <div class="min-h-screen">
     <Header />
-    <main className="flex flex-col items-center">
-      <TheEntry />
-    </main>
+    <TheEntry />
     <footer class="bg-indigo-900 py-6 text-white dark:bg-zinc-950">
       <div class="container mx-auto px-6">
         <div class="flex flex-col items-center justify-between md:flex-row">

@@ -5,7 +5,7 @@ import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
 import { useVolumeStore } from '@/stores/volumeStore'
 import service from '@/services/signalRService'
-import FlickeringGrid from './FlickeringGrid.vue'
+import FlickeringGrid from '../../common/FlickeringGrid.vue'
 import { onMounted } from 'vue'
 
 const playerStore = usePlayerStore() // Renamed for clarity

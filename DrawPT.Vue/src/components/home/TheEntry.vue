@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
+import { RouterLink } from 'vue-router'
 import GuessInput from '../common/GuessInput.vue'
 import StandardInput from '../common/StandardInput.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
@@ -89,9 +90,12 @@ onMounted(() => {
         <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
           Daily Challenge
         </button>
-        <button class="btn-default ml-2 text-lg font-semibold shadow-md" @click="createRoom">
+        <RouterLink
+          class="btn-default ml-2 text-lg font-semibold shadow-md"
+          :to="{ name: 'game-selection' }"
+        >
           Play Game
-        </button>
+        </RouterLink>
       </div>
     </div>
     <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
