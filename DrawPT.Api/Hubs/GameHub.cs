@@ -211,6 +211,7 @@ namespace DrawPT.Api.Hubs
             if (userId == null)
             {
                 _logger.LogWarning("user_id not found in claim while requesting to join a room!");
+                await Clients.Caller.ErrorJoiningRoom("Failed to join room.  Please refresh and try again.");
                 return;
             }
 
@@ -267,7 +268,7 @@ namespace DrawPT.Api.Hubs
             if (playerIdClaim == null)
             {
                 _logger.LogError("user_id not found in claim while joining a room!");
-                await Clients.Caller.ErrorJoiningRoom();
+                await Clients.Caller.ErrorJoiningRoom("Failed to join room.  Please refresh and try again.");
                 return;
             }
 
@@ -292,7 +293,7 @@ namespace DrawPT.Api.Hubs
             if (gameState == null)
             {
                 _logger.LogError($"Game state for room {roomCode} not found!");
-                await Clients.Caller.ErrorJoiningRoom();
+                await Clients.Caller.ErrorJoiningRoom("Failed to join room.  Please refresh and try again.");
                 return;
             }
             await _cache.SetGameState(gameState);

@@ -15,27 +15,23 @@ namespace DrawPT.Common.Services
         private readonly ImageClient _imageClient;
         private readonly GeminiImageGenerator _geminiImageGenerator;
 
-        string _imagePrompt = @"You are a highly imaginative player in an AI-driven digital art game.
-Given a theme, generate a visually compelling prompt that will produce a stunning yet clear image—avoiding overly abstract concepts.
-Keep the response short and concrete, ensuring the generated image remains recognizable and engaging.
-Introduce variety while maintaining alignment to the given theme to make guessing fun and dynamic.
+        string _imagePrompt = @"You are a highly imaginative, visually oriented AI assistant designed to generate striking, beautiful image prompts for an AI-powered digital art game.
+Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme and art style.
+Focus on vivid visual elements, textures, compositions, and lighting that enhance the appeal of the artwork.
+Ensure clear imagery, avoiding overly abstract or ambiguous concepts that may be difficult to depict accurately.
+Dynamically adjust the tone and structure of prompts based on the given art style, leveraging techniques specific to each genre to enhance authenticity.
+Maintain engagement and variety in each response while aligning to the provided theme.
 
-Response format (excluding curly braces): '[{Theme}] {Creative image prompt}'";
+Response Format:
+(Use this format without curly braces) [{Art Style}] [{Theme}] {Creative image prompt}";
         private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
-
 Evaluation Criteria:
 Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
-
 Very Strong Conceptual & Sentiment Match (15-19 Points): The guess conveys the same emotional tone and core meaning, matching on some words.
-
 Strong Conceptual & Sentiment Match (11-14 Points): The guess conveys the same emotional tone and core meaning, even if the wording is different.
-
 Moderate Conceptual Overlap (8-10 Points): The guess captures important aspects of the phrase—such as key themes, related emotions, or partial word matches—but deviates in structure.
-
 Weak Connection (4-7 Points): The guess contains elements that vaguely relate to the original phrase but alters meaning significantly.
-
 Very Weak Connection (1-3 Points): The guess contains trace elements that can arguably relate to the original phrase.
-
 Unrelated (0 Points): The guess has no meaningful connection in words, sentiment, or concept.
 
 Strict Response Format:
@@ -47,6 +43,7 @@ json
         'Id': '<unique identifier>',
         'PlayerId': '<unique identifier of original Player ID>',
         'ConnectionId': '<unique identifier of original Connection ID>',
+        'Username': '<contestant's username>',
         'Guess': '<contestant's guessed phrase>',
         'Score': '<integer from 0 to 20>',
         'Reason': '<explanation for the given score>',
@@ -56,9 +53,7 @@ json
     }
 ]
 The response must always be a JSON array, even when evaluating a single contestant.
-
 Ensure explanations ('Reason') are concise yet sufficiently justify the assigned score.
-
 Original Phrase:
 Now, the original phrase is:";
 
@@ -130,13 +125,11 @@ Now, the original phrase is:";
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
-            return await GenerateFakeGameQuestionAsync(theme);
-
             var prompt = await GenerateImagePromptAsync(theme);
             var imageUrl = await GenerateImageAsync(prompt);
             return new GameQuestion()
             {
-                OriginalPrompt = prompt.Split(']')[1],
+                OriginalPrompt = prompt.Split(']')[^1],
                 ImageUrl = imageUrl
             };
         }
@@ -178,7 +171,7 @@ Now, the original phrase is:";
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(_imagePrompt),
-                new UserChatMessage(theme)
+                new UserChatMessage($"[anime][{theme}]")
             };
 
             try
