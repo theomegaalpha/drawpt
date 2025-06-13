@@ -3,7 +3,7 @@ import RoomWrapper from '@/components/room/RoomWrapper.vue'
 </script>
 
 <template>
-  <main>
+  <main class="h-full">
     <RoomWrapper />
   </main>
 </template>
