@@ -303,7 +303,7 @@ namespace DrawPT.Api.Hubs
             // Start consuming from all client broadcast messages
             if (gameState.HostPlayerId == playerId)
             {
-                var broadcastQueueName = _channel.QueueDeclare(queue: "", exclusive: true, autoDelete: true, durable: false).QueueName; // Server-generated name
+                var broadcastQueueName = _channel.QueueDeclare(queue: "", exclusive: false, autoDelete: true, durable: false).QueueName; // Server-generated name
                 _channel.QueueBind(
                     queue: broadcastQueueName,
                     exchange: GameEngineBroadcastMQ.ExchangeName,
