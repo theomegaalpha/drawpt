@@ -64,7 +64,7 @@ onUnmounted(() => {
 <template>
   <GameNotifications />
   <SetUsername v-if="!roomStore.successfullyJoined" />
-  <div v-if="roomStore.successfullyJoined && playerStore.player?.id">
+  <div v-if="roomStore.successfullyJoined && playerStore.player?.id" class="h-full">
     <GameResults v-if="scoreboardStore.gameResults.playerResults.length > 0" />
     <div v-else>
       <Lobby v-if="!roomStore.room.isGameStarted" />

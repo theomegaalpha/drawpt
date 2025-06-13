@@ -7,7 +7,7 @@ import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 
 const scoreboardStore = useScoreboardStore()
-const { setSfxUrl } = useVolumeStore()
+const { setSfxUrl, stopMusic } = useVolumeStore()
 const { gameResults } = scoreboardStore
 const { player: you } = usePlayerStore()
 
@@ -38,6 +38,7 @@ function frame() {
 
 onMounted(() => {
   setSfxUrl('/sounds/victory.mp3')
+  stopMusic()
 })
 
 onMounted(() => {
