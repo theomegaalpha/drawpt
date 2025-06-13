@@ -4,25 +4,31 @@ import Lobby from '@/components/room/lobby/Lobby.vue'
 import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/GameNotifications.vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
+import VolumeControls from '@/components/room/volume/VolumeControls.vue'
 
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoinStore'
+import { useVolumeStore } from '@/stores/volumeStore'
 import api from '@/services/api'
 import service from '@/services/signalRService'
 import {
   registerBaseGameHubEvents,
   unregisterBaseGameHubEvents
 } from '@/services/gameEventHandlers'
+import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+
+useBackgroundMusic()
 
 const roomStore = useRoomStore()
 const playerStore = usePlayerStore()
 const scoreboardStore = useScoreboardStore()
 const notificationStore = useNotificationStore()
 const roomJoinStore = useRoomJoinStore()
+const { isModalOpen, toggleModal } = useVolumeStore()
 
 onMounted(async () => {
   roomJoinStore.reset()
@@ -63,6 +69,11 @@ onUnmounted(() => {
     <div v-else>
       <Lobby v-if="!roomStore.room.isGameStarted" />
       <Game v-else />
+    </div>
+
+    <!-- Button to toggle Volume Settings Modal -->
+    <div class="absolute left-4 top-4 z-[100]">
+      <VolumeControls :show="isModalOpen" @close="toggleModal" />
     </div>
   </div>
 </template>
