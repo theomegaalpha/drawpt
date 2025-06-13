@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DrawPT.Common.Services
+namespace DrawPT.Common.Services.AI
 {
     public class GeminiRequestPayload
     {
