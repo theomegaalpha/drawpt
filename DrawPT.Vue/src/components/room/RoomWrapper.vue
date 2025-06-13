@@ -19,6 +19,9 @@ import {
   registerBaseGameHubEvents,
   unregisterBaseGameHubEvents
 } from '@/services/gameEventHandlers'
+import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+
+useBackgroundMusic()
 
 const roomStore = useRoomStore()
 const playerStore = usePlayerStore()
@@ -72,13 +75,5 @@ onUnmounted(() => {
     <div class="absolute left-4 top-4 z-[100]">
       <VolumeControls :show="isModalOpen" @close="toggleModal" />
     </div>
-
-    <!-- Optional: Display current volumes for demonstration -->
-    <!--
-    <div class="mt-4 p-4 bg-gray-100 rounded">
-      <p>Current SFX Volume (in RoomWrapper): {{ currentSfxVolume }}%</p>
-      <p>Current Music Volume (in RoomWrapper): {{ currentMusicVolume }}%</p>
-    </div>
-    -->
   </div>
 </template>

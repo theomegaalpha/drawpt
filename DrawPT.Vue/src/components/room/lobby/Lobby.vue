@@ -7,13 +7,11 @@ import { useVolumeStore } from '@/stores/volumeStore'
 import service from '@/services/signalRService'
 import FlickeringGrid from './FlickeringGrid.vue'
 import { onMounted } from 'vue'
-import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
 
 const playerStore = usePlayerStore() // Renamed for clarity
 const roomStore = useRoomStore() // Renamed for clarity
 const volumeStore = useVolumeStore()
-const { loadAndPlayMusic } = useBackgroundMusic()
-const { musicVolume } = volumeStore
+const { setMusicUrl, togglePlayMusic } = volumeStore
 
 const startGame = async () => {
   var gameStarted = await service.invoke('startGame')
@@ -23,7 +21,8 @@ const startGame = async () => {
 }
 
 onMounted(() => {
-  loadAndPlayMusic(`/music/lofi1.mp3`, musicVolume)
+  setMusicUrl('/music/lofi1.mp3')
+  togglePlayMusic()
 })
 </script>
 
