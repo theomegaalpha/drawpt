@@ -3,11 +3,17 @@ import PlayerList from './PlayerList.vue' // New import
 import RoomInfo from './RoomInfo.vue' // New import
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
+import { useVolumeStore } from '@/stores/volumeStore'
 import service from '@/services/signalRService'
-import FlickeringGrid from './FlickeringGrid.vue' // Adjusted path if Lobby.vue is moved
+import FlickeringGrid from './FlickeringGrid.vue'
+import { onMounted } from 'vue'
+import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
 
 const playerStore = usePlayerStore() // Renamed for clarity
 const roomStore = useRoomStore() // Renamed for clarity
+const volumeStore = useVolumeStore()
+const { loadAndPlayMusic } = useBackgroundMusic()
+const { musicVolume } = volumeStore
 
 const startGame = async () => {
   var gameStarted = await service.invoke('startGame')
@@ -15,6 +21,10 @@ const startGame = async () => {
     console.error('Game could not be started')
   }
 }
+
+onMounted(() => {
+  loadAndPlayMusic(`/music/lofi1.mp3`, musicVolume)
+})
 </script>
 
 <template>
