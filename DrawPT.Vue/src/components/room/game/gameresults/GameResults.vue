@@ -2,10 +2,12 @@
 import { onMounted } from 'vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { usePlayerStore } from '@/stores/player'
+import { useVolumeStore } from '@/stores/volumeStore'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 
 const scoreboardStore = useScoreboardStore()
+const { setSfxUrl } = useVolumeStore()
 const { gameResults } = scoreboardStore
 const { player: you } = usePlayerStore()
 
@@ -33,6 +35,10 @@ function frame() {
     requestAnimationFrame(frame)
   }
 }
+
+onMounted(() => {
+  setSfxUrl('/sounds/victory.mp3')
+})
 
 onMounted(() => {
   // start the animation

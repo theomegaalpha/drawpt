@@ -2,6 +2,9 @@
 import { onBeforeMount } from 'vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
+import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+
+useBackgroundMusic()
 const { updateGameResults } = useScoreboardStore()
 var result = {
   playerResults: [

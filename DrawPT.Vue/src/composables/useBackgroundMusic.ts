@@ -89,6 +89,22 @@ export function useBackgroundMusic() {
     { immediate: true } // Set initial volume when composable is used
   )
 
+  // Watch for changes in the store's sfxUrl and play the sound effect once
+  watch(
+    () => volumeStore.sfxUrl,
+    (newSfxUrl, oldSfxUrl) => {
+      if (newSfxUrl && newSfxUrl !== oldSfxUrl) {
+        const sfxAudio = new Audio(newSfxUrl)
+        const sfxVolumePercent = volumeStore.sfxVolume
+        const sfxVolumeNormalized = Math.max(0, Math.min(100, sfxVolumePercent)) / 100
+        sfxAudio.volume = sfxVolumeNormalized
+        sfxAudio.play().catch((error) => {
+          console.error('Error playing SFX:', error, 'URL:', newSfxUrl)
+        })
+      }
+    }
+  )
+
   const setVolume = (volumePercent: number) => {
     volumeStore.setMusicVolume(volumePercent)
   }
