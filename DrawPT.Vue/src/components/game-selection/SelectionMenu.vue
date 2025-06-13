@@ -3,7 +3,6 @@ import api from '@/services/api'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
-import FlickeringGrid from '@/components/common/FlickeringGrid.vue'
 import StandardInput from '../common/StandardInput.vue'
 
 const showTooltip = ref(false)
@@ -44,27 +43,31 @@ const createRoom = () => {
       class="grid w-full grid-cols-1 gap-3 md:grid-cols-2 md:items-stretch lg:mx-auto lg:max-w-4xl"
     >
       <!-- Inner grid for columns -->
-      <div
-        class="col-span-1 flex flex-col justify-center rounded-xl p-8 text-center shadow-md dark:bg-gray-500/5"
-      >
-        <button
-          class="btn-default w-full"
-          disabled
-          @mouseenter="showTooltip = true"
-          @mouseleave="showTooltip = false"
-          @focus="showTooltip = true"
-          @blur="showTooltip = false"
-        >
-          Join Matchmaking Queue
-        </button>
-        <div
-          v-if="showTooltip"
-          class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
-        >
-          Coming soon!
+      <div class="col-span-1 flex flex-col rounded-xl p-8 text-center shadow-md dark:bg-gray-500/5">
+        <h2 class="mb-4 text-xl font-bold">Public Matchmaking</h2>
+        <div class="flex justify-center p-8 text-center">
+          <div class="relative w-full">
+            <button
+              class="btn-default w-full"
+              disabled
+              @mouseenter="showTooltip = true"
+              @mouseleave="showTooltip = false"
+              @focus="showTooltip = true"
+              @blur="showTooltip = false"
+            >
+              Join Matchmaking Queue
+            </button>
+            <div
+              v-if="showTooltip"
+              class="absolute bottom-full left-1/2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
+            >
+              Coming soon!
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-span-1 rounded-xl p-8 text-center shadow-md dark:bg-gray-500/5">
+        <h2 class="mb-4 text-xl font-bold">Private Lobby</h2>
         <div class="relative">
           <button class="btn-default w-full" @click="createRoom()">Create Room</button>
         </div>
