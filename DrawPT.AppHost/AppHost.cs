@@ -36,6 +36,7 @@ var openai = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureOpenAI("openai")
     : builder.AddConnectionString("openai");
 var gemini = builder.AddConnectionString("gemini");
+var freepikKey = builder.AddParameter("FreepikApiKey", true);
 
 var rabbitmq = builder.AddRabbitMQ("messaging");
 
@@ -59,6 +60,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithEnvironment("AuthenticationSecretKey", supabaseSecretKey)
     .WithEnvironment("SupabaseUrl", supabaseUrl)
     .WithEnvironment("SupabaseApiKey", supabaseApiKey)
+    .WithEnvironment("FreepikApiKey", freepikKey)
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
@@ -99,6 +101,7 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(db)
     .WithReference(openai)
     .WithReference(gemini)
+    .WithEnvironment("FreepikApiKey", freepikKey)
     .WaitFor(rabbitmq)
     .WaitFor(storage)
     .WaitFor(redis)

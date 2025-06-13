@@ -7,6 +7,7 @@ using DrawPT.GameEngine.LocalCache;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Services;
 using DrawPT.Common.Interfaces.Game;
+using DrawPT.Common.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.AddAzureOpenAIClient(connectionName: "openai");
 var services = builder.Services;
 services.AddHostedService<GameEventListener>();
 services.AddTransient<GeminiImageGenerator>();
+services.AddTransient<FreepikImageService>();
 services.AddTransient<IAIService, AIService>();
 services.AddTransient<IAssessmentService, AssessmentService>();
 services.AddTransient<ICacheService, CacheService>();

@@ -7,13 +7,13 @@ using System.ClientModel;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
-namespace DrawPT.Common.Services
+namespace DrawPT.Common.Services.AI
 {
     public class AIService : IAIService
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
-        private readonly GeminiImageGenerator _geminiImageGenerator;
+        private readonly FreepikImageService _freepikImageService;
 
         string _imagePrompt = @"You are a highly imaginative, visually oriented AI assistant designed to generate striking, beautiful image prompts for an AI-powered digital art game.
 Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme and art style.
@@ -57,11 +57,11 @@ Ensure explanations ('Reason') are concise yet sufficiently justify the assigned
 Original Phrase:
 Now, the original phrase is:";
 
-        public AIService(OpenAIClient aiClient, GeminiImageGenerator geminiImageGenerator, IConfiguration configuration)
+        public AIService(OpenAIClient aiClient, FreepikImageService freepikImageService, IConfiguration configuration)
         {
             _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
             _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel"));
-            _geminiImageGenerator = geminiImageGenerator;
+            _freepikImageService = freepikImageService;
         }
 
         public async Task<List<PlayerAnswer>> AssessAnswerAsync(string originalPrompt, List<PlayerAnswer> answers)
@@ -79,12 +79,12 @@ Now, the original phrase is:";
             {
                 var options = new ChatCompletionOptions
                 {
-                    Temperature = (float)1,
+                    Temperature = 1,
                     MaxOutputTokenCount = 800,
 
-                    TopP = (float)1,
-                    FrequencyPenalty = (float)0,
-                    PresencePenalty = (float)0
+                    TopP = 1,
+                    FrequencyPenalty = 0,
+                    PresencePenalty = 0
                 };
 
                 ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
@@ -130,7 +130,7 @@ Now, the original phrase is:";
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
-                ImageUrl = imageUrl
+                ImageUrl = imageUrl ?? string.Empty
             };
         }
 
@@ -178,12 +178,12 @@ Now, the original phrase is:";
             {
                 var options = new ChatCompletionOptions
                 {
-                    Temperature = (float)1,
+                    Temperature = 1,
                     MaxOutputTokenCount = 800,
 
-                    TopP = (float)1,
-                    FrequencyPenalty = (float)0,
-                    PresencePenalty = (float)0
+                    TopP = 1,
+                    FrequencyPenalty = 0,
+                    PresencePenalty = 0
                 };
 
                 ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
@@ -211,7 +211,7 @@ Now, the original phrase is:";
         }
 
         // create a GenerateImageAsync method here
-        private async Task<string> GenerateImageAsync(string prompt)
+        private async Task<string?> GenerateImageAsync(string prompt)
         {
             return await GenerateImageRestfullyAsync(prompt);
 
@@ -228,9 +228,9 @@ Now, the original phrase is:";
             return image.ImageUri.ToString() ?? string.Empty;
         }
 
-        private async Task<string> GenerateImageRestfullyAsync(string prompt)
+        private async Task<string?> GenerateImageRestfullyAsync(string prompt)
         {
-            return await _geminiImageGenerator.GenerateAndSaveImageAsync(prompt);
+            return await _freepikImageService.GenerateAndSaveImageAsync(prompt);
         }
     }
 }
