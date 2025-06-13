@@ -21,14 +21,14 @@ jobs:
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      AZURE_CERTIFICATE_NAME: ${{ vars.AZURE_CERTIFICATE_NAME }}
-      AZURE_GOOGLE_CLIENT_ID: ${{ vars.AZURE_GOOGLE_CLIENT_ID }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_CERTIFICATE_NAME: ${{ vars.AZURE_CERTIFICATE_NAME }}
       AZURE_CUSTOM_DOMAIN: ${{ vars.AZURE_CUSTOM_DOMAIN }}
       AZURE_SUPABASE_ANON_KEY: ${{ vars.AZURE_SUPABASE_ANON_KEY }}
-      AZURE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
-      AZURE_SUPABASE_ISSUER: ${{ vars.AZURE_SUPABASE_ISSUER }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      AZURE_GOOGLE_CLIENT_ID: ${{ vars.AZURE_GOOGLE_CLIENT_ID }}
+      AZURE_SUPABASE_ISSUER: ${{ vars.AZURE_SUPABASE_ISSUER }}
+      AZURE_SUPABASE_URL: ${{ vars.AZURE_SUPABASE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,20 +53,22 @@ jobs:
       - name: Provision Infrastructure
         run: azd provision --no-prompt
         env:
-          AZURE_SUPABASE_SECRET_KEY: ${{ secrets.AZURE_SUPABASE_SECRET_KEY }}
-          AZURE_GEMINI: ${{ secrets.AZURE_GEMINI }}
-          AZURE_MESSAGING_PASSWORD: ${{ secrets.AZURE_MESSAGING_PASSWORD }}
           AZURE_CACHE_PASSWORD: ${{ secrets.AZURE_CACHE_PASSWORD }}
-          AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
+          AZURE_GEMINI: ${{ secrets.AZURE_GEMINI }}
           AZURE_SUPABASE_API_KEY: ${{ secrets.AZURE_SUPABASE_API_KEY }}
+          AZURE_FREEPIK_API_KEY: ${{ secrets.AZURE_FREEPIK_API_KEY }}
+          AZURE_SUPABASE_SECRET_KEY: ${{ secrets.AZURE_SUPABASE_SECRET_KEY }}
+          AZURE_MESSAGING_PASSWORD: ${{ secrets.AZURE_MESSAGING_PASSWORD }}
+          AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
 
       - name: Deploy Application
         run: azd deploy --no-prompt
         env:
-          AZURE_SUPABASE_SECRET_KEY: ${{ secrets.AZURE_SUPABASE_SECRET_KEY }}
-          AZURE_GEMINI: ${{ secrets.AZURE_GEMINI }}
-          AZURE_MESSAGING_PASSWORD: ${{ secrets.AZURE_MESSAGING_PASSWORD }}
           AZURE_CACHE_PASSWORD: ${{ secrets.AZURE_CACHE_PASSWORD }}
-          AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
+          AZURE_GEMINI: ${{ secrets.AZURE_GEMINI }}
           AZURE_SUPABASE_API_KEY: ${{ secrets.AZURE_SUPABASE_API_KEY }}
+          AZURE_FREEPIK_API_KEY: ${{ secrets.AZURE_FREEPIK_API_KEY }}
+          AZURE_SUPABASE_SECRET_KEY: ${{ secrets.AZURE_SUPABASE_SECRET_KEY }}
+          AZURE_MESSAGING_PASSWORD: ${{ secrets.AZURE_MESSAGING_PASSWORD }}
+          AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
         
