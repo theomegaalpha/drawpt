@@ -26,8 +26,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  squareSize: 4,
-  gridGap: 6,
+  squareSize: 5,
+  gridGap: 7,
   flickerChance: 0.3,
   color: 'rgb(0, 0, 0)',
   darkModeColor: 'rgb(255, 255, 255)',
@@ -45,8 +45,17 @@ let animationFrameId: number = 0
 let gridParams: ReturnType<typeof setupCanvasInternal> | undefined
 let resizeObserver: ResizeObserver
 let intersectionObserver: IntersectionObserver
-let lastTime = 0
+// let lastTime = 0 // Replaced by lastLogicExecutionTime and lastScheduledRenderTime
 let ctx: CanvasRenderingContext2D | null = null
+
+// --- Optimizations Start ---
+const TARGET_FPS = 15 // Target FPS for the animation
+const RENDER_INTERVAL_MS = 1000 / TARGET_FPS
+let lastLogicExecutionTime = 0 // Timestamp of the last logic update/draw
+let lastScheduledRenderTime = 0 // Timestamp for scheduling renders
+
+const colorCache = new Map<string, string>()
+// --- Optimizations End ---
 
 // Watch for dark mode changes
 const checkDarkMode = () => {
@@ -57,17 +66,27 @@ const checkDarkMode = () => {
 
 const memoizedColor = computed(() => {
   const toRGBA = (colorVal: string) => {
+    if (colorCache.has(colorVal)) {
+      return colorCache.get(colorVal)!
+    }
     if (typeof window === 'undefined') {
-      return `rgba(0, 0, 0,`
+      // Return a fully transparent black as a fallback for SSR or no window
+      return 'rgba(0, 0, 0, 0)'
     }
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = 1
     const tempCtx = canvas.getContext('2d')
-    if (!tempCtx) return 'rgba(0, 0, 0,`'
+    if (!tempCtx) {
+      console.error('FlickeringGrid: Failed to get 2D context for color conversion')
+      return 'rgba(0, 0, 0, 0)' // Fallback
+    }
     tempCtx.fillStyle = colorVal
     tempCtx.fillRect(0, 0, 1, 1)
     const [r, g, b] = Array.from(tempCtx.getImageData(0, 0, 1, 1).data)
-    return `rgba(${r}, ${g}, ${b},`
+    // Keep the trailing comma for opacity to be appended later
+    const result = `rgba(${r}, ${g}, ${b},`
+    colorCache.set(colorVal, result)
+    return result
   }
   return toRGBA(isDarkMode.value ? props.darkModeColor : props.color)
 })
@@ -127,21 +146,30 @@ const drawGrid = (
   }
 }
 
-const animate = (time: number) => {
+const animate = (timestamp: number) => {
+  animationFrameId = requestAnimationFrame(animate) // Keep rAF scheduling
+
   if (!isInView.value || !gridParams || !ctx) {
-    if (isInView.value) {
-      // Only request next frame if it should be animating
-      animationFrameId = requestAnimationFrame(animate)
-    }
+    // If not in view, or not ready, skip update/draw.
+    // IntersectionObserver handles cancelling rAF when not in view.
     return
   }
 
-  const deltaTime = (time - lastTime) / 1000 // Time in seconds
-  lastTime = time
+  // lastScheduledRenderTime and lastLogicExecutionTime are initialized by onMounted or intersectionObserver
 
-  updateSquares(gridParams.squares, deltaTime)
-  drawGrid(ctx, gridParams)
-  animationFrameId = requestAnimationFrame(animate)
+  const elapsedSinceLastScheduled = timestamp - lastScheduledRenderTime
+
+  if (elapsedSinceLastScheduled >= RENDER_INTERVAL_MS) {
+    // Adjust lastScheduledRenderTime to maintain consistent interval
+    lastScheduledRenderTime = timestamp - (elapsedSinceLastScheduled % RENDER_INTERVAL_MS)
+
+    // Calculate deltaTime based on actual time passed since last logic execution
+    const deltaTimeSeconds = (timestamp - lastLogicExecutionTime) / 1000
+    lastLogicExecutionTime = timestamp // Update time of this execution
+
+    updateSquares(gridParams.squares, deltaTimeSeconds)
+    drawGrid(ctx, gridParams)
+  }
 }
 
 const updateCanvasSizeAndSetup = () => {
@@ -220,13 +248,21 @@ onMounted(() => {
     ([entry]) => {
       isInView.value = entry.isIntersecting
       if (isInView.value) {
-        lastTime = performance.now()
+        const now = performance.now()
+        lastScheduledRenderTime = now // Initialize for throttled animation
+        lastLogicExecutionTime = now // Initialize
         if (!animationFrameId) {
+          // Start animation if not already running
           animationFrameId = requestAnimationFrame(animate)
         }
       } else {
-        cancelAnimationFrame(animationFrameId)
-        animationFrameId = 0
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId)
+          animationFrameId = 0
+        }
+        // Reset timers when not in view
+        lastScheduledRenderTime = 0
+        lastLogicExecutionTime = 0
       }
     },
     { threshold: 0 }
@@ -255,16 +291,42 @@ onMounted(() => {
 
   // Initial animation start if in view
   if (isInView.value) {
-    lastTime = performance.now()
-    animationFrameId = requestAnimationFrame(animate)
+    const now = performance.now()
+    lastScheduledRenderTime = now // Initialize for throttled animation
+    lastLogicExecutionTime = now // Initialize
+    // animationFrameId = requestAnimationFrame(animate) // Already handled by intersection observer logic if initially in view
+    // Ensure animation starts if initially in view and observer hasn't fired yet or if logic needs explicit start
+    if (
+      !animationFrameId &&
+      canvasRef.value &&
+      intersectionObserver
+        .takeRecords()
+        .some((e) => e.isIntersecting || e.target === canvasRef.value)
+    ) {
+      isInView.value = true // Ensure isInView is true
+      lastScheduledRenderTime = performance.now()
+      lastLogicExecutionTime = performance.now()
+      animationFrameId = requestAnimationFrame(animate)
+    } else if (!animationFrameId && isInView.value) {
+      // Fallback if observer logic is tricky for initial state
+      lastScheduledRenderTime = performance.now()
+      lastLogicExecutionTime = performance.now()
+      animationFrameId = requestAnimationFrame(animate)
+    }
   }
 })
 
 onUnmounted(() => {
-  cancelAnimationFrame(animationFrameId)
-  animationFrameId = 0
+  if (animationFrameId) {
+    // Check before cancelling
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = 0
+  }
   if (resizeObserver) resizeObserver.disconnect()
   if (intersectionObserver) intersectionObserver.disconnect()
+  // Reset timers
+  lastScheduledRenderTime = 0
+  lastLogicExecutionTime = 0
 })
 </script>
 
