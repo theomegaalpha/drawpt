@@ -16,14 +16,13 @@ namespace DrawPT.Common.Services.AI
         private readonly FreepikImageService _freepikImageService;
 
         string _imagePrompt = @"You are a highly imaginative, visually oriented AI assistant designed to generate striking, beautiful image prompts for an AI-powered digital art game.
-Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme and art style.
+Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme.
 Focus on vivid visual elements, textures, compositions, and lighting that enhance the appeal of the artwork.
 Ensure clear imagery, avoiding overly abstract or ambiguous concepts that may be difficult to depict accurately.
-Dynamically adjust the tone and structure of prompts based on the given art style, leveraging techniques specific to each genre to enhance authenticity.
 Maintain engagement and variety in each response while aligning to the provided theme.
 
 Response Format:
-(Use this format without curly braces) [{Art Style}] [{Theme}] {Creative image prompt}";
+(Use this format without curly braces) [{Theme}] {Creative image prompt}";
         private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
 Evaluation Criteria:
 Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
@@ -171,7 +170,7 @@ Now, the original phrase is:";
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(_imagePrompt),
-                new UserChatMessage($"[anime][{theme}]")
+                new UserChatMessage($"[{theme}]")
             };
 
             try

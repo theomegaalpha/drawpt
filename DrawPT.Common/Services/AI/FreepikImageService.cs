@@ -34,7 +34,7 @@ namespace DrawPT.Common.Services.AI
             var requestPayload = new FreepikImageRequestPayload
             {
                 Prompt = prompt,
-                NegativePrompt = "cartoon, ugly",
+                NegativePrompt = "ugly,malformed hands",
                 GuidanceScale = 1,
                 NumImages = 1,
                 Image = new FreepikImageRequestPayload.ImageDetails
@@ -43,7 +43,7 @@ namespace DrawPT.Common.Services.AI
                 },
                 Styling = new FreepikImageRequestPayload.StylingDetails
                 {
-                    Style = "anime",
+                    //Style = "anime",
                     Effects = new FreepikImageRequestPayload.EffectsDetails
                     {
                         Lightning = "cold"

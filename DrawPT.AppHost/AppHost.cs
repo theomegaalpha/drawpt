@@ -42,6 +42,10 @@ var rabbitmq = builder.AddRabbitMQ("messaging");
 
 var redis = builder.AddRedis("cache");
 
+var insights = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureApplicationInsights("appinsights")
+    : builder.AddConnectionString("appinsights", "ConnectionStrings:appinsights");
+
 var supabaseUrl = builder.AddParameter("supabase-url");
 var supabaseIssuer= builder.AddParameter("supabase-issuer");
 var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
@@ -56,6 +60,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(rabbitmq)
     .WithReference(signalr)
     .WithReference(redis)
+    .WithReference(insights)
     .WithEnvironment("AuthenticationValidIssuer", supabaseIssuer)
     .WithEnvironment("AuthenticationSecretKey", supabaseSecretKey)
     .WithEnvironment("SupabaseUrl", supabaseUrl)
@@ -91,6 +96,7 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
 builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
     .WithReference(rabbitmq)
     .WithReference(redis)
+    .WithReference(insights)
     .WaitFor(rabbitmq)
     .WaitFor(redis);
 
@@ -101,6 +107,7 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(db)
     .WithReference(openai)
     .WithReference(gemini)
+    .WithReference(insights)
     .WithEnvironment("FreepikApiKey", freepikKey)
     .WaitFor(rabbitmq)
     .WaitFor(storage)
