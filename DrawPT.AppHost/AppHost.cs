@@ -42,6 +42,8 @@ var rabbitmq = builder.AddRabbitMQ("messaging");
 
 var redis = builder.AddRedis("cache");
 
+var insights = builder.AddAzureApplicationInsights("appinsights");
+
 var supabaseUrl = builder.AddParameter("supabase-url");
 var supabaseIssuer= builder.AddParameter("supabase-issuer");
 var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
