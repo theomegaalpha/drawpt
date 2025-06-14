@@ -9,6 +9,7 @@ namespace DrawPT.Api.Hubs
         Task AlreadyInRoom();
         Task NavigateToRoom();
         Task ErrorJoiningRoom(string error);
+        Task InitRoomPlayers(List<Player> players);
 
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);

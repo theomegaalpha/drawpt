@@ -322,6 +322,8 @@ namespace DrawPT.Api.Hubs
                                 consumer: _interactionConsumer);
 
             await HandleClientBroadcast(roomCode, GameEngineBroadcastMQ.PlayerJoinedAction, JsonSerializer.Serialize(player));
+            var otherPlayers = players.Where(p => p.ConnectionId != Context.ConnectionId).ToList();
+            await Clients.Caller.InitRoomPlayers(otherPlayers);
             await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
         }
 
