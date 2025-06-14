@@ -57,6 +57,7 @@ onMounted(() => {
         :style="{ transitionDelay: `${(gameResults.playerResults.length - 1 - index) * 1800}ms` }"
       >
         <PlayerResultCard
+          :class="{ 'animate-bounce': index === 0 }"
           :is-you="result.connectionId === you.connectionId"
           :player-result="result"
         />
