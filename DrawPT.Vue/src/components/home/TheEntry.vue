@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import api from '@/services/api'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router' // Added useRoute
-import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router'
 import GuessInput from '../common/GuessInput.vue'
 import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 
-const { clearRoom, updateRoomCode } = useRoomStore()
-const roomCodeInput = ref<string>('')
 const guess = ref('')
-const showTooltip = ref(false)
 
 const submitGuess = () => {
   if (guess.value.trim()) {
@@ -21,58 +16,12 @@ const submitGuess = () => {
   }
 }
 
-const authStore = useAuthStore()
-const isAuthenticated = computed(() => {
-  return !!authStore.user
-})
-
-const router = useRouter()
-const route = useRoute() // Added to access current route
-
-const joinRoom = (codeToJoin: string) => {
-  if (!codeToJoin || codeToJoin.trim().length === 0) {
-    console.warn('Attempted to join with an empty room code.')
-    // Optionally, add a user notification here
-    return
-  }
-  const upperCaseCode = codeToJoin.toUpperCase()
-  updateRoomCode(upperCaseCode)
-  // Navigate to the 'room' route, passing roomCode as a parameter.
-  // Assumes 'room' route is defined as /room/:roomCode
-  router.push({ name: 'room', params: { roomCode: upperCaseCode } })
-}
-
-const createRoom = () => {
-  if (!isAuthenticated.value) {
-    router.push({ name: 'login' })
-    return
-  }
-
-  api.createRoom().then((newlyCreatedCode) => {
-    if (newlyCreatedCode) {
-      joinRoom(newlyCreatedCode)
-    } else {
-      console.error('Failed to create room: No room code received from API.')
-      // Optionally, add a user notification here
-    }
-  })
-}
-
 const scrollToPrompt = () => {
   const element = document.getElementById('prompt-of-the-day')
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
   }
 }
-
-onMounted(() => {
-  clearRoom()
-  const queryRoomCode = route.query.roomCode as string
-  if (queryRoomCode) {
-    // If a roomCode is present in the URL query, attempt to join it automatically
-    joinRoom(queryRoomCode)
-  }
-})
 </script>
 
 <template>
@@ -132,7 +81,6 @@ onMounted(() => {
           <WinStreak
             class="flex items-center justify-center"
             :dailyStatus="[true, false, true, true, false, true, true]"
-            currentDayIndex="6"
           />
         </div>
       </div>

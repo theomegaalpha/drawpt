@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import api from '@/services/api'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import StandardInput from '../common/StandardInput.vue'
 
 const showTooltip = ref(false)
 
-const { updateRoomCode } = useRoomStore()
+const { updateRoomCode, clearRoom } = useRoomStore()
 const roomCodeInput = ref<string>('')
 const router = useRouter()
 
@@ -34,6 +34,10 @@ const createRoom = () => {
     }
   })
 }
+
+onMounted(() => {
+  clearRoom()
+})
 </script>
 
 <template>
