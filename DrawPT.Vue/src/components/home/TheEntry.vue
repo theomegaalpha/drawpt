@@ -81,6 +81,7 @@ const scrollToPrompt = () => {
           <WinStreak
             class="flex items-center justify-center"
             :dailyStatus="[true, false, true, true, false, true, true]"
+            :currentDayIndex="0"
           />
         </div>
       </div>

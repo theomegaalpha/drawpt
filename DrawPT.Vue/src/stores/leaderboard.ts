@@ -20,35 +20,33 @@ export const useLeaderboardStore = defineStore('leaderboard', () => {
   }
 
   function fetchDailies() {
-    return
-    setIsLoading(true)
-    return fetch('/api/leaderboard/dailies')
-      .then((response) => response.json())
-      .then((data) => {
-        dailies.value = data
-      })
-      .catch((error) => {
-        console.error('Error fetching dailies:', error)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    // setIsLoading(true)
+    // return fetch('/api/leaderboard/dailies')
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     dailies.value = data
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error fetching dailies:', error)
+    //   })
+    //   .finally(() => {
+    //     setIsLoading(false)
+    //   })
   }
 
   function fetchPlayerResults() {
-    return
-    setIsLoading(true)
-    return fetch('/api/leaderboard/game-results')
-      .then((response) => response.json())
-      .then((data) => {
-        playerResults.value = data
-      })
-      .catch((error) => {
-        console.error('Error fetching game results:', error)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    // setIsLoading(true)
+    // return fetch('/api/leaderboard/game-results')
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     playerResults.value = data
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error fetching game results:', error)
+    //   })
+    //   .finally(() => {
+    //     setIsLoading(false)
+    //   })
   }
 
   return {
