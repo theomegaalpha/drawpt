@@ -1,0 +1,6 @@
+@DrawPT.ScheduledService_HostAddress = http://localhost:5063
+
+GET {{DrawPT.ScheduledService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

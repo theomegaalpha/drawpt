@@ -116,4 +116,7 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WaitFor(api);
 
 
+builder.AddProject<Projects.DrawPT_ScheduledService>("drawpt-scheduledservice");
+
+
 builder.Build().Run();

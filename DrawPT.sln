@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawPT.GameEngine", "DrawPT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawPT.Common", "DrawPT.Common\DrawPT.Common.csproj", "{A7527A2A-9BA4-440C-832D-B87DBDE89411}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawPT.ScheduledService", "DrawPT.ScheduledService\DrawPT.ScheduledService.csproj", "{CFA27F8C-4486-43C8-FBEA-2F062DDA75DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{A7527A2A-9BA4-440C-832D-B87DBDE89411}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7527A2A-9BA4-440C-832D-B87DBDE89411}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7527A2A-9BA4-440C-832D-B87DBDE89411}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA27F8C-4486-43C8-FBEA-2F062DDA75DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA27F8C-4486-43C8-FBEA-2F062DDA75DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA27F8C-4486-43C8-FBEA-2F062DDA75DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA27F8C-4486-43C8-FBEA-2F062DDA75DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
