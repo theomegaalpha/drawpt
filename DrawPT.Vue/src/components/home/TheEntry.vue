@@ -4,8 +4,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
+import { RouterLink } from 'vue-router'
 import GuessInput from '../common/GuessInput.vue'
-import StandardInput from '../common/StandardInput.vue'
+import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 
 const { clearRoom, updateRoomCode } = useRoomStore()
@@ -89,9 +90,12 @@ onMounted(() => {
         <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
           Daily Challenge
         </button>
-        <button class="btn-default ml-2 text-lg font-semibold shadow-md" @click="createRoom">
+        <RouterLink
+          class="btn-default ml-2 text-lg font-semibold shadow-md"
+          :to="{ name: 'game-selection' }"
+        >
           Play Game
-        </button>
+        </RouterLink>
       </div>
     </div>
     <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -114,7 +118,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Right column wrapper for Game Options and Leaderboard -->
       <div class="flex flex-col gap-8">
         <div
           class="bg-surface-default flex flex-grow flex-col overflow-hidden rounded-xl shadow-md"
@@ -125,47 +128,12 @@ onMounted(() => {
           <Leaderboard class="flex-grow" />
         </div>
         <div class="bg-surface-default rounded-xl p-6 shadow-md">
-          <h2 class="mb-4 text-xl font-bold">Game Options</h2>
-          <div class="space-y-3">
-            <div class="relative">
-              <button
-                class="btn-default w-full"
-                disabled
-                @mouseenter="showTooltip = true"
-                @mouseleave="showTooltip = false"
-                @focus="showTooltip = true"
-                @blur="showTooltip = false"
-              >
-                Join Multiplayer Lobby
-              </button>
-              <div
-                v-if="showTooltip"
-                class="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
-              >
-                Coming soon!
-              </div>
-            </div>
-            <div class="relative">
-              <button class="btn-default w-full" @click="createRoom()">Create Room</button>
-            </div>
-
-            <div class="relative flex w-full">
-              <StandardInput
-                placeholder="Room Code"
-                maxlength="4"
-                :autocapitalize="true"
-                v-model="roomCodeInput"
-                @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
-              />
-              <button
-                class="btn-default ml-2 flex rounded-full px-6"
-                :disabled="roomCodeInput.length < 4"
-                @click="joinRoom(roomCodeInput)"
-              >
-                Join
-              </button>
-            </div>
-          </div>
+          <h2 class="mb-4 text-xl font-bold">Win Streak</h2>
+          <WinStreak
+            class="flex items-center justify-center"
+            :dailyStatus="[true, false, true, true, false, true, true]"
+            currentDayIndex="6"
+          />
         </div>
       </div>
     </div>
