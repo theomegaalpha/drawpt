@@ -68,6 +68,21 @@ namespace DrawPT.Api.Controllers
                 if (assessment == null || assessment.Count == 0)
                     return BadRequest("Failed to assess the answer.");
 
+
+                if (saveToDb)
+                {
+                    var answerToSave = new DailyAnswerEntity
+                    {
+                        PlayerId = playerAnswer.PlayerId,
+                        QuestionId = todaysQuestion.Id,
+                        Guess = playerAnswer.Guess,
+                        Score = assessment.First().Score,
+                        Reason = assessment.First().Reason,
+                        CreatedAt = playerAnswer.SubmittedAt
+                    };
+                    await _dailiesRepository.SaveDailyAnswer(answerToSave);
+                }
+
                 return Ok(assessment.First());
             }
             catch (Exception ex)

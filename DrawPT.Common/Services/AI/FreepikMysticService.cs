@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -130,7 +130,7 @@ namespace DrawPT.Common.Services.AI
                         if (statusFreepikResponse.Data.Generated != null && statusFreepikResponse.Data.Generated.Any())
                         {
                             imageUrlToDownload = statusFreepikResponse.Data.Generated.FirstOrDefault();
-                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow:yyyyMMdd}.png");
+                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow.AddDays(1):yyyyMMdd}.png");
                             return imageUrl;
                         }
                         else
