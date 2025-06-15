@@ -28,7 +28,7 @@ builder.AddAzureOpenAIClient(connectionName: "openai");
 var services = builder.Services;
 services.AddHostedService<GameEventListener>();
 services.AddTransient<GeminiImageGenerator>();
-services.AddTransient<FreepikImageService>();
+services.AddTransient<FreepikFastService>();
 services.AddTransient<IAIService, AIService>();
 services.AddTransient<IAssessmentService, AssessmentService>();
 services.AddTransient<ICacheService, CacheService>();

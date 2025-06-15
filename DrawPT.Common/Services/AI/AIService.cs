@@ -13,7 +13,7 @@ namespace DrawPT.Common.Services.AI
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
-        private readonly FreepikImageService _freepikImageService;
+        private readonly FreepikFastService _freepikImageService;
 
         string _imagePrompt = @"You are a highly imaginative, visually oriented AI assistant designed to generate striking, beautiful image prompts for an AI-powered digital art game.
 Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme.
@@ -56,7 +56,7 @@ Ensure explanations ('Reason') are concise yet sufficiently justify the assigned
 Original Phrase:
 Now, the original phrase is:";
 
-        public AIService(OpenAIClient aiClient, FreepikImageService freepikImageService, IConfiguration configuration)
+        public AIService(OpenAIClient aiClient, FreepikFastService freepikImageService, IConfiguration configuration)
         {
             _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
             _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel"));

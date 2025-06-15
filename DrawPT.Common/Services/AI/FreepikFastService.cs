@@ -8,15 +8,15 @@ using System.Text.Json.Serialization;
 namespace DrawPT.Common.Services.AI
 {
 
-    public class FreepikImageService
+    public class FreepikFastService
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string apiEndpoint;
         private readonly string apiKey;
         private readonly IStorageService _storageService;
-        private readonly ILogger<FreepikImageService> _logger;
+        private readonly ILogger<FreepikFastService> _logger;
 
-        public FreepikImageService(IConfiguration configuration, IStorageService storageService, ILogger<FreepikImageService> logger)
+        public FreepikFastService(IConfiguration configuration, IStorageService storageService, ILogger<FreepikFastService> logger)
         {
             apiEndpoint = configuration.GetValue<string>("FreepikUrl") ?? throw new InvalidOperationException("Freepik API endpoint not configured.");
             apiKey = configuration.GetValue<string>("FreepikApiKey") ?? throw new InvalidOperationException("Freepik API key not configured.");
