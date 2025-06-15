@@ -6,6 +6,7 @@ namespace DrawPT.Data.Repositories
     public class DailiesDbContext(DbContextOptions options) : DbContext(options)
     {
         public DbSet<DailyQuestionEntity> DailyQuestions => Set<DailyQuestionEntity>();
+        public DbSet<DailyThemeEntity> DailyThemes => Set<DailyThemeEntity>();
     }
 
     public class DailiesRepository
@@ -15,6 +16,11 @@ namespace DrawPT.Data.Repositories
         public DailiesRepository(DailiesDbContext context)
         {
             _context = context;
+        }
+
+        public List<DailyThemeEntity> GetDailyThemes()
+        {
+            return _context.DailyThemes.ToList();
         }
 
         public List<DailyQuestionEntity> GetDailyQuestions(DateTime dateTime)
