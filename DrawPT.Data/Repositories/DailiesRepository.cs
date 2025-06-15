@@ -23,9 +23,14 @@ namespace DrawPT.Data.Repositories
             return _context.DailyThemes.ToList();
         }
 
-        public List<DailyQuestionEntity> GetDailyQuestions(DateTime dateTime)
+        public List<DailyQuestionEntity> GetDailyQuestions(int limit = 5)
         {
-            return _context.DailyQuestions.Where(dq => dq.Date == dateTime.Date).ToList();
+            return _context.DailyQuestions.OrderByDescending(dq => dq.Date).Take(limit).ToList();
+        }
+
+        public DailyQuestionEntity? GetDailyQuestion(DateTime dateTime)
+        {
+            return _context.DailyQuestions.Where(dq => dq.Date == dateTime.Date).FirstOrDefault();
         }
 
         public async Task AddDailyQuestion(DailyQuestionEntity image)

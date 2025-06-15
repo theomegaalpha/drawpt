@@ -32,6 +32,15 @@ namespace DrawPT.ScheduledService
         {
             _logger.LogInformation("Daily Midnight Task Service is starting.");
 
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                // Grab tomorrow's daily question immediately if tomorrow's doesn't already exist.
+                var dailiesRepository = scope.ServiceProvider.GetRequiredService<DailiesRepository>();
+                var tomorrowsQuestion = dailiesRepository.GetDailyQuestion(DateTime.UtcNow.AddDays(1).Date);
+                if (tomorrowsQuestion == null)
+                    DoWork(null);
+            }
+
             DateTimeOffset now = DateTimeOffset.UtcNow;
             DateTimeOffset estNow = TimeZoneInfo.ConvertTime(now, _estZoneInfo);
 
