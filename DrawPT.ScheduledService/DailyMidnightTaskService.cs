@@ -69,11 +69,13 @@ namespace DrawPT.ScheduledService
             _logger.LogInformation("Command execution started.");
             try
             {
-                var question = await _dailyAIService.GenerateGameQuestionAsync("");
+                var randomTheme = _dailiesRepository.GetDailyThemes().OrderBy(_ => Guid.NewGuid()).First();
+
+                var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme);
                 var daily = new DailyQuestionEntity
                 {
                     Date = DateTime.UtcNow.AddDays(1).Date,
-                    Style = "anime",
+                    Style = randomTheme.Style,
                     ImageUrl = question.ImageUrl,
                     OriginalPrompt = question.OriginalPrompt
                 };
