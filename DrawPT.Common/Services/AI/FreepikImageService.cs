@@ -34,8 +34,8 @@ namespace DrawPT.Common.Services.AI
             var requestPayload = new FreepikImageRequestPayload
             {
                 Prompt = prompt,
-                NegativePrompt = "ugly,malformed hands",
-                GuidanceScale = 1,
+                NegativePrompt = "low quality, worst quality, normal quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, fewer fingers, long neck, long body",
+                GuidanceScale = 2,
                 NumImages = 1,
                 Image = new FreepikImageRequestPayload.ImageDetails
                 {
