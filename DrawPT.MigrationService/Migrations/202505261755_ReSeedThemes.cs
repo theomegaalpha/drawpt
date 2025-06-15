@@ -7,24 +7,26 @@ namespace DrawPT.MigrationService.Migrations
     {
         private readonly string[] _themes =
         [
-            "Under the Sea", "Space Adventure", "Jungle Safari",
-            "Fairy Tale", "Wild West", "Ancient Egypt",
-            "Anime", "Cyberpunk", "Miniaturecore", "Academia",
-            "Steampunk", "Circus", "Horror Anime", "Cartoon",
-            "Comic Book Superheroes", "Manga", "Video Games",
-            "Goblins", "Supernatural", "Fantasy", "Sci-Fi",
-            "Aliens & UFOs", "Mystical", "Post-Apocalyptic",
-            "Invasions", "Time Travel", "Dinosaurs", "Magical",
-            "Nature and Wildlife", "Sports and Games",
-            "Gundam", "Medieval Times", "Robots and Androids",
-            "Mythical Creatures", "Haunted Places", "Dreamscapes",
-            "Noir", "Pirates", "Vikings", "Zombies", "Gods & Mythology",
-            "Mad Science", "Secret Agents / Spies", "Lost Worlds",
-            "Carnival Funfair", "Kaiju / Giant Monsters", "Witches & Wizards",
-            "Music & Concerts", "Urban Legends", "Surreal Worlds",
-            "Dystopian Societies", "Food Worlds", "Feudal Japan",
-            "Elemental Magic", "Deep Sea Mysteries", "Ancient Rome",
-            "Grand Heists", "Abstract Art", "Living Toys", "Gothic Style"
+            "Legendary swordsman","Giant mecha","Post-apocalyptic","Bounty hunter",
+            "Superpowered duel","Idol singer","Demon-slaying","Ethereal spirit",
+            "Cyber-enhanced ninja","Yokai","Katana-wielding mercenary","Augmented hacker",
+            "Street racer","Glitching AI","Bounty hunter","Futuristic night market",
+            "Bio-engineered creature","Massive vertical metropolis","Samurai",
+            "Digital dreamscape","Hyper-stylized warrior","Dark fantasy duel",
+            "Surreal battlefield","Futuristic gods","Post-apocalyptic",
+            "Rogue magician","Masked anti-hero","Anime shonen protagonist",
+            "Ancient spirits","Heroic last stand","Dragons and airships",
+            "Celestial knights","Dark sorcerer","Demon hunter","Underground city",
+            "Cosmic guardian","Ancient cyber-magic","Doomed hero","Futuristic coliseum",
+            "Otherworldly portal","Ethereal warrior","Anime-inspired","Celestial dragon",
+            "High-speed chase","Cyberpunk","Video game hero","Neon-slashed samurai",
+            "Superpowered warrior","Glitching reality","Legendary warlock","VR gladiator",
+            "Mechanical deity","Time distortion","Sci-fi concept art","Epic fantasy battle",
+            "Surreal cities","Cyberpunk dystopia","Fantasy landscapes","Anime-inspired fantasy",
+            "Ethereal warrior","Anime-inspired","Celestial dragon", "Legendary warlock",
+            "Miniaturecore", "Academia","Under the Sea","Horrorifying Creature","Science Fantasy",
+            "Goblins","Supernatural","Fantasy","Sci-Fi","Aliens & UFOs","Mystical",
+            "Lucid Scifi"
         ];
 
         /// <inheritdoc />
