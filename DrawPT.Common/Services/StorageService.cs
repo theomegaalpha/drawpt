@@ -79,14 +79,13 @@ namespace DrawPT.Common.Services
 
         public async Task<string?> DownloadImageAsync(string imageUrl, string blobName)
         {
-            var id = Guid.NewGuid();
             try
             {
                 Uri uri = new Uri(imageUrl);
                 string extension = Path.GetExtension(uri.AbsolutePath);
 
                 BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_storageContainerName);
-                var blobClient = containerClient.GetBlobClient($"{id}{extension}");
+                var blobClient = containerClient.GetBlobClient(blobName);
 
                 using var httpClient = new HttpClient();
                 using var response = await httpClient.GetAsync(imageUrl);
@@ -98,7 +97,7 @@ namespace DrawPT.Common.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to save image ({id}) to blob storage.", ex.Message);
+                Console.WriteLine($"Failed to save image ({blobName}) to blob storage.", ex.Message);
                 return null;
             }
         }

@@ -44,7 +44,7 @@ namespace DrawPT.Common.Services.AI
             {
                 Prompt = prompt,
                 StyleReference = refImageString, // image style reference, replace with actual value
-                Adherence = 80,
+                Adherence = 100,
                 Resolution = "2k",
                 AspectRatio = "traditional_3_4",
                 FixedGeneration = false,
@@ -130,7 +130,7 @@ namespace DrawPT.Common.Services.AI
                         if (statusFreepikResponse.Data.Generated != null && statusFreepikResponse.Data.Generated.Any())
                         {
                             imageUrlToDownload = statusFreepikResponse.Data.Generated.FirstOrDefault();
-                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow.ToShortDateString()}");
+                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow:yyyyMMdd}.png");
                             return imageUrl;
                         }
                         else
