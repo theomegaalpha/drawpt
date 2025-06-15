@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using DrawPT.Data;
@@ -17,11 +17,11 @@ builder.Services.AddDbContextPool<ReferenceDbContext>(options =>
         sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
     ));
 builder.EnrichSqlServerDbContext<ReferenceDbContext>();
-builder.Services.AddDbContextPool<ImageDbContext>(options =>
+builder.Services.AddDbContextPool<DailiesDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("database"), sqlOptions =>
         sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
     ));
-builder.EnrichSqlServerDbContext<ImageDbContext>();
+builder.EnrichSqlServerDbContext<DailiesDbContext>();
 
 var app = builder.Build();
 

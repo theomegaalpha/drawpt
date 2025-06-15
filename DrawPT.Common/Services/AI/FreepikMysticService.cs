@@ -139,7 +139,6 @@ namespace DrawPT.Common.Services.AI
                             _logger.LogDebug($"Full status response for debugging: {statusResponseBody}");
                             return null;
                         }
-                        break;
                     }
                     else if (currentStatus == "FAILED")
                     {

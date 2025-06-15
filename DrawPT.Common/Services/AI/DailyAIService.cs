@@ -2,8 +2,6 @@
 using DrawPT.Common.Models.Game;
 using OpenAI;
 using OpenAI.Chat;
-using OpenAI.Images;
-using System.ClientModel;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 

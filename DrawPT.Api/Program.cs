@@ -52,7 +52,7 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
-builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
+builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
@@ -73,7 +73,7 @@ builder.Services.AddTransient<ProfileService>();
 
 
 builder.Services.AddTransient<StorageService>();
-builder.Services.AddTransient<ImageRepository>();
+builder.Services.AddTransient<DailiesRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
 builder.Services.AddTransient<RandomService>();
 builder.Services.AddTransient<CacheService>();
