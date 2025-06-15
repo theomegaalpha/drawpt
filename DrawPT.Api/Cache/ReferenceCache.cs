@@ -1,5 +1,4 @@
-﻿using DrawPT.Data.Models;
-using DrawPT.Data.Repositories;
+﻿using DrawPT.Data.Repositories;
 using System.Collections.Concurrent;
 
 namespace DrawPT.Api.Cache

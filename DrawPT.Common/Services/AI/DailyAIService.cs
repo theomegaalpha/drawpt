@@ -2,18 +2,15 @@
 using DrawPT.Common.Models.Game;
 using OpenAI;
 using OpenAI.Chat;
-using OpenAI.Images;
-using System.ClientModel;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
 namespace DrawPT.Common.Services.AI
 {
-    public class AIService : IAIService
+    public class DailyAIService : IAIService
     {
         private readonly ChatClient _chatClient;
-        private readonly ImageClient _imageClient;
-        private readonly FreepikFastService _freepikImageService;
+        private readonly FreepikMysticService _freepikImageService;
 
         string _imagePrompt = @"You are a highly imaginative, visually oriented AI assistant designed to generate striking, beautiful image prompts for an AI-powered digital art game.
 Your task is to craft concise, highly descriptive prompts that drive the generation of visually stunning yet recognizable images, tailored to the given theme.
@@ -56,10 +53,9 @@ Ensure explanations ('Reason') are concise yet sufficiently justify the assigned
 Original Phrase:
 Now, the original phrase is:";
 
-        public AIService(OpenAIClient aiClient, FreepikFastService freepikImageService, IConfiguration configuration)
+        public DailyAIService(OpenAIClient aiClient, FreepikMysticService freepikImageService, IConfiguration configuration)
         {
             _chatClient = aiClient.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
-            _imageClient = aiClient.GetImageClient(configuration.GetValue<string>("Azure:OpenAI:ImageModel"));
             _freepikImageService = freepikImageService;
         }
 
@@ -93,7 +89,8 @@ Now, the original phrase is:";
                 {
                     if (completion.Content.Count == 0)
                     {
-                        answers.ForEach(a => {
+                        answers.ForEach(a =>
+                        {
                             a.Reason = "Problem assing scores.";
                             a.Score = 20;
                         });
@@ -102,7 +99,8 @@ Now, the original phrase is:";
                     var playerAnswers = JsonSerializer.Deserialize<List<PlayerAnswer>>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (playerAnswers == null)
                     {
-                        answers.ForEach(a => {
+                        answers.ForEach(a =>
+                        {
                             a.Reason = "Problem assing scores.";
                             a.Score = 20;
                         });
@@ -115,7 +113,8 @@ Now, the original phrase is:";
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            answers.ForEach(a => {
+            answers.ForEach(a =>
+            {
                 a.Reason = "Problem assing scores.";
                 a.Score = 20;
             });
@@ -130,38 +129,6 @@ Now, the original phrase is:";
             {
                 OriginalPrompt = prompt.Split(']')[^1],
                 ImageUrl = imageUrl ?? string.Empty
-            };
-        }
-
-        public async Task<GameQuestion> GenerateFakeGameQuestionAsync(string _)
-        {
-            await Task.Delay(3000);
-            string[] prompts = [
-                "black and white digital illustration inspired by Dora Art, featuring a tattooed female figure with a sense of reflective calmness.",
-                "Dragon Ball Fighter, presented in the distinctive style of Thiago Valdi. Featuring a sleek combination of light black and silver tones.",
-                "A single girl in a vibrant, shiny dress standing gracefully in a neon-infused rainstorm. The cyberpunk-inspired scene should emphasize her captivating beauty.",
-                "An enigmatic Call of Duty - Blacklist Games character, ironically captivating Mosscore adventure amidst ethereal gossamer fabrics.",
-                "An evil, cyborg Terminator robot with hyper-realistic attention to detail.",
-                "A nightmarish man enveloped in a blend of pink and black hues. His backlit form casts a mysterious silhouette, while intricate details amplify the horror.",
-                "An ultra-detailed and ultra-realistic depiction of Iron-Man in a venomized form, ensuring an unparalleled level of intricacy, and realism.",
-                "Nier Automata's 2B portrayed in a watercolor masterpiece by Greg Rutkowski, capturing sharp focus in a stunning studio photograph."
-                ];
-            string[] imageUrls = [
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f1168c6d00b9a61edd8a3a_CxCAdRB8SeRB6KI1hcODSrz2rZg34Zpcc2_KGyUm-lg.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f113ae7271fdad063aa84e_OV0Ei7Ncv6fgW7BlI_gt-QhF7qwtwCjVNGMwBNEFcM8.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f201291226b683660aeaca_xLH48FdbWdRElTt--1X3hiA54tITt5XJNfA4v5bpG0w.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f1169fa1e7c6f077ef00b2_R5p9PVQZa_svZ8TG6TLQp8SKtwNrTlVxrh12oJ9y4ms.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112f4e551d643fe3acdb9_2Qo1RFXaSiDysKaWsEGNmMn5lYPhoSV9gdrAm-51_1s.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f1ff2c15d25940b0da7133_5hme_hy0Pf5zbZ1PahcnWIqNAsHj95232tQrFEkEdfk.webp",
-                "https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f115b0b802ee4960a3da9f_4PrnPJDEMZkZm9djp21r1YPHRyIN-bRf2ncVUjssRDI.webp"
-                ];
-            var random = new Random();
-            var index = random.Next(prompts.Length);
-            return new GameQuestion()
-            {
-                OriginalPrompt = prompts[index],
-                ImageUrl = imageUrls[index]
             };
         }
 
@@ -213,18 +180,6 @@ Now, the original phrase is:";
         private async Task<string?> GenerateImageAsync(string prompt)
         {
             return await GenerateImageRestfullyAsync(prompt);
-
-            ClientResult<GeneratedImage> imageResult = await _imageClient.GenerateImageAsync(prompt, new()
-            {
-                Quality = GeneratedImageQuality.Standard,
-                Size = GeneratedImageSize.W1024xH1024,
-                Style = GeneratedImageStyle.Vivid,
-                ResponseFormat = GeneratedImageFormat.Uri
-            });
-
-            GeneratedImage image = imageResult.Value;
-            Console.WriteLine($"Image URL: {image.ImageUri}");
-            return image.ImageUri.ToString() ?? string.Empty;
         }
 
         private async Task<string?> GenerateImageRestfullyAsync(string prompt)

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using DrawPT.Common.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,7 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
-builder.AddSqlServerDbContext<ImageDbContext>(connectionName: "database");
+builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
@@ -72,12 +73,18 @@ builder.Services.AddTransient<ProfileService>();
 
 
 builder.Services.AddTransient<StorageService>();
-builder.Services.AddTransient<ImageRepository>();
+builder.Services.AddTransient<DailiesRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
 builder.Services.AddTransient<RandomService>();
 builder.Services.AddTransient<CacheService>();
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
+
+builder.Services.AddTransient<IStorageService, StorageService>();
+builder.Services.AddTransient<FreepikMysticService>();
+builder.Services.AddTransient<FreepikFastService>();
+builder.Services.AddTransient<IAIService, DailyAIService>();
+builder.Services.AddTransient<DailyAIService>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()

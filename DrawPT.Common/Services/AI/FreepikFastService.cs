@@ -8,17 +8,18 @@ using System.Text.Json.Serialization;
 namespace DrawPT.Common.Services.AI
 {
 
-    public class FreepikImageService
+    public class FreepikFastService
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string apiEndpoint;
         private readonly string apiKey;
         private readonly IStorageService _storageService;
-        private readonly ILogger<FreepikImageService> _logger;
+        private readonly ILogger<FreepikFastService> _logger;
 
-        public FreepikImageService(IConfiguration configuration, IStorageService storageService, ILogger<FreepikImageService> logger)
+        public FreepikFastService(IConfiguration configuration, IStorageService storageService, ILogger<FreepikFastService> logger)
         {
             apiEndpoint = configuration.GetValue<string>("FreepikUrl") ?? throw new InvalidOperationException("Freepik API endpoint not configured.");
+            apiEndpoint += "/text-to-image";
             apiKey = configuration.GetValue<string>("FreepikApiKey") ?? throw new InvalidOperationException("Freepik API key not configured.");
             _storageService = storageService;
             _logger = logger;
@@ -34,8 +35,8 @@ namespace DrawPT.Common.Services.AI
             var requestPayload = new FreepikImageRequestPayload
             {
                 Prompt = prompt,
-                NegativePrompt = "ugly,malformed hands",
-                GuidanceScale = 1,
+                NegativePrompt = "low quality, worst quality, normal quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, fewer fingers, long neck, long body",
+                GuidanceScale = 2,
                 NumImages = 1,
                 Image = new FreepikImageRequestPayload.ImageDetails
                 {

@@ -28,7 +28,10 @@ var storage = builder.AddAzureStorage("storage")
         storageAccount.AccessTier = StorageAccountAccessTier.Hot;
         storageAccount.AllowBlobPublicAccess = true;
     })
-    .RunAsEmulator()
+    .RunAsEmulator(azurite =>
+                    {
+                        azurite.WithLifetime(ContainerLifetime.Persistent);
+                    })
     .AddBlobs("blobs");
 
 // Add AI
@@ -47,7 +50,7 @@ var insights = builder.ExecutionContext.IsPublishMode
     : builder.AddConnectionString("appinsights", "ConnectionStrings:appinsights");
 
 var supabaseUrl = builder.AddParameter("supabase-url");
-var supabaseIssuer= builder.AddParameter("supabase-issuer");
+var supabaseIssuer = builder.AddParameter("supabase-issuer");
 var supabaseAnonKey = builder.AddParameter("supabase-anon-key");
 var supabaseSecretKey = builder.AddParameter("supabase-secret-key", true);
 var supabaseApiKey = builder.AddParameter("supabase-api-key", true);
@@ -113,6 +116,15 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WaitFor(storage)
     .WaitFor(redis)
     .WaitFor(db)
+    .WaitFor(api);
+
+
+builder.AddProject<Projects.DrawPT_ScheduledService>("drawpt-scheduledservice")
+    .WithReference(storage)
+    .WithReference(redis)
+    .WithReference(db)
+    .WithReference(openai)
+    .WithEnvironment("FreepikApiKey", freepikKey)
     .WaitFor(api);
 
 

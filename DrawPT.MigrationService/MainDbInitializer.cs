@@ -25,7 +25,7 @@ public class MainDbInitializer(
         {
             using var scope = serviceProvider.CreateScope();
             var refDbContext = scope.ServiceProvider.GetRequiredService<ReferenceDbContext>();
-            var imageDbContext = scope.ServiceProvider.GetRequiredService<ImageDbContext>();
+            var imageDbContext = scope.ServiceProvider.GetRequiredService<DailiesDbContext>();
 
             await EnsureDatabaseAsync(refDbContext, cancellationToken);
             await EnsureDatabaseAsync(imageDbContext, cancellationToken);

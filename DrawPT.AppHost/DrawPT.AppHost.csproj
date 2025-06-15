@@ -30,6 +30,7 @@
     <ProjectReference Include="..\DrawPT.GameEngine\DrawPT.GameEngine.csproj" />
     <ProjectReference Include="..\DrawPT.Matchmaking\DrawPT.Matchmaking.csproj" />
     <ProjectReference Include="..\DrawPT.MigrationService\DrawPT.MigrationService.csproj" />
+    <ProjectReference Include="..\DrawPT.ScheduledService\DrawPT.ScheduledService.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
