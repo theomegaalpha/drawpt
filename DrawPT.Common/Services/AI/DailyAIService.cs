@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
 using OpenAI;
 using OpenAI.Chat;
@@ -128,6 +128,7 @@ Now, the original phrase is:";
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
+                Theme = theme,
                 ImageUrl = imageUrl ?? string.Empty
             };
         }
