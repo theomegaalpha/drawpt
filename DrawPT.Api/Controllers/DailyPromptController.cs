@@ -4,6 +4,7 @@ using DrawPT.Data.Repositories.Game;
 using DrawPT.Common.Models.Game;
 using DrawPT.Common.Services.AI;
 using Microsoft.AspNetCore.Mvc;
+using DrawPT.Common.Models.Daily;
 
 
 namespace DrawPT.Api.Controllers
@@ -83,7 +84,15 @@ namespace DrawPT.Api.Controllers
                     await _dailiesRepository.SaveDailyAnswer(answerToSave);
                 }
 
-                return Ok(assessment.First());
+                var answerPublic = new DailyAnswerPublic()
+                {
+                    Date = todaysQuestion.Date,
+                    PlayerId = playerAnswer.PlayerId,
+                    Guess = playerAnswer.Guess,
+                    Score = assessment.First().Score,
+                    Reason = assessment.First().Reason
+                };
+                return Ok(answerPublic);
             }
             catch (Exception ex)
             {
