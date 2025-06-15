@@ -130,7 +130,7 @@ namespace DrawPT.Common.Services.AI
                         if (statusFreepikResponse.Data.Generated != null && statusFreepikResponse.Data.Generated.Any())
                         {
                             imageUrlToDownload = statusFreepikResponse.Data.Generated.FirstOrDefault();
-                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow.AddDays(1):yyyyMMdd}.png");
+                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow.AddDays(1).Date:yyyyMMdd}.png");
                             return imageUrl;
                         }
                         else
