@@ -119,7 +119,13 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WaitFor(api);
 
 
-builder.AddProject<Projects.DrawPT_ScheduledService>("drawpt-scheduledservice");
+builder.AddProject<Projects.DrawPT_ScheduledService>("drawpt-scheduledservice")
+    .WithReference(storage)
+    .WithReference(redis)
+    .WithReference(db)
+    .WithReference(openai)
+    .WithEnvironment("FreepikApiKey", freepikKey)
+    .WaitFor(api);
 
 
 builder.Build().Run();

@@ -2,6 +2,8 @@ using DrawPT.Common.Services.AI;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace DrawPT.ScheduledService
 {
     public class DailyMidnightTaskService : IHostedService, IDisposable
@@ -11,18 +13,19 @@ namespace DrawPT.ScheduledService
         private readonly TimeZoneInfo _estZoneInfo;
         private CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 
-        private readonly DailiesRepository _dailiesRepository;
+        // Removed DailiesRepository from constructor injection
         private readonly DailyAIService _dailyAIService;
+        private readonly IServiceProvider _serviceProvider; // Added IServiceProvider
 
         public DailyMidnightTaskService(ILogger<DailyMidnightTaskService> logger, DailyAIService dailyAIService,
-            DailiesRepository dailiesRepository)
+            IServiceProvider serviceProvider) // Added IServiceProvider
         {
             _logger = logger;
             // On Windows: "Eastern Standard Time"
             // On Linux/macOS: "America/New_York"
             _estZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/New_York") ?? TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "IAIService cannot be null.");
-            _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)); // Store IServiceProvider
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -69,19 +72,25 @@ namespace DrawPT.ScheduledService
             _logger.LogInformation("Command execution started.");
             try
             {
-                var randomTheme = _dailiesRepository.GetDailyThemes().OrderBy(_ => Guid.NewGuid()).First();
-
-                var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme);
-                var daily = new DailyQuestionEntity
+                // Create a scope to resolve scoped services
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    Date = DateTime.UtcNow.AddDays(1).Date,
-                    Style = randomTheme.Style,
-                    ImageUrl = question.ImageUrl,
-                    OriginalPrompt = question.OriginalPrompt
-                };
-                await _dailiesRepository.AddDailyQuestion(daily);
+                    var dailiesRepository = scope.ServiceProvider.GetRequiredService<DailiesRepository>();
 
-                _logger.LogInformation($"Successfully saved daily {daily}");
+                    var randomTheme = dailiesRepository.GetDailyThemes().OrderBy(_ => Guid.NewGuid()).First();
+
+                    var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme);
+                    var daily = new DailyQuestionEntity
+                    {
+                        Date = DateTime.UtcNow.AddDays(1).Date,
+                        Style = randomTheme.Style,
+                        ImageUrl = question.ImageUrl,
+                        OriginalPrompt = question.OriginalPrompt
+                    };
+                    await dailiesRepository.AddDailyQuestion(daily);
+
+                    _logger.LogInformation($"Successfully saved daily {daily}");
+                }
             }
             catch (OperationCanceledException)
             {

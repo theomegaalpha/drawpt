@@ -1,3 +1,7 @@
+using DrawPT.Common.Interfaces;
+using DrawPT.Common.Services;
+using DrawPT.Common.Services.AI;
+using DrawPT.Data.Repositories;
 using DrawPT.ScheduledService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +13,14 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 
 // Add the new scheduled service
+builder.AddAzureOpenAIClient(connectionName: "openai");
+builder.AddAzureBlobClient(connectionName: "blobs");
+builder.Services.AddTransient<IStorageService, StorageService>();
+builder.Services.AddTransient<FreepikMysticService>();
+builder.Services.AddTransient<DailyAIService>();
+builder.Services.AddScoped<DailiesRepository>(); // Changed from AddTransient to AddScoped
+
+builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.Services.AddHostedService<DailyMidnightTaskService>();
 
 var app = builder.Build();

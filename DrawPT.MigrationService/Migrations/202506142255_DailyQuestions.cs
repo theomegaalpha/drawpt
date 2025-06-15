@@ -106,16 +106,21 @@ namespace DrawPT.MigrationService.Migrations
                 "digital-art:Surreal cities"
                 ];
 
+            // Convert the themes array to a 2D object array for InsertData
+            var themeValues = new object[_themes.Length, 3];
+            for (int i = 0; i < _themes.Length; i++)
+            {
+                var parts = _themes[i].Split(':');
+                themeValues[i, 0] = Guid.NewGuid();
+                themeValues[i, 1] = parts[0];
+                themeValues[i, 2] = parts[1];
+            }
+
             migrationBuilder.InsertData(
                 schema: "game",
                 table: "DailyThemes",
                 columns: ["Id", "Style", "Theme"],
-                values: _themes.Select(theme => new
-                {
-                    Id = Guid.NewGuid(),
-                    Style = theme.Split(':')[0],
-                    Theme = theme.Split(':')[1]
-                }).ToArray());
+                values: themeValues);
         }
 
         /// <inheritdoc />
