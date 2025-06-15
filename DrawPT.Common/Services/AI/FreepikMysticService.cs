@@ -147,68 +147,13 @@ namespace DrawPT.Common.Services.AI
                         return null;
                     }
                 }
-
-                if (pollingAttempts >= maxPollingAttempts && currentStatus != "COMPLETED")
-                {
-                    _logger.LogError($"Polling timeout for Task ID: {taskId}. Last status: {currentStatus}");
-                    return null;
-                }
-
-                if (string.IsNullOrEmpty(imageUrlToDownload))
-                {
-                    _logger.LogWarning($"Could not find image URL after polling or task did not complete successfully. Task ID: {taskId}, Status: {currentStatus}");
-                    return null;
-                }
-
-                byte[] imageBytes;
-                try
-                {
-                    _logger.LogInformation($"Downloading image from URL: {imageUrlToDownload}");
-                    // Ensure httpClient still has the API key if the download URL is also protected by it
-                    // For Freepik, the 'generated' URLs are typically public S3 URLs, so API key might not be needed for GET on them.
-                    // If they are protected, ensure headers are set appropriately or use a new HttpClient instance if needed.
-                    HttpResponseMessage imageDownloadResponse = await httpClient.GetAsync(imageUrlToDownload);
-                    if (imageDownloadResponse.IsSuccessStatusCode)
-                    {
-                        imageBytes = await imageDownloadResponse.Content.ReadAsByteArrayAsync();
-                    }
-                    else
-                    {
-                        _logger.LogError($"Failed to download image from {imageUrlToDownload}. Status: {imageDownloadResponse.StatusCode}");
-                        return null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error downloading image from {imageUrlToDownload}: {ex.Message}");
-                    return null;
-                }
-
-                if (imageBytes == null || imageBytes.Length == 0)
-                {
-                    _logger.LogError("Downloaded image data is empty.");
-                    return null;
-                }
-
-                string blobName = $"freepik-image-{Guid.NewGuid()}.png";
-                string? finalImageUrl = await _storageService.SaveImageAsync(imageBytes, blobName);
-
-                if (finalImageUrl != null)
-                {
-                    _logger.LogInformation($"Image successfully generated, downloaded, and uploaded to: {finalImageUrl}");
-                    return finalImageUrl;
-                }
-                else
-                {
-                    _logger.LogError("Failed to upload image to blob storage.");
-                    return null;
-                }
             }
             catch (Exception e)
             {
                 _logger.LogError($"An unexpected error occurred: {e.Message}");
                 return null;
             }
+            return null;
         }
 
         private class FreepikImageResponse
