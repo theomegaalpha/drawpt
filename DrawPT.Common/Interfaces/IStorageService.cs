@@ -12,6 +12,8 @@ namespace DrawPT.Common.Interfaces
         /// </summary>
         Task<string?> SaveImageAsync(byte[] imageBytes, string blobName);
 
-        Task<bool> DownloadImageAsync(Guid id, string imageUrl);
+        Task<byte[]> GetImageAsync(string blobName);
+
+        Task<string?> DownloadImageAsync(string imageUrl, string blobName);
     }
 }

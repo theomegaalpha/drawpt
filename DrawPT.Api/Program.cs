@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using DrawPT.Common.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,12 @@ builder.Services.AddTransient<RandomService>();
 builder.Services.AddTransient<CacheService>();
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddSingleton<ReferenceCache>();
+
+builder.Services.AddTransient<IStorageService, StorageService>();
+builder.Services.AddTransient<FreepikMysticService>();
+builder.Services.AddTransient<FreepikFastService>();
+builder.Services.AddTransient<IAIService, DailyAIService>();
+builder.Services.AddTransient<DailyAIService>();
 
 // Add SignalR with CORS
 builder.Services.AddSignalR()

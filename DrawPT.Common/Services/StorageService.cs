@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Azure.Storage.Blobs;
+
 using DrawPT.Common.Interfaces;
 
 namespace DrawPT.Common.Services
@@ -45,8 +46,40 @@ namespace DrawPT.Common.Services
             }
         }
 
-        public async Task<bool> DownloadImageAsync(Guid id, string imageUrl)
+        public async Task<byte[]> GetImageAsync(string blobName)
         {
+            if (string.IsNullOrEmpty(blobName))
+            {
+                throw new ArgumentNullException(nameof(blobName), "Blob name cannot be null or empty.");
+            }
+
+            try
+            {
+                BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_storageContainerName);
+                BlobClient blobClient = containerClient.GetBlobClient(blobName);
+
+                if (await blobClient.ExistsAsync())
+                {
+                    using var memoryStream = new MemoryStream();
+                    await blobClient.DownloadToAsync(memoryStream);
+                    return memoryStream.ToArray();
+                }
+                else
+                {
+                    Console.WriteLine($"Blob {blobName} does not exist.");
+                    return Array.Empty<byte>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to retrieve image ({blobName}) from blob storage: {ex.Message}");
+                return Array.Empty<byte>();
+            }
+        }
+
+        public async Task<string?> DownloadImageAsync(string imageUrl, string blobName)
+        {
+            var id = Guid.NewGuid();
             try
             {
                 Uri uri = new Uri(imageUrl);
@@ -60,15 +93,14 @@ namespace DrawPT.Common.Services
                 response.EnsureSuccessStatusCode();
                 using var imageStream = await response.Content.ReadAsStreamAsync();
 
-                await blobClient.UploadAsync(imageStream, true);
+                var client = await blobClient.UploadAsync(imageStream, true);
+                return blobClient.Uri.ToString();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to save image ({id}) to blob storage.", ex.Message);
-                return false;
+                return null;
             }
-
-            return true;
         }
     }
 }

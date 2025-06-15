@@ -19,6 +19,7 @@ namespace DrawPT.Common.Services.AI
         public FreepikFastService(IConfiguration configuration, IStorageService storageService, ILogger<FreepikFastService> logger)
         {
             apiEndpoint = configuration.GetValue<string>("FreepikUrl") ?? throw new InvalidOperationException("Freepik API endpoint not configured.");
+            apiEndpoint += "/text-to-image";
             apiKey = configuration.GetValue<string>("FreepikApiKey") ?? throw new InvalidOperationException("Freepik API key not configured.");
             _storageService = storageService;
             _logger = logger;
