@@ -24,7 +24,7 @@
 
   /* Basic Surface and Text Colors (Optional - use if you find them helpful) */
   .bg-surface-default {
-    @apply border border-black/10 shadow-md dark:border-white/10;
+    @apply border border-black/10 bg-white/80 shadow-md dark:border-white/10 dark:bg-neutral-900/30;
   }
 
   .bg-surface-accent {

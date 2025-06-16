@@ -35,16 +35,23 @@ export async function getDailyAnswer(): Promise<DailyAnswer> {
   return (await response.json()) as DailyAnswer
 }
 
-export async function updateAnswer(answer: string): Promise<void> {
+export async function submitAnswer(answer: string): Promise<DailyAnswer> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json'
   }
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
   }
-  await fetch(`/api/dailyprompt`, {
+  const response = await fetch(`/api/dailyprompt`, {
     method: 'POST',
     headers,
     body: JSON.stringify(answer)
   })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch player data')
+  }
+
+  return (await response.json()) as DailyAnswer
 }

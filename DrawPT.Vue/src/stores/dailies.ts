@@ -41,8 +41,14 @@ export const useDailiesStore = defineStore('dailies', {
         this.isLoading = false
       }
     },
+    setIsLoading(loading: boolean) {
+      this.isLoading = loading
+    },
     setImageLoaded(loaded: boolean) {
       this.imageLoaded = loaded
+    },
+    setDailyAnswer(answer: DailyAnswer) {
+      this.dailyAnswer = answer
     }
   }
 })
