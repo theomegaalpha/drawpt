@@ -8,8 +8,15 @@ import api from '@/api/api'
 
 const guess = ref('')
 const dailiesStore = useDailiesStore()
-const { dailyQuestion, dailyAnswer, showAssessment, imageLoaded, isAssessing, isLoadingDaily } =
-  storeToRefs(dailiesStore)
+const {
+  dailyQuestion,
+  dailyAnswer,
+  dailyError,
+  showAssessment,
+  imageLoaded,
+  isAssessing,
+  isLoadingDaily
+} = storeToRefs(dailiesStore)
 
 const defaultImageUrl = computed(() => {
   if (isLoading.value) return '/images/daily-image-loading.png'
@@ -65,23 +72,12 @@ onMounted(() => {
       <img
         :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
         :alt="dailyQuestion.theme"
-        class="h-auto w-full object-contain"
+        class="animate-fade-blur-in h-auto w-full object-contain"
         @error="handleImageError"
       />
-      <!-- error screen -->
-      <div
-        v-if="!imageLoaded"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
-      >
-        <div class="flex flex-col items-center justify-center">
-          <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
-          <p class="text-center text-lg font-semibold">Error loading today's daily image.</p>
-          <p class="text-center text-sm">Please try again later.</p>
-        </div>
-      </div>
       <!-- loading scree -->
       <div
-        v-else-if="isLoading.value"
+        v-if="isLoading.value"
         class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
       >
         <div class="flex flex-col items-center justify-center">
@@ -96,6 +92,17 @@ onMounted(() => {
         <div class="flex flex-col items-center justify-center">
           <p class="text-lg font-semibold">Your guess:</p>
           <p class="text-sm">{{ dailyAnswer.guess }}</p>
+        </div>
+      </div>
+      <!-- error screen -->
+      <div
+        v-else-if="dailyError"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+      >
+        <div class="flex flex-col items-center justify-center">
+          <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
+          <p class="text-center text-lg font-semibold">Error loading today's daily image.</p>
+          <p class="text-center text-sm">Please try again later.</p>
         </div>
       </div>
     </div>
