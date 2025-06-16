@@ -2,8 +2,6 @@ using DrawPT.Common.Services.AI;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace DrawPT.ScheduledService
 {
     public class DailyMidnightTaskService : IHostedService, IDisposable

@@ -1,13 +1,13 @@
-using DrawPT.Common.Interfaces;
+using System.Text.Json;
+using DrawPT.Common.Models.Daily;
 using DrawPT.Common.Models.Game;
+using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
-using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 
 namespace DrawPT.Common.Services.AI
 {
-    public class DailyAIService : IAIService
+    public class DailyAIService
     {
         private readonly ChatClient _chatClient;
         private readonly FreepikMysticService _freepikImageService;
@@ -20,38 +20,50 @@ Maintain engagement and variety in each response while aligning to the provided 
 
 Response Format:
 (Use this format without curly braces) [{Theme}] {Creative image prompt}";
-        private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
-Evaluation Criteria:
-Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
-Very Strong Conceptual & Sentiment Match (15-19 Points): The guess conveys the same emotional tone and core meaning, matching on some words.
-Strong Conceptual & Sentiment Match (11-14 Points): The guess conveys the same emotional tone and core meaning, even if the wording is different.
-Moderate Conceptual Overlap (8-10 Points): The guess captures important aspects of the phrase—such as key themes, related emotions, or partial word matches—but deviates in structure.
-Weak Connection (4-7 Points): The guess contains elements that vaguely relate to the original phrase but alters meaning significantly.
-Very Weak Connection (1-3 Points): The guess contains trace elements that can arguably relate to the original phrase.
-Unrelated (0 Points): The guess has no meaningful connection in words, sentiment, or concept.
+        private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent and precise similarity assessments, awarding scores between 0 and 100 based on linguistic, semantic, and contextual resemblance.
+Additionally, you must generate a closeness array, a 10-integer heatmap ranging from 0 to 9, representing how well different portions of the guessed phrase match the original prompt.
 
-Strict Response Format:
-Return results as a JSON array where each contestant's data follows this structure:
+Scoring Guidelines
+This scoring system heavily penalizes incomplete guesses, ensuring accuracy and fairness in rating attempts.
+100 (Exact Match) – Word-for-word identical phrase.
+90–99 (Near Exact Match) – Slight rewording but captures ALL core details.
+80–89 (High Similarity) – Strong rephrasing but retains the full meaning and details.
+70–79 (Moderate Similarity) – All major components present but phrasing is altered.
+50–69 (Loose Similarity) – Recognizable but missing multiple key elements.
+25–49 (Weak Similarity) – Guess touches on a single aspect while ignoring full context.
+0–24 (Unrelated) – Guess is too vague or completely incorrect.
+Penalty for Missing Key Details
+If a guess only matches a single element (e.g., ""Singer"" instead of the full scene ""A radiant idol singer on a dazzling stage...""), it must fall between 25–40 rather than 60.
+The more context lost, the greater the deduction.
+Weight prioritization: Subject + Scene + Action > Single Noun Identification
 
+Closeness Array Rules
+Generate an array of 10 integers (0–9) indicating word-by-word similarity.
+The highest scores should align with words that strongly match, even if rephrased (e.g., synonyms like ""cat"" vs. ""feline"").
+Lower scores indicate words with minimal relevance or contradictory meaning.
+The array reflects sentence position, ensuring early and late-word variations are captured separately.
+Example:
+Original Prompt: ""A radiant idol singer on a dazzling stage..."" Guess: ""Singer"" Expected Score: 30 (captures only the profession, missing pose, costume, lighting, audience, and scene) Expected Array: [9,0,0,0,0,0,0,0,0,0] (only the first word matches, rest are completely absent)
+
+Strict Response Format
+Return results as a JSON object with the following structure:
 json
-[
-    {
-        'Id': '<unique identifier>',
-        'PlayerId': '<unique identifier of original Player ID>',
-        'ConnectionId': '<unique identifier of original Connection ID>',
-        'Username': '<contestant's username>',
-        'Guess': '<contestant's guessed phrase>',
-        'Score': '<integer from 0 to 20>',
-        'Reason': '<explanation for the given score>',
-        'IsGambling': <boolean>,
-        'BonusPoints': <integer from 0 to 5 of original scoring>,
-        'SubmittedAt': <string>
-    }
-]
-The response must always be a JSON array, even when evaluating a single contestant.
-Ensure explanations ('Reason') are concise yet sufficiently justify the assigned score.
-Original Phrase:
-Now, the original phrase is:";
+{
+    ""Id"": ""<unique identifier>"",
+    ""QuestionId"": ""<unique identifier of original Question ID>"",
+    ""PlayerId"": ""<unique identifier of original Player ID>"",
+    ""Date"": ""<ISO 8601 string>"",
+    ""Guess"": ""<contestant's guessed phrase>"",
+    ""OriginalPrompt"": ""<the original image prompt>"",
+    ""Reason"": ""<justification for assigned score>"",
+    ""Score"": <integer from 0 to 100>,
+    ""ClosenessArray"": [<10 integers from 0 to 9 representing semantic accuracy>],
+    ""CreatedAt"": ""<ISO 8601 string>""
+}
+Guidelines for Consistency
+""Reason"" must concisely justify the score using specific linguistic and semantic comparisons.
+The closeness array must align with sentence structure, capturing semantic similarity at each word position.
+Ensure the response always follows the structured JSON format.";
 
         public DailyAIService(OpenAIClient aiClient, FreepikMysticService freepikImageService, IConfiguration configuration)
         {
@@ -59,16 +71,13 @@ Now, the original phrase is:";
             _freepikImageService = freepikImageService;
         }
 
-        public async Task<List<PlayerAnswer>> AssessAnswerAsync(string originalPrompt, List<PlayerAnswer> answers)
+        public async Task<DailyAnswerPublic?> AssessAnswerAsync(string originalPrompt, DailyAnswerPublic answer)
         {
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(_assessmentPrompt + originalPrompt),
-                new UserChatMessage(JsonSerializer.Serialize(answers))
+                new UserChatMessage(JsonSerializer.Serialize(answer))
             };
-
-            if (answers.Count == 0)
-                return answers;
 
             try
             {
@@ -88,37 +97,17 @@ Now, the original phrase is:";
                 if (completion != null)
                 {
                     if (completion.Content.Count == 0)
-                    {
-                        answers.ForEach(a =>
-                        {
-                            a.Reason = "Problem assing scores.";
-                            a.Score = 20;
-                        });
-                    }
+                        return null;
+
                     var jsonResponse = completion.Content[0].Text.ToString() ?? "{}";
-                    var playerAnswers = JsonSerializer.Deserialize<List<PlayerAnswer>>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    if (playerAnswers == null)
-                    {
-                        answers.ForEach(a =>
-                        {
-                            a.Reason = "Problem assing scores.";
-                            a.Score = 20;
-                        });
-                        return answers;
-                    }
-                    return playerAnswers;
+                    return JsonSerializer.Deserialize<DailyAnswerPublic>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            answers.ForEach(a =>
-            {
-                a.Reason = "Problem assing scores.";
-                a.Score = 20;
-            });
-            return answers;
+            return null;
         }
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)

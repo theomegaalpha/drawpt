@@ -15,7 +15,7 @@ export const useDailiesStore = defineStore('dailies', {
   }),
   getters: {
     getDailyQuestion: (state) => state.dailyQuestion,
-    getDailyAnswer: (state) => state.dailyAnswer,
+    hasDailyAnswer: (state) => state.dailyAnswer.guess !== undefined,
     isDailyQuestionLoaded: (state) => Object.keys(state.dailyQuestion).length > 0,
     isDailyAnswerLoaded: (state) => Object.keys(state.dailyAnswer).length > 0
   },
@@ -40,7 +40,7 @@ export const useDailiesStore = defineStore('dailies', {
           const answer = await api.getDailyAnswer()
           if (!answer) return
           this.dailyAnswer = answer
-          this.setShowAssessment(true)
+          this.setShowAssessment(answer?.guess ? true : false)
         }
       } catch (err: any) {
         console.warn((err as Error).message || 'Failed to initialize daily data')
@@ -63,6 +63,7 @@ export const useDailiesStore = defineStore('dailies', {
     },
     setDailyAnswer(answer: DailyAnswer) {
       this.dailyAnswer = answer
+      this.setShowAssessment(answer.guess ? true : false)
     }
   }
 })

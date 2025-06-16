@@ -20,6 +20,7 @@ namespace DrawPT.MigrationService.Migrations
                     PlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Date = table.Column<DateTime>(type: "date", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     Guess = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ClosenessArray = table.Column<string>(type: "nvarchar(255)", nullable: false, defaultValue: "[0,0,0,0,0,0,0,0,0,0]"), // Added ClosenessArray
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Score = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")

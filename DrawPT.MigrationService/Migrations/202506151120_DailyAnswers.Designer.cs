@@ -29,6 +29,12 @@ namespace DrawPT.MigrationService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ClosenessArray") // Added ClosenessArray
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(255)")
+                        .HasDefaultValue("[0,0,0,0,0,0,0,0,0,0]");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")

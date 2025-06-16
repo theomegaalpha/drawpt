@@ -78,19 +78,21 @@ namespace DrawPT.Api.Controllers
 
                 var saveToDb = false;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                if (userId != null)
+                Guid parsedUserId = Guid.Empty;
+                if (userId != null && Guid.TryParse(userId, out parsedUserId))
                     saveToDb = true;
 
-                var playerAnswer = new PlayerAnswer
+                var playerAnswer = new DailyAnswerPublic
                 {
-                    PlayerId = userId != null ? Guid.Parse(userId) : Guid.NewGuid(),
+                    PlayerId = Guid.NewGuid(),
                     Guess = answer,
-                    SubmittedAt = DateTime.UtcNow
+                    Date = todaysQuestion.Date,
+                    Reason = ""
                 };
 
-                var assessment = await _dailyAIService.AssessAnswerAsync(todaysQuestion.OriginalPrompt, [playerAnswer]);
+                var assessment = await _dailyAIService.AssessAnswerAsync(todaysQuestion.OriginalPrompt, playerAnswer);
 
-                if (assessment == null || assessment.Count == 0)
+                if (assessment == null)
                     return BadRequest("Failed to assess the answer.");
 
 
@@ -98,12 +100,14 @@ namespace DrawPT.Api.Controllers
                 {
                     var answerToSave = new DailyAnswerEntity
                     {
-                        PlayerId = playerAnswer.PlayerId,
+                        Date = todaysQuestion.Date,
+                        PlayerId = parsedUserId,
                         QuestionId = todaysQuestion.Id,
                         Guess = playerAnswer.Guess,
-                        Score = assessment.First().Score,
-                        Reason = assessment.First().Reason,
-                        CreatedAt = playerAnswer.SubmittedAt
+                        Score = assessment.Score,
+                        ClosenessArray = assessment.ClosenessArray,
+                        Reason = assessment.Reason,
+                        CreatedAt = DateTime.UtcNow
                     };
                     await _dailiesRepository.SaveDailyAnswer(answerToSave);
                 }
@@ -113,8 +117,9 @@ namespace DrawPT.Api.Controllers
                     Date = todaysQuestion.Date,
                     PlayerId = playerAnswer.PlayerId,
                     Guess = playerAnswer.Guess,
-                    Score = assessment.First().Score,
-                    Reason = assessment.First().Reason
+                    Score = assessment.Score,
+                    Reason = assessment.Reason,
+                    ClosenessArray = assessment.ClosenessArray,
                 };
                 return Ok(answerPublic);
             }

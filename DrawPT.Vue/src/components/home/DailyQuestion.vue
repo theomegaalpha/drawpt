@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { EyeIcon, Loader2Icon, OctagonAlertIcon, SquareArrowUpRightIcon } from 'lucide-vue-next'
+import { EyeIcon, Loader2Icon, OctagonAlertIcon, Share2Icon } from 'lucide-vue-next'
 import api from '@/api/api'
 
 const guess = ref('')
@@ -84,16 +84,6 @@ onMounted(() => {
           <Loader2Icon class="h-12 w-12 animate-spin" />
         </div>
       </div>
-      <!-- assessment stats -->
-      <div
-        v-else-if="showAssessment"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
-      >
-        <div class="flex flex-col items-center justify-center">
-          <p class="text-lg font-semibold">Your guess:</p>
-          <p class="text-sm">{{ dailyAnswer.guess }}</p>
-        </div>
-      </div>
       <!-- error screen -->
       <div
         v-else-if="dailyError"
@@ -105,12 +95,21 @@ onMounted(() => {
           <p class="text-center text-sm">Please try again later.</p>
         </div>
       </div>
+      <!-- assessment stats -->
+      <div
+        v-else-if="showAssessment"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+      >
+        <div class="flex flex-col items-center justify-center">
+          <p class="text-lg font-semibold">Your guess:</p>
+          <p class="text-sm">{{ dailyAnswer.guess }}</p>
+        </div>
+      </div>
     </div>
     <GuessInput
-      v-if="!dailyAnswer"
+      v-if="!dailiesStore.hasDailyAnswer"
       class="mt-4"
       v-model="guess"
-      :disabled="!imageLoaded"
       :isLoading="isLoading.value"
       :submitAction="submitGuess"
     />
@@ -125,7 +124,7 @@ onMounted(() => {
       </button>
       <button class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full">
         <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
-        <SquareArrowUpRightIcon v-else class="mr-4 h-4 w-4" />
+        <Share2Icon v-else class="mr-4 h-4 w-4" />
         Share Results
       </button>
     </div>

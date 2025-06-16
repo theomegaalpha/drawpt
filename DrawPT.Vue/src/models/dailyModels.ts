@@ -3,6 +3,7 @@ export interface DailyAnswer {
   date: string
   guess: string
   reason: string
+  closenessArray: number[]
   score: number
 }
 

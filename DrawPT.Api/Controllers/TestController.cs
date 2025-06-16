@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Services.AI;
 
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ namespace DrawPT.Api.Controllers
     [ApiController]
     public class TestController : Controller
     {
-        private readonly IAIService _dailyAIService;
+        private readonly DailyAIService _dailyAIService;
 
         public TestController(DailyAIService dailyAIService)
         {
@@ -21,7 +21,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var imageBytes = await _dailyAIService.GenerateGameQuestionAsync("Nier Automata");
+            //var imageBytes = await _dailyAIService.GenerateGameQuestionAsync("Nier Automata");
 
 
             return Ok();
