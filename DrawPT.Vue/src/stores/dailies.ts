@@ -40,6 +40,9 @@ export const useDailiesStore = defineStore('dailies', {
       } finally {
         this.isLoading = false
       }
+    },
+    setImageLoaded(loaded: boolean) {
+      this.imageLoaded = loaded
     }
   }
 })

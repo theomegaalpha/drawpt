@@ -15,8 +15,8 @@ const { dailyQuestion, dailyAnswer, imageLoaded } = storeToRefs(dailiesStore)
 const defaultImageUrl = '/images/daily-image-error.png'
 
 const handleImageError = (event: Event) => {
-  const imgElement = event.target as HTMLImageElement
-  imgElement.src = defaultImageUrl
+  dailiesStore.setImageLoaded(false)
+  console.error('Error loading daily image:', event)
 }
 
 const submitGuess = () => {
@@ -69,7 +69,7 @@ onMounted(() => {
         </div>
         <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
           <div
-            class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
+            class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
           >
             <img
               :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
@@ -77,6 +77,29 @@ onMounted(() => {
               class="h-auto w-full object-contain"
               @error="handleImageError"
             />
+            <div
+              v-if="!imageLoaded"
+              class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="mb-4 h-12 w-12 text-red-500"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <p class="text-center text-lg font-semibold">Error loading today's daily image.</p>
+              <p class="text-center text-sm">Please try again later.</p>
+            </div>
           </div>
           <GuessInput class="mt-4" v-model="guess" :disabled="true" :submitAction="submitGuess" />
         </div>
