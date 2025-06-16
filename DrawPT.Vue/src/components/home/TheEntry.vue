@@ -12,6 +12,13 @@ const guess = ref('')
 const dailiesStore = useDailiesStore()
 const { dailyQuestion, dailyAnswer } = storeToRefs(dailiesStore)
 
+const defaultImageUrl = '/images/daily-image-error.png'
+
+const handleImageError = (event: Event) => {
+  const imgElement = event.target as HTMLImageElement
+  imgElement.src = defaultImageUrl
+}
+
 const submitGuess = () => {
   if (guess.value.trim()) {
     console.log('Submitted guess:', guess.value)
@@ -68,6 +75,7 @@ onMounted(() => {
               :src="dailyQuestion.imageUrl"
               :alt="dailyQuestion.theme"
               class="h-auto w-full object-contain"
+              @error="handleImageError"
             />
           </div>
           <GuessInput class="mt-4" v-model="guess" :submitAction="submitGuess" />
