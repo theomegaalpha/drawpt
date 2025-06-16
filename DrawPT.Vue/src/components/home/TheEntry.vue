@@ -78,7 +78,7 @@ onMounted(() => {
               @error="handleImageError"
             />
           </div>
-          <GuessInput class="mt-4" v-model="guess" :submitAction="submitGuess" />
+          <GuessInput class="mt-4" v-model="guess" :disabled="true" :submitAction="submitGuess" />
         </div>
       </div>
 

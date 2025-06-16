@@ -7,6 +7,7 @@ import StandardInput from './StandardInput.vue'
 const props = defineProps<{
   modelValue: string
   submitAction: (value: string) => void
+  disabled?: boolean
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -22,6 +23,8 @@ const inputValue = computed({
 const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
 
 const handleRecordButtonMouseDown = () => {
+  if (props.disabled) return
+
   if (!isListening.value) {
     toggleListening()
   }
@@ -52,12 +55,14 @@ const localSubmitGuess = () => {
         placeholder="Guess the prompt"
         v-model="inputValue"
         @keyup.enter="localSubmitGuess"
+        :disabled="props.disabled"
       />
       <button
         @mousedown="handleRecordButtonMouseDown"
         @mouseup="handleRecordButtonMouseUp"
         @mouseleave="handleRecordButtonMouseUp"
-        class="absolute right-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors hover:text-white"
+        class="absolute right-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors"
+        :class="{ 'cursor-not-allowed': disabled, 'hover:text-white': !disabled }"
         aria-label="Use microphone"
       >
         <MicIcon class="h-5 w-5" />
