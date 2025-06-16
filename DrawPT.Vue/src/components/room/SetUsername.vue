@@ -6,7 +6,7 @@ import { useNotificationStore } from '@/stores/notifications'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { registerRoomHubEvents, unregisterRoomHubEvents } from '@/services/roomEventHandlers'
-import api from '@/services/api'
+import api from '@/api/api'
 import StandardInput from '../common/StandardInput.vue'
 
 const router = useRouter()

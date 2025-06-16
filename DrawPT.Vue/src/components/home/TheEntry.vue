@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import api from '@/services/api'
+import api from '@/api/api'
 import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router'
