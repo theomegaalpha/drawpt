@@ -3,7 +3,7 @@ import PlayerList from './PlayerList.vue' // New import
 import RoomInfo from './RoomInfo.vue' // New import
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
-import { useVolumeStore } from '@/stores/volumeStore'
+import { useVolumeStore } from '@/stores/volume'
 import service from '@/services/signalRService'
 import FlickeringGrid from '../../common/FlickeringGrid.vue'
 import { onMounted } from 'vue'

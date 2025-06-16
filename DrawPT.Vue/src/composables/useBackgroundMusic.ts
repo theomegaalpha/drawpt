@@ -1,5 +1,5 @@
 import { ref, onUnmounted, watch } from 'vue'
-import { useVolumeStore } from '@/stores/volumeStore'
+import { useVolumeStore } from '@/stores/volume'
 
 export function useBackgroundMusic() {
   const audio = ref<HTMLAudioElement | null>(null)

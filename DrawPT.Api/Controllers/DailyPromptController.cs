@@ -28,7 +28,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet]
         public ActionResult<DailyQuestionEntity> GetDailyPrompt()
         {
-            var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.UtcNow.Date);
+            var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
             if (todaysQuestion != null)
             {
                 return Ok(todaysQuestion);

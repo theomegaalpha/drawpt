@@ -1,5 +1,5 @@
 // src/services/roomEventHandlers.ts
-import { useRoomJoinStore } from '@/stores/roomJoinStore'
+import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useRoomStore } from '@/stores/room'
 import type { HubConnection } from '@microsoft/signalr'
 import type { Player } from '@/models/player'
