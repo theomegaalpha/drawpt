@@ -1,45 +1,8 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { useDailiesStore } from '@/stores/dailies'
 import { RouterLink } from 'vue-router'
-import GuessInput from '../common/GuessInput.vue'
 import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
-import api from '@/api/api'
 import DailyQuestion from './DailyQuestion.vue'
-
-const guess = ref('')
-const dailiesStore = useDailiesStore()
-const { dailyQuestion, dailyAnswer, imageLoaded } = storeToRefs(dailiesStore)
-
-const defaultImageUrl = '/images/daily-image-error.png'
-
-const handleImageError = (event: Event) => {
-  dailiesStore.setImageLoaded(false)
-  console.error('Error loading daily image:', event)
-}
-
-const submitGuess = () => {
-  var myGuess = guess.value.trim()
-  if (myGuess) {
-    console.log('Submitted guess:', myGuess)
-    dailiesStore.setIsLoading(true)
-    api
-      .submitAnswer(myGuess)
-      .then((assessedAnswer) => {
-        dailiesStore.setDailyAnswer(assessedAnswer)
-      })
-      .catch((error) => {
-        console.error('API error:', error)
-      })
-      .finally(() => {
-        guess.value = ''
-        dailiesStore.setIsLoading(false)
-      })
-  }
-}
 
 const scrollToPrompt = () => {
   const element = document.getElementById('prompt-of-the-day')
@@ -47,10 +10,6 @@ const scrollToPrompt = () => {
     element.scrollIntoView({ behavior: 'smooth' })
   }
 }
-
-onMounted(() => {
-  dailiesStore.initStore()
-})
 </script>
 
 <template>
@@ -77,7 +36,9 @@ onMounted(() => {
       </div>
     </div>
     <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <div class="bg-surface-default rounded-xl p-6 shadow-md"><DailyQuestion /></div>
+      <div class="bg-surface-default rounded-xl p-6 shadow-md">
+        <DailyQuestion />
+      </div>
 
       <div class="flex flex-col gap-8">
         <div

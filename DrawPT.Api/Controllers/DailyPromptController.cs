@@ -43,7 +43,7 @@ namespace DrawPT.Api.Controllers
         /// Gets the daily prompt for the current date.
         /// </summary>
         [Authorize]
-        [HttpGet("/myanswer")]
+        [HttpGet("myanswer")]
         public ActionResult<DailyQuestionEntity> GetDailyAnswerPrompt()
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;

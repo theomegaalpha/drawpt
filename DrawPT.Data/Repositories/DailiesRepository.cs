@@ -40,9 +40,9 @@ namespace DrawPT.Data.Repositories
             return _context.DailyAnswers.Where(da => da.Date == date.Date).ToList();
         }
 
-        public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid id, DateTime date)
+        public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid playerId, DateTime date)
         {
-            return _context.DailyAnswers.Where(da => da.Id == id && da.Date == date.Date).ToList();
+            return _context.DailyAnswers.Where(da => da.PlayerId == playerId && da.Date == date.Date).ToList();
         }
 
         public async Task AddDailyQuestion(DailyQuestionEntity image)

@@ -18,7 +18,7 @@ export async function getDailyQuestion(): Promise<DailyQuestion> {
   return (await response.json()) as DailyQuestion
 }
 
-export async function getDailyAnswer(): Promise<DailyAnswer> {
+export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   const headers: HeadersInit = {}
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
@@ -28,8 +28,7 @@ export async function getDailyAnswer(): Promise<DailyAnswer> {
   })
 
   if (!response.ok) {
-    console.error(response.status, response.statusText)
-    throw new Error('Failed to fetch player data')
+    return null
   }
 
   return (await response.json()) as DailyAnswer
