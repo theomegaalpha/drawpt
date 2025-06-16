@@ -7,7 +7,7 @@ export const useDailiesStore = defineStore('dailies', {
   state: () => ({
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
-    isLoadingDaily: false,
+    isLoadingDaily: true,
     isAssessing: false,
     showAssessment: false,
     imageLoaded: false

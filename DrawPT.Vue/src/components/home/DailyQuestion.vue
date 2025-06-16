@@ -3,15 +3,18 @@ import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { Loader2Icon, OctagonAlertIcon } from 'lucide-vue-next'
+import { EyeIcon, Loader2Icon, OctagonAlertIcon, SquareArrowUpRightIcon } from 'lucide-vue-next'
 import api from '@/api/api'
 
 const guess = ref('')
 const dailiesStore = useDailiesStore()
-const { dailyQuestion, dailyAnswer, imageLoaded, isAssessing, isLoadingDaily } =
+const { dailyQuestion, dailyAnswer, showAssessment, imageLoaded, isAssessing, isLoadingDaily } =
   storeToRefs(dailiesStore)
 
-const defaultImageUrl = '/images/daily-image-error.png'
+const defaultImageUrl = computed(() => {
+  if (isLoading.value) return '/images/daily-image-loading.png'
+  return '/images/daily-image-error.png'
+})
 
 const handleImageError = (event: Event) => {
   console.error('Error loading daily image:', event)
@@ -65,36 +68,59 @@ onMounted(() => {
         class="h-auto w-full object-contain"
         @error="handleImageError"
       />
+      <!-- error screen -->
       <div
-        v-if="!imageLoaded || isLoading.value || dailyAnswer"
+        v-if="!imageLoaded"
         class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
       >
-        <!-- assessment stats -->
-        <div
-          v-if="dailyAnswer && dailyAnswer.guess"
-          class="flex flex-col items-center justify-center"
-        >
-          <p class="text-lg font-semibold">Your guess:</p>
-          <p class="text-sm">{{ dailyAnswer.guess }}</p>
-        </div>
-        <!-- loading scree -->
-        <div v-if="isLoading.value" class="flex flex-col items-center justify-center">
-          <Loader2Icon class="h-12 w-12 animate-spin" />
-        </div>
-        <!-- error screen -->
-        <div class="flex flex-col items-center justify-center" v-else-if="!dailyAnswer">
+        <div class="flex flex-col items-center justify-center">
           <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
           <p class="text-center text-lg font-semibold">Error loading today's daily image.</p>
           <p class="text-center text-sm">Please try again later.</p>
         </div>
       </div>
+      <!-- loading scree -->
+      <div
+        v-else-if="isLoading.value"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+      >
+        <div class="flex flex-col items-center justify-center">
+          <Loader2Icon class="h-12 w-12 animate-spin" />
+        </div>
+      </div>
+      <!-- assessment stats -->
+      <div
+        v-else-if="showAssessment"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+      >
+        <div class="flex flex-col items-center justify-center">
+          <p class="text-lg font-semibold">Your guess:</p>
+          <p class="text-sm">{{ dailyAnswer.guess }}</p>
+        </div>
+      </div>
     </div>
     <GuessInput
+      v-if="!dailyAnswer"
       class="mt-4"
       v-model="guess"
       :disabled="!imageLoaded"
       :isLoading="isLoading.value"
       :submitAction="submitGuess"
     />
+    <div class="relative flex w-full pt-4" v-else>
+      <button
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        @click="dailiesStore.setShowAssessment(!showAssessment)"
+      >
+        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <EyeIcon v-else class="mr-4 h-4 w-4" />
+        {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
+      </button>
+      <button class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full">
+        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <SquareArrowUpRightIcon v-else class="mr-4 h-4 w-4" />
+        Share Results
+      </button>
+    </div>
   </div>
 </template>
