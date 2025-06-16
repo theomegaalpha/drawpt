@@ -72,7 +72,7 @@ onMounted(() => {
       <img
         :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
         :alt="dailyQuestion.theme"
-        class="animate-fade-blur-in h-auto w-full object-contain"
+        class="animate-fade-blur-in -my-1 aspect-[3/4] h-auto w-full object-contain"
         @error="handleImageError"
       />
       <!-- loading scree -->
