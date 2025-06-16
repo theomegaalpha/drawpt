@@ -1,15 +1,17 @@
 
-using DrawPT.Data.Repositories;
-using DrawPT.Data.Repositories.Game;
+using DrawPT.Common.Models.Daily;
 using DrawPT.Common.Models.Game;
 using DrawPT.Common.Services.AI;
+using DrawPT.Data.Repositories;
+using DrawPT.Data.Repositories.Game;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using DrawPT.Common.Models.Daily;
 
 
 namespace DrawPT.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class DailyPromptController : ControllerBase
     {
@@ -26,7 +28,7 @@ namespace DrawPT.Api.Controllers
         /// Gets the daily prompt for the current date.
         /// </summary>
         [HttpGet]
-        public ActionResult<DailyQuestionEntity> GetDailyPrompt()
+        public ActionResult<DailyQuestionEntity> GetDailyQuestionPrompt()
         {
             var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
             if (todaysQuestion != null)
@@ -35,6 +37,28 @@ namespace DrawPT.Api.Controllers
             }
 
             return NotFound("No daily question found for today.");
+        }
+
+        /// <summary>
+        /// Gets the daily prompt for the current date.
+        /// </summary>
+        [Authorize]
+        [HttpGet("/myanswer")]
+        public ActionResult<DailyQuestionEntity> GetDailyAnswerPrompt()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in claims.");
+            }
+
+            var todaysAnswers = _dailiesRepository.GetDailyAnswersByPlayerId(Guid.Parse(userId), DateTime.Now.Date);
+            if (todaysAnswers != null && todaysAnswers.Any())
+            {
+                return Ok(todaysAnswers.FirstOrDefault());
+            }
+
+            return NotFound("No daily answer found for today.");
         }
 
 

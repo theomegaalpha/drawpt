@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import api from '@/api/api'
-import { computed, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useDailiesStore } from '@/stores/dailies'
 import { RouterLink } from 'vue-router'
 import GuessInput from '../common/GuessInput.vue'
 import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 
 const guess = ref('')
+const dailiesStore = useDailiesStore()
+const { dailyQuestion, dailyAnswer } = storeToRefs(dailiesStore)
 
 const submitGuess = () => {
   if (guess.value.trim()) {
@@ -22,6 +25,10 @@ const scrollToPrompt = () => {
     element.scrollIntoView({ behavior: 'smooth' })
   }
 }
+
+onMounted(() => {
+  dailiesStore.initStore()
+})
 </script>
 
 <template>
@@ -51,15 +58,15 @@ const scrollToPrompt = () => {
       <div class="bg-surface-default rounded-xl p-6 shadow-md">
         <div class="flex items-baseline gap-x-2">
           <h2 class="text-xl font-bold">Guess Today's Prompt</h2>
-          <span class="text-lg">Hint: Dark</span>
+          <span class="text-lg">Hint: {{ dailyQuestion.theme }}</span>
         </div>
         <div class="prose prose-indigo dark:prose-invert text-color-default mt-2">
           <div
             class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
           >
             <img
-              src="https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp"
-              alt="AI Drawing"
+              :src="dailyQuestion.imageUrl"
+              :alt="dailyQuestion.theme"
               class="h-auto w-full object-contain"
             />
           </div>

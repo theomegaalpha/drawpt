@@ -42,7 +42,7 @@ export async function updateAnswer(answer: string): Promise<void> {
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
   }
-  await fetch(`/api/player`, {
+  await fetch(`/api/dailyprompt`, {
     method: 'POST',
     headers,
     body: JSON.stringify(answer)
