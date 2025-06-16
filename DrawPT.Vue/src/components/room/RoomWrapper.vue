@@ -11,9 +11,9 @@ import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
-import { useRoomJoinStore } from '@/stores/roomJoinStore'
-import { useVolumeStore } from '@/stores/volumeStore'
-import api from '@/services/api'
+import { useRoomJoinStore } from '@/stores/roomJoin'
+import { useVolumeStore } from '@/stores/volume'
+import api from '@/api/api'
 import service from '@/services/signalRService'
 import {
   registerBaseGameHubEvents,

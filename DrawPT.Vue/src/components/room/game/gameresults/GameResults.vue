@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { usePlayerStore } from '@/stores/player'
-import { useVolumeStore } from '@/stores/volumeStore'
+import { useVolumeStore } from '@/stores/volume'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 

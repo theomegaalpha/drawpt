@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import api from '@/services/api'
+import api from '@/api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'

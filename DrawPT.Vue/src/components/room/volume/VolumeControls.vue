@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Volume2 } from 'lucide-vue-next'
-import { useVolumeStore } from '@/stores/volumeStore'
+import { useVolumeStore } from '@/stores/volume'
 
 import { ref } from 'vue'
 

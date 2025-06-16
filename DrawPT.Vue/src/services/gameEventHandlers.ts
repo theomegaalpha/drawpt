@@ -4,7 +4,7 @@ import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
-import { useRoomJoinStore } from '@/stores/roomJoinStore'
+import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useGameStateStore } from '@/stores/gameState'
 
 import type { Player } from '@/models/player'
