@@ -10,7 +10,7 @@ import Leaderboard from './leaderboard/Leaderboard.vue'
 
 const guess = ref('')
 const dailiesStore = useDailiesStore()
-const { dailyQuestion, dailyAnswer } = storeToRefs(dailiesStore)
+const { dailyQuestion, dailyAnswer, imageLoaded } = storeToRefs(dailiesStore)
 
 const defaultImageUrl = '/images/daily-image-error.png'
 
@@ -72,7 +72,7 @@ onMounted(() => {
             class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900"
           >
             <img
-              :src="dailyQuestion.imageUrl"
+              :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
               :alt="dailyQuestion.theme"
               class="h-auto w-full object-contain"
               @error="handleImageError"

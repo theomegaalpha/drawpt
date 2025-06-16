@@ -8,7 +8,7 @@ export const useDailiesStore = defineStore('dailies', {
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
     isLoading: false,
-    error: null as string | null
+    imageLoaded: false
   }),
   getters: {
     getDailyQuestion: (state) => state.dailyQuestion,
@@ -23,11 +23,12 @@ export const useDailiesStore = defineStore('dailies', {
       }
 
       this.isLoading = true
-      this.error = null
+      this.imageLoaded = false
       try {
         if (!this.isDailyQuestionLoaded) {
           const question = await api.getDailyQuestion()
           this.dailyQuestion = question
+          if (question.imageUrl) this.imageLoaded = true
         }
 
         if ((await isAuthenticated()) && !this.isDailyAnswerLoaded) {
@@ -35,7 +36,7 @@ export const useDailiesStore = defineStore('dailies', {
           this.dailyAnswer = answer
         }
       } catch (err) {
-        this.error = (err as Error).message || 'Failed to initialize daily data'
+        console.error((err as Error).message || 'Failed to initialize daily data')
       } finally {
         this.isLoading = false
       }
