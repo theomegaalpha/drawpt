@@ -3,11 +3,8 @@ using Azure.Provisioning.Storage;
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure SQL Server
-//var sql = builder.AddAzureSqlServer("sql")
-//        .RunAsContainer();
-
-var sql = builder.AddSqlServer("sql")
-                 .WithLifetime(ContainerLifetime.Persistent); // temporary to save monies
+var sql = builder.AddAzureSqlServer("sql")
+                 .RunAsContainer();
 var db = sql.AddDatabase("database");
 
 var signalr = builder.ExecutionContext.IsPublishMode
