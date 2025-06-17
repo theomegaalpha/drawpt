@@ -45,9 +45,21 @@ namespace DrawPT.Data.Repositories
             return _context.DailyAnswers.Where(da => da.PlayerId == playerId && da.Date == date.Date).ToList();
         }
 
-        public async Task AddDailyQuestion(DailyQuestionEntity image)
+        public async Task SaveDailyQuestion(DailyQuestionEntity question)
         {
-            _context.DailyQuestions.Add(image);
+            var existingQuestion = await _context.DailyQuestions.FirstOrDefaultAsync(dq => dq.Date == question.Date);
+            if (existingQuestion != null)
+            {
+                existingQuestion.Style = question.Style;
+                existingQuestion.Theme = question.Theme;
+                existingQuestion.ImageUrl = question.ImageUrl;
+                existingQuestion.OriginalPrompt = question.OriginalPrompt;
+                _context.DailyQuestions.Update(existingQuestion);
+            }
+            else
+            {
+                _context.DailyQuestions.Add(question);
+            }
             await _context.SaveChangesAsync();
         }
 

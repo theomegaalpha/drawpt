@@ -51,6 +51,7 @@ json
     ""Id"": ""<unique identifier>"",
     ""QuestionId"": ""<unique identifier of original Question ID>"",
     ""PlayerId"": ""<unique identifier of original Player ID>"",
+    ""Username"": ""<contestant's username>"",
     ""Date"": ""<ISO 8601 string>"",
     ""Guess"": ""<contestant's guessed phrase>"",
     ""OriginalPrompt"": ""<the original image prompt>"",
