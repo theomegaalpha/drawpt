@@ -15,16 +15,16 @@
   }
 
   .btn-primary {
-    @apply btn bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-950 dark:hover:bg-indigo-900;
+    @apply btn bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600 dark:bg-indigo-950 dark:hover:bg-indigo-900 disabled:dark:hover:bg-indigo-950;
   }
 
   .btn-default {
-    @apply btn border border-black/20 bg-gray-50 text-gray-800 hover:bg-gray-100 focus:ring-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-black dark:text-gray-200 dark:hover:bg-[rgb(10,10,10)];
+    @apply btn border border-black/20 bg-gray-50 text-gray-800 hover:bg-gray-100 focus:ring-gray-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-200 dark:hover:bg-[rgb(10,10,10)] disabled:dark:hover:bg-black;
   }
 
   /* Basic Surface and Text Colors (Optional - use if you find them helpful) */
   .bg-surface-default {
-    @apply border border-black/10 shadow-md dark:border-white/10;
+    @apply border border-black/10 bg-white/80 shadow-md dark:border-white/10 dark:bg-neutral-900/30;
   }
 
   .bg-surface-accent {

@@ -2,8 +2,6 @@ using DrawPT.Common.Services.AI;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace DrawPT.ScheduledService
 {
     public class DailyMidnightTaskService : IHostedService, IDisposable
@@ -86,17 +84,21 @@ namespace DrawPT.ScheduledService
                 {
                     var dailiesRepository = scope.ServiceProvider.GetRequiredService<DailiesRepository>();
 
+                    if (dailiesRepository.GetDailyQuestion(DateTime.Now.AddDays(1).Date) != null)
+                        return;
+
                     var randomTheme = dailiesRepository.GetDailyThemes().OrderBy(_ => Guid.NewGuid()).First();
 
                     var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme);
                     var daily = new DailyQuestionEntity
                     {
-                        Date = DateTime.UtcNow.AddDays(1).Date,
+                        Date = DateTime.Now.AddDays(1).Date,
                         Style = randomTheme.Style,
+                        Theme = randomTheme.Theme,
                         ImageUrl = question.ImageUrl,
                         OriginalPrompt = question.OriginalPrompt
                     };
-                    await dailiesRepository.AddDailyQuestion(daily);
+                    await dailiesRepository.SaveDailyQuestion(daily);
 
                     _logger.LogInformation($"Successfully saved daily {daily}");
                 }

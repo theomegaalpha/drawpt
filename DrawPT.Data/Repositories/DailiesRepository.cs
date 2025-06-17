@@ -37,17 +37,29 @@ namespace DrawPT.Data.Repositories
 
         public List<DailyAnswerEntity> GetDailyAnswers(DateTime date)
         {
-            return _context.DailyAnswers.Where(da => da.Date == date.Date).ToList();
+            return _context.DailyAnswers.Where(da => da.Date == date.Date).OrderByDescending(da => da.Score).Take(20).ToList();
         }
 
-        public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid id, DateTime date)
+        public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid playerId, DateTime date)
         {
-            return _context.DailyAnswers.Where(da => da.Id == id && da.Date == date.Date).ToList();
+            return _context.DailyAnswers.Where(da => da.PlayerId == playerId && da.Date == date.Date).ToList();
         }
 
-        public async Task AddDailyQuestion(DailyQuestionEntity image)
+        public async Task SaveDailyQuestion(DailyQuestionEntity question)
         {
-            _context.DailyQuestions.Add(image);
+            var existingQuestion = await _context.DailyQuestions.FirstOrDefaultAsync(dq => dq.Date == question.Date);
+            if (existingQuestion != null)
+            {
+                existingQuestion.Style = question.Style;
+                existingQuestion.Theme = question.Theme;
+                existingQuestion.ImageUrl = question.ImageUrl;
+                existingQuestion.OriginalPrompt = question.OriginalPrompt;
+                _context.DailyQuestions.Update(existingQuestion);
+            }
+            else
+            {
+                _context.DailyQuestions.Add(question);
+            }
             await _context.SaveChangesAsync();
         }
 

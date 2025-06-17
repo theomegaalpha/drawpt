@@ -34,16 +34,9 @@ namespace DrawPT.Common.Services.AI
                 throw new ArgumentNullException(nameof(prompt), "Prompt cannot be null or empty.");
             }
 
-            var refImage = _storageService.GetImageAsync("freepik/references/1.png").Result;
-            string? refImageString = null;
-            if (refImage != null)
-                refImageString = Convert.ToBase64String(refImage);
-
-
             var requestPayload = new FreepikImageRequestPayload
             {
                 Prompt = prompt,
-                StyleReference = refImageString, // image style reference, replace with actual value
                 Adherence = 100,
                 Resolution = "2k",
                 AspectRatio = "traditional_3_4",

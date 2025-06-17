@@ -34,7 +34,7 @@
         </div>
         <div class="bg-muted h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
           <img
-            :src="player.color"
+            :src="randomImage()"
             :alt="`${player.username}'s avatar`"
             class="h-full w-full object-cover"
             @error="handleImageError"
@@ -57,6 +57,28 @@ import { useLeaderboardStore } from '@/stores/leaderboard'
 
 const leaderboardStore = useLeaderboardStore()
 const isLoading = computed(() => leaderboardStore.isLoading)
+const randomImage = () => {
+  const images = [
+    '/images/profile-photos/animal-1.png',
+    '/images/profile-photos/animal-2.png',
+    '/images/profile-photos/animal-3.png',
+    '/images/profile-photos/animal-4.png',
+    '/images/profile-photos/animal-5.png',
+    '/images/profile-photos/animal-6.png',
+    '/images/profile-photos/anime-1.png',
+    '/images/profile-photos/anime-2.png',
+    '/images/profile-photos/anime-3.png',
+    '/images/profile-photos/anime-4.png',
+    '/images/profile-photos/anime-5.png',
+    '/images/profile-photos/anime-6.png',
+    '/images/profile-photos/anime-7.png',
+    '/images/profile-photos/anime-8.png',
+    '/images/profile-photos/anime-9.png',
+    '/images/profile-photos/anime-10.png'
+  ]
+  let randomIndex = Math.floor(Math.random() * images.length)
+  return images[randomIndex]
+}
 
 const tabs = [
   { id: 'daily', label: 'Daily Prompt' },

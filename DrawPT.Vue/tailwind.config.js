@@ -51,6 +51,20 @@ export default {
             filter: 'blur(0px)',
             transform: 'translateY(0px)'
           }
+        },
+        'fade-blur-in-effect': {
+          '0%': {
+            opacity: '0',
+            filter: 'blur(12px)'
+          },
+          '50%': {
+            opacity: '0',
+            filter: 'blur(12px)'
+          },
+          '100%': {
+            opacity: '1',
+            filter: 'blur(0px)'
+          }
         }
       },
       animation: {
@@ -58,7 +72,8 @@ export default {
         'timer-countdown': 'timer-countdown linear',
         'slide-in-left': 'slide-in-left 0.3s ease-in forwards',
         'slide-in': 'slide-in 0.2s ease-in forwards',
-        'blur-in': 'blur-in-effect 0.5s ease-out forwards'
+        'blur-in': 'blur-in-effect 0.5s ease-out forwards',
+        'fade-blur-in': 'fade-blur-in-effect 2s ease-out forwards'
       }
     }
   },

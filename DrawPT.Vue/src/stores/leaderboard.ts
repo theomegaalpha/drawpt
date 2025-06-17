@@ -20,18 +20,18 @@ export const useLeaderboardStore = defineStore('leaderboard', () => {
   }
 
   function fetchDailies() {
-    // setIsLoading(true)
-    // return fetch('/api/leaderboard/dailies')
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     dailies.value = data
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error fetching dailies:', error)
-    //   })
-    //   .finally(() => {
-    //     setIsLoading(false)
-    //   })
+    setIsLoading(true)
+    return fetch('/api/dailyanswer/top20')
+      .then((response) => response.json())
+      .then((data) => {
+        dailies.value = data
+      })
+      .catch((error) => {
+        console.error('Error fetching dailies:', error)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   function fetchPlayerResults() {

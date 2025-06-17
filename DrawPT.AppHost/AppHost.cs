@@ -4,7 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure SQL Server
 var sql = builder.AddAzureSqlServer("sql")
-                 .RunAsContainer();
+                 .RunAsContainer(c => c.WithLifetime(ContainerLifetime.Persistent));
 var db = sql.AddDatabase("database");
 
 var signalr = builder.ExecutionContext.IsPublishMode

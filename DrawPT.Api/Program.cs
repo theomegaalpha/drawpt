@@ -83,7 +83,6 @@ builder.Services.AddSingleton<ReferenceCache>();
 builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<FreepikMysticService>();
 builder.Services.AddTransient<FreepikFastService>();
-builder.Services.AddTransient<IAIService, DailyAIService>();
 builder.Services.AddTransient<DailyAIService>();
 
 // Add SignalR with CORS

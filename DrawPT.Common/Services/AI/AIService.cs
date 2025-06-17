@@ -23,6 +23,7 @@ Maintain engagement and variety in each response while aligning to the provided 
 
 Response Format:
 (Use this format without curly braces) [{Theme}] {Creative image prompt}";
+        private const string _imageEnhancePrompt = @"  Use a painterly style image with visible brushstrokes and a slightly textured surface, utilizing a muted pastel color palette of soft blues, light grays, and pale yellow with soft, diffused lighting.";
         private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
 Evaluation Criteria:
 Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
@@ -125,7 +126,7 @@ Now, the original phrase is:";
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            var imageUrl = await GenerateImageAsync(prompt);
+            var imageUrl = await GenerateImageAsync($"{prompt} {_imageEnhancePrompt}");
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
