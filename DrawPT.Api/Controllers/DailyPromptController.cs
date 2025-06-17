@@ -73,7 +73,7 @@ namespace DrawPT.Api.Controllers
             }
             try
             {
-                var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.UtcNow.Date);
+                var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
 
                 var saveToDb = false;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;

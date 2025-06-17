@@ -111,7 +111,7 @@ onMounted(() => {
       <!-- loading scree -->
       <div
         v-if="isLoading.value"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
       >
         <div class="flex flex-col items-center justify-center">
           <Loader2Icon class="h-12 w-12 animate-spin" />
@@ -120,7 +120,7 @@ onMounted(() => {
       <!-- error screen -->
       <div
         v-else-if="dailyError"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
       >
         <div class="flex flex-col items-center justify-center">
           <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
@@ -131,12 +131,14 @@ onMounted(() => {
       <!-- assessment stats -->
       <div
         v-else-if="showAssessment"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 text-white dark:bg-opacity-70"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white"
       >
         <div class="flex flex-col items-center justify-center">
+          <p class="text-lg">Score: {{ dailyAnswer.score }}</p>
           <p class="text-lg font-semibold">Your guess:</p>
           <p class="text-sm">{{ dailyAnswer.guess }}</p>
           <ClosenessDisplay :closenessArray="dailyAnswer.closenessArray" />
+          <p class="mx-6 mt-8 text-sm">{{ dailyAnswer.reason }}</p>
         </div>
       </div>
     </div>

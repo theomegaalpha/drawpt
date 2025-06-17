@@ -1,5 +1,5 @@
 <template>
-  <div class="my-2 flex cursor-pointer gap-[5px]" title="Click to copy values">
+  <div class="my-2 flex gap-2" title="Click to copy values">
     <div
       v-for="(value, index) in closenessArray"
       :key="index"

@@ -69,7 +69,7 @@ export default {
         'slide-in-left': 'slide-in-left 0.3s ease-in forwards',
         'slide-in': 'slide-in 0.2s ease-in forwards',
         'blur-in': 'blur-in-effect 0.5s ease-out forwards',
-        'fade-blur-in': 'fade-blur-in-effect 1.5s ease-out forwards'
+        'fade-blur-in': 'fade-blur-in-effect 1.5s ease-out 500ms forwards'
       }
     }
   },
