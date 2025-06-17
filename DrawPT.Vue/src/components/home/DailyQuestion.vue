@@ -29,9 +29,14 @@ const handleImageError = (event: Event) => {
   console.error('Error loading daily image:', event)
 }
 
-const isLoading = computed(() => isAssessing || isLoadingDaily)
+const isLoading = computed(() => isAssessing.value || isLoadingDaily.value)
 
 const submitGuess = () => {
+  if (isLoading.value || isAssessing.value) {
+    console.warn('Already loading or assessing, ignoring guess submission.')
+    return
+  }
+
   var myGuess = guess.value.trim()
   if (myGuess) {
     console.log('Submitted guess:', myGuess)
@@ -110,8 +115,8 @@ onMounted(() => {
       />
       <!-- loading scree -->
       <div
-        v-if="isLoading.value"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
+        v-if="isLoading"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center">
           <Loader2Icon class="h-12 w-12 animate-spin" />
@@ -120,7 +125,7 @@ onMounted(() => {
       <!-- error screen -->
       <div
         v-else-if="dailyError"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center">
           <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
@@ -131,7 +136,7 @@ onMounted(() => {
       <!-- assessment stats -->
       <div
         v-else-if="showAssessment"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center p-8">
           <p class="text-lg">
@@ -148,23 +153,29 @@ onMounted(() => {
       v-if="!dailiesStore.hasDailyAnswer"
       class="mt-4"
       v-model="guess"
-      :isLoading="isLoading.value"
+      :isLoading="isLoading"
       :submitAction="submitGuess"
     />
     <div class="relative flex w-full pt-4" v-else>
       <button
         class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
         @click="dailiesStore.setShowAssessment(!showAssessment)"
       >
-        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <EyeIcon v-else class="mr-4 h-4 w-4" />
         {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
       </button>
       <button
         class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
         @click="copyClosenessArrayToClipboard"
       >
-        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <Share2Icon v-else class="mr-4 h-4 w-4" />
         {{ shareText }}
       </button>
