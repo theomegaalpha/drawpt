@@ -37,7 +37,7 @@ namespace DrawPT.Data.Repositories
 
         public List<DailyAnswerEntity> GetDailyAnswers(DateTime date)
         {
-            return _context.DailyAnswers.Where(da => da.Date == date.Date).ToList();
+            return _context.DailyAnswers.Where(da => da.Date == date.Date).OrderByDescending(da => da.Score).Take(20).ToList();
         }
 
         public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid playerId, DateTime date)

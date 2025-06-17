@@ -60,9 +60,15 @@ json
     ""CreatedAt"": ""<ISO 8601 string>""
 }
 Guidelines for Consistency
-""Reason"" must concisely justify the score using specific linguistic and semantic comparisons.
+""Reason"" must concisely justify the score using specific linguistic and semantic comparisons without revealing the original prompt.
+""Reason"" should include details on how the guess aligns with the original prompt.
+""Reason"" should only very briefly mention where guess deviates from original prompt.
+""Reason"" should not mention any aspects of the original prompt not captured in the guess.
 The closeness array must align with sentence structure, capturing semantic similarity at each word position.
-Ensure the response always follows the structured JSON format.";
+Ensure the response always follows the structured JSON format.
+Penalty for Missing Key Details
+The more context lost, the greater the deduction.
+Weight prioritization: Subject + Scene + Action > Single Noun Identification";
 
         public DailyAIService(OpenAIClient aiClient, FreepikMysticService freepikImageService, IConfiguration configuration)
         {

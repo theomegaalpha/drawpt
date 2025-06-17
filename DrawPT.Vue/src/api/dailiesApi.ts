@@ -6,7 +6,7 @@ export async function getDailyQuestion(): Promise<DailyQuestion> {
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
   }
-  const response = await fetch('/api/dailyprompt', {
+  const response = await fetch('/api/dailyquestion', {
     headers
   })
 
@@ -23,7 +23,7 @@ export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
   }
-  const response = await fetch('/api/dailyprompt/myanswer', {
+  const response = await fetch('/api/dailyanswer', {
     headers
   })
 
@@ -34,6 +34,23 @@ export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   return (await response.json()) as DailyAnswer
 }
 
+export async function getTop20DailyAnswers(): Promise<DailyAnswer[]> {
+  const headers: HeadersInit = {}
+  if (await isAuthenticated()) {
+    headers['Authorization'] = `Bearer ${await getAccessToken()}`
+  }
+  const response = await fetch('/api/dailyanswer/top20', {
+    headers
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch top daily answers')
+  }
+
+  return (await response.json()) as DailyAnswer[]
+}
+
 export async function submitAnswer(answer: string): Promise<DailyAnswer> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json'
@@ -41,7 +58,7 @@ export async function submitAnswer(answer: string): Promise<DailyAnswer> {
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
   }
-  const response = await fetch(`/api/dailyprompt`, {
+  const response = await fetch(`/api/dailyanswer`, {
     method: 'POST',
     headers,
     body: JSON.stringify(answer)

@@ -41,12 +41,12 @@ const submitGuess = () => {
       .submitAnswer(myGuess)
       .then((assessedAnswer) => {
         dailiesStore.setDailyAnswer(assessedAnswer)
+        guess.value = ''
       })
       .catch((error) => {
         console.error('API error:', error)
       })
       .finally(() => {
-        guess.value = ''
         dailiesStore.setIsLoading(false)
         dailiesStore.setIsAssessing(false)
       })
@@ -105,7 +105,7 @@ onMounted(() => {
       <img
         :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
         :alt="dailyQuestion.theme"
-        class="animate-fade-blur-in -my-1 aspect-[3/4] h-auto w-full object-contain"
+        class="animate-fade-blur-in -my-1 aspect-[3/4] h-auto w-full object-contain transition delay-1000"
         @error="handleImageError"
       />
       <!-- loading scree -->
@@ -133,12 +133,14 @@ onMounted(() => {
         v-else-if="showAssessment"
         class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white"
       >
-        <div class="flex flex-col items-center justify-center">
-          <p class="text-lg">Score: {{ dailyAnswer.score }}</p>
+        <div class="flex flex-col items-center justify-center p-8">
+          <p class="text-lg">
+            Score: <div class="ml-2 float-right  font-bold" :class="{'animate-bounce text-green-600': dailyAnswer.score >= 70}">{{ dailyAnswer.score }}</div>
+          </p>
           <p class="text-lg font-semibold">Your guess:</p>
-          <p class="text-sm">{{ dailyAnswer.guess }}</p>
+          <p class="text-md">{{ dailyAnswer.guess }}</p>
           <ClosenessDisplay :closenessArray="dailyAnswer.closenessArray" />
-          <p class="mx-6 mt-8 text-sm">{{ dailyAnswer.reason }}</p>
+          <p class="mt-8 text-sm">{{ dailyAnswer.reason }}</p>
         </div>
       </div>
     </div>

@@ -1,49 +1,32 @@
-
 using DrawPT.Common.Models.Daily;
 using DrawPT.Common.Services.AI;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace DrawPT.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class DailyPromptController : ControllerBase
+    public class DailyAnswerController : ControllerBase
     {
         private readonly DailiesRepository _dailiesRepository;
         private readonly DailyAIService _dailyAIService;
 
-        public DailyPromptController(DailiesRepository dailiesRepository, DailyAIService dailyAIService)
+        public DailyAnswerController(DailiesRepository dailiesRepository, DailyAIService dailyAIService)
         {
             _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "DailyAIService cannot be null.");
         }
 
-        /// <summary>
-        /// Gets the daily prompt for the current date.
-        /// </summary>
-        [HttpGet]
-        public ActionResult<DailyQuestionEntity> GetDailyQuestionPrompt()
-        {
-            var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
-            if (todaysQuestion != null)
-            {
-                return Ok(todaysQuestion);
-            }
-
-            return NotFound("No daily question found for today.");
-        }
 
         /// <summary>
-        /// Gets the daily prompt for the current date.
+        /// Gets the daily answer for today.
         /// </summary>
         [Authorize]
-        [HttpGet("myanswer")]
-        public ActionResult<DailyQuestionEntity> GetDailyAnswerPrompt()
+        [HttpGet]
+        public ActionResult<DailyAnswerPublic> GetMyDailyAnswer()
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
             if (userId == null)
@@ -56,6 +39,19 @@ namespace DrawPT.Api.Controllers
             {
                 return Ok(todaysAnswers.FirstOrDefault());
             }
+
+            return NotFound("No daily answer found for today.");
+        }
+
+        /// <summary>
+        /// Gets the daily answer for today.
+        /// </summary>
+        [HttpGet("top20")]
+        public ActionResult<IEnumerable<DailyAnswerPublic>> GetTop20DailyAnswers()
+        {
+            var todaysAnswers = _dailiesRepository.GetDailyAnswers(DateTime.Now.Date);
+            if (todaysAnswers != null)
+                return Ok(todaysAnswers);
 
             return NotFound("No daily answer found for today.");
         }
