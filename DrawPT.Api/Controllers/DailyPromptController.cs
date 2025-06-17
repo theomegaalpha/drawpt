@@ -1,6 +1,5 @@
 
 using DrawPT.Common.Models.Daily;
-using DrawPT.Common.Models.Game;
 using DrawPT.Common.Services.AI;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;

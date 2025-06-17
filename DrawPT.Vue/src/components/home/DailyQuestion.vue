@@ -5,8 +5,10 @@ import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { EyeIcon, Loader2Icon, OctagonAlertIcon, Share2Icon } from 'lucide-vue-next'
 import api from '@/api/api'
+import ClosenessDisplay from '../common/ClosenessDisplay.vue'
 
 const guess = ref('')
+const shareText = ref('Share Results')
 const dailiesStore = useDailiesStore()
 const {
   dailyQuestion,
@@ -48,6 +50,37 @@ const submitGuess = () => {
         dailiesStore.setIsLoading(false)
         dailiesStore.setIsAssessing(false)
       })
+  }
+}
+
+const getEmojiForValue = (value: number): string => {
+  if (value >= 7) {
+    return '🟩'
+  } else if (value >= 4) {
+    return '🟨'
+  } else {
+    return '⬛'
+  }
+}
+
+const copyClosenessArrayToClipboard = async () => {
+  if (!dailyAnswer.value.closenessArray || dailyAnswer.value.closenessArray.length === 0) {
+    console.warn('Closeness array is empty, nothing to copy.')
+    return
+  }
+  try {
+    const emojiString = dailyAnswer.value.closenessArray.map(getEmojiForValue).join('')
+    const formattedString = `My score today was: ${dailyAnswer.value.score}%\nHere is my spoiler free guess: ${emojiString}\nTry to beat my score at ${window.location.origin}`
+    await navigator.clipboard.writeText(formattedString)
+    console.debug('Closeness emoji copied to clipboard:', emojiString)
+
+    shareText.value = 'Copied to Clipboard!'
+    setTimeout(() => {
+      shareText.value = 'Share Results'
+    }, 3000)
+  } catch (err) {
+    console.error('Failed to copy closeness emoji to clipboard:', err)
+    // Optional: Notify user of failure
   }
 }
 
@@ -103,6 +136,7 @@ onMounted(() => {
         <div class="flex flex-col items-center justify-center">
           <p class="text-lg font-semibold">Your guess:</p>
           <p class="text-sm">{{ dailyAnswer.guess }}</p>
+          <ClosenessDisplay :closenessArray="dailyAnswer.closenessArray" />
         </div>
       </div>
     </div>
@@ -122,10 +156,13 @@ onMounted(() => {
         <EyeIcon v-else class="mr-4 h-4 w-4" />
         {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
       </button>
-      <button class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full">
+      <button
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        @click="copyClosenessArrayToClipboard"
+      >
         <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
         <Share2Icon v-else class="mr-4 h-4 w-4" />
-        Share Results
+        {{ shareText }}
       </button>
     </div>
   </div>

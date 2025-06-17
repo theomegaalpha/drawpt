@@ -33,7 +33,6 @@ This scoring system heavily penalizes incomplete guesses, ensuring accuracy and 
 25–49 (Weak Similarity) – Guess touches on a single aspect while ignoring full context.
 0–24 (Unrelated) – Guess is too vague or completely incorrect.
 Penalty for Missing Key Details
-If a guess only matches a single element (e.g., ""Singer"" instead of the full scene ""A radiant idol singer on a dazzling stage...""), it must fall between 25–40 rather than 60.
 The more context lost, the greater the deduction.
 Weight prioritization: Subject + Scene + Action > Single Noun Identification
 
