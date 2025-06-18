@@ -11,6 +11,7 @@ var result = {
     {
       id: 'player1-uuid',
       connectionId: 'conn1',
+      avatar: null,
       color: 'blue',
       username: 'PlayerOne',
       score: 150
@@ -18,6 +19,7 @@ var result = {
     {
       id: 'player2-uuid',
       connectionId: 'conn1',
+      avatar: null,
       color: 'blue',
       username: 'PlayerTwo',
       score: 140
@@ -25,6 +27,7 @@ var result = {
     {
       id: 'player3-uuid',
       connectionId: 'conn3',
+      avatar: null,
       color: 'red',
       username: 'PlayerThree',
       score: 200
