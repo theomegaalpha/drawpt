@@ -20,10 +20,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            //var imageBytes = await _dailyAIService.GenerateGameQuestionAsync("Nier Automata");
-
-
-            return Ok();
+            return Ok(DateTime.Now);
         }
     }
 }

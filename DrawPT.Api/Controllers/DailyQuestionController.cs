@@ -1,5 +1,5 @@
 using DrawPT.Data.Repositories;
-using DrawPT.Data.Repositories.Game;
+using DrawPT.Common.Models.Daily;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrawPT.Api.Controllers
@@ -19,12 +19,19 @@ namespace DrawPT.Api.Controllers
         /// Gets the daily prompt for the current date.
         /// </summary>
         [HttpGet]
-        public ActionResult<DailyQuestionEntity> GetDailyQuestionPrompt()
+        public ActionResult<DailyQuestionPublic> GetDailyQuestionPrompt()
         {
             var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
             if (todaysQuestion != null)
             {
-                return Ok(todaysQuestion);
+                var dailyQuestionPublic = new DailyQuestionPublic
+                {
+                    Date = todaysQuestion.Date,
+                    Style = todaysQuestion.Style,
+                    Theme = todaysQuestion.Theme,
+                    ImageUrl = todaysQuestion.ImageUrl,
+                };
+                return Ok(dailyQuestionPublic);
             }
 
             return NotFound("No daily question found for today.");
