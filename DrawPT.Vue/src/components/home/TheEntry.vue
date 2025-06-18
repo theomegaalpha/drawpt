@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 import DailyQuestion from './DailyQuestion.vue'
-import { usePlayerStore } from '@/stores/player'
-
-const playerStore = usePlayerStore()
 
 const scrollToPrompt = () => {
   const element = document.getElementById('prompt-of-the-day')
@@ -14,10 +10,6 @@ const scrollToPrompt = () => {
     element.scrollIntoView({ behavior: 'smooth' })
   }
 }
-
-onMounted(() => {
-  playerStore.init()
-})
 </script>
 
 <template>

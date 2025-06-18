@@ -3,6 +3,12 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { MenuIcon, XIcon } from 'lucide-vue-next' // Added MenuIcon and XIcon
+import { storeToRefs } from 'pinia'
+
+import { usePlayerStore } from '@/stores/player'
+
+const playerStore = usePlayerStore()
+const { player, blankAvatar } = storeToRefs(playerStore)
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -15,6 +21,14 @@ const isMobileMenuOpen = ref(false) // State for mobile menu
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const isProfileMenuOpen = ref(false)
+const toggleProfileMenu = () => {
+  isProfileMenuOpen.value = !isProfileMenuOpen.value
+}
+const goToEditProfile = () => {
+  router.push('/profile')
 }
 
 const handleLogout = async () => {
@@ -65,9 +79,44 @@ const handleLogout = async () => {
                 </router-link>
               </li>
               <li v-if="isAuthenticated">
+                <router-link
+                  to="/profile"
+                  class="text-muted-foreground hover:text-accent-foreground block duration-150 lg:hidden"
+                >
+                  <span>Edit Profile</span>
+                </router-link>
+              </li>
+              <li v-if="isAuthenticated">
+                <div
+                  class="text-muted-foreground hover:text-accent-foreground relative hidden cursor-pointer duration-150 lg:block"
+                >
+                  <img
+                    :src="player.avatar || blankAvatar"
+                    alt="avatar"
+                    class="hidden h-8 w-8 rounded-full lg:block"
+                    @click="toggleProfileMenu"
+                  />
+                  <div
+                    v-if="isProfileMenuOpen"
+                    class="absolute right-0 z-50 mt-2 flex w-48 flex-col items-end rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
+                  >
+                    <router-link
+                      to="/profile"
+                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                    >
+                      Edit Profile
+                    </router-link>
+                    <button
+                      @click="handleLogout"
+                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                </div>
                 <div
                   @click="handleLogout"
-                  class="text-muted-foreground hover:text-accent-foreground block cursor-pointer duration-150"
+                  class="text-muted-foreground hover:text-accent-foreground block cursor-pointer duration-150 lg:hidden"
                 >
                   <span>Log out</span>
                 </div>
