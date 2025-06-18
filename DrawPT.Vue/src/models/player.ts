@@ -3,6 +3,7 @@ export interface Player {
   connectionId: string
   color: string
   username: string
+  avatar: string | null
 }
 
 export interface PlayerResult extends Player {
