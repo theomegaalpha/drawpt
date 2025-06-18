@@ -1,7 +1,5 @@
-﻿using DrawPT.Api.Services;
 using DrawPT.Common.Models;
 using DrawPT.Common.Interfaces;
-using DrawPT.Common.Models.Supabase;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DrawPT.Common.Services;
@@ -13,14 +11,11 @@ namespace DrawPT.Api.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly RandomService _randomService;
         private readonly ICacheService _cacheService;
-        private readonly ProfileService _profileService;
+        private readonly PlayerService _profileService;
 
-        public PlayerController(ICacheService cacheService,
-            RandomService randomService, ProfileService profileService)
+        public PlayerController(ICacheService cacheService, PlayerService profileService)
         {
-            _randomService = randomService;
             _cacheService = cacheService;
             _profileService = profileService;
         }
@@ -33,12 +28,7 @@ namespace DrawPT.Api.Controllers
             if (userId == null)
                 return BadRequest("User ID claim is not present.");
 
-            var player = await _cacheService.CreatePlayerAsync();
-            player.Username = _randomService.GenerateRandomUsername();
-            player.Id = new Guid(userId);
-            var profile = await _profileService.GetProfileAsync(new Guid(userId));
-
-            return Ok(player);
+            return Ok(await _profileService.GetPlayerAsync(Guid.Parse(userId)));
         }
 
         // GET: api/<PlayerController>/00000000-0000-0000-0000-000000000000
@@ -56,16 +46,18 @@ namespace DrawPT.Api.Controllers
 
 
         // POST: api/<PlayerController>
-        [HttpPost()]
+        [HttpPost]
         public async Task<ActionResult<Player>> Post([FromBody] Player player)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
             if (userId == null)
                 return BadRequest("User ID claim is not present.");
 
-            var updatedPlayer = await _cacheService.UpdatePlayerAsync(player);
-            await _profileService.UpdateUsernameAsync(new Guid(userId), player.Username);
-            return Ok(updatedPlayer);
+            if (userId != player.Id.ToString())
+                return Unauthorized("You can only edit your own profile.");
+
+            await _profileService.UpdatePlayerAsync(player);
+            return Ok(player);
         }
     }
 }

@@ -3,22 +3,22 @@ import { useNotificationStore } from './notifications'
 
 interface RoomJoinState {
   isLoading: boolean
-  canSetUsername: boolean
+  canJoinRoom: boolean
   joinError: string | null
 }
 
 export const useRoomJoinStore = defineStore('roomJoin', {
   state: (): RoomJoinState => ({
     isLoading: false,
-    canSetUsername: false,
+    canJoinRoom: false,
     joinError: null
   }),
   actions: {
     setLoading(loading: boolean) {
       this.isLoading = loading
     },
-    setCanSetUsername(canSet: boolean) {
-      this.canSetUsername = canSet
+    setCanJoinRoom(canSet: boolean) {
+      this.canJoinRoom = canSet
       if (canSet) {
         this.joinError = null // Clear error when username can be set
       }
@@ -26,7 +26,7 @@ export const useRoomJoinStore = defineStore('roomJoin', {
     setJoinError(error: string | null) {
       this.joinError = error
       this.isLoading = false
-      this.canSetUsername = false
+      this.canJoinRoom = false
       if (error) {
         const notificationStore = useNotificationStore()
         notificationStore.addGameNotification(error, true)
@@ -34,7 +34,7 @@ export const useRoomJoinStore = defineStore('roomJoin', {
     },
     reset() {
       this.isLoading = false
-      this.canSetUsername = false
+      this.canJoinRoom = false
       this.joinError = null
     },
     handleRoomIsFull() {
@@ -45,7 +45,7 @@ export const useRoomJoinStore = defineStore('roomJoin', {
     },
     handleNavigateToRoom() {
       console.log('Navigating to room...')
-      this.setCanSetUsername(true)
+      this.setCanJoinRoom(true)
       this.setLoading(false)
     },
     handleErrorJoiningRoom(errorMessage?: string) {

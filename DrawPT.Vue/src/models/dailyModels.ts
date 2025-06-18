@@ -1,6 +1,7 @@
 export interface DailyAnswer {
   playerId: string
   username: string
+  avatar: string | null
   date: string
   guess: string
   reason: string

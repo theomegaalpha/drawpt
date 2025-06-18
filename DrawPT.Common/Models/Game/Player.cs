@@ -16,14 +16,14 @@ namespace DrawPT.Common.Models
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
+        /// Player's avatar
+        /// </summary>
+        public string? Avatar{ get; set; }
+
+        /// <summary>
         /// Player's connection ID for real-time communication
         /// </summary>
         public string ConnectionId { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Whether the player is currently active in the game
-        /// </summary>
-        public bool IsActive { get; set; } = true;
 
         /// <summary>
         /// Room code for the game this player is in

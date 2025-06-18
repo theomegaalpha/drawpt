@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import service from '@/services/signalRService' // Still needed for invoke
 import { useNotificationStore } from '@/stores/notifications'
@@ -7,7 +7,7 @@ import { usePlayerStore } from '@/stores/player'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { registerRoomHubEvents, unregisterRoomHubEvents } from '@/services/roomEventHandlers'
 import api from '@/api/api'
-import StandardInput from '../common/StandardInput.vue'
+import { onBeforeUnmount } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -19,11 +19,11 @@ const username = ref(playerStore.player?.username || '')
 const roomCode = ref((route.params.roomCode as string) || '')
 
 // Computed properties from the store
-const canSetUsername = computed(() => roomJoinStore.canSetUsername)
-const isLoading = computed(() => roomJoinStore.isLoading)
 const joinError = computed(() => roomJoinStore.joinError)
+const canJoinRoom = computed(() => roomJoinStore.canJoinRoom)
 
 let unsubscribeFromConnectionStatus: (() => void) | null = null
+let unsubscribeNavigateToRoom: (() => void) | null = null
 
 const requestToJoin = async () => {
   roomJoinStore.setLoading(true)
@@ -45,6 +45,13 @@ const requestToJoin = async () => {
   }
 }
 
+watch(canJoinRoom, (newVal) => {
+  if (newVal) {
+    playerStore.setUsername(username.value)
+    service.invoke('joinGame', roomCode.value, username.value)
+  }
+})
+
 onMounted(() => {
   roomJoinStore.reset()
   if (!roomCode.value) {
@@ -58,6 +65,7 @@ onMounted(() => {
     api.checkRoom(roomCode.value).then((exists) => {
       if (!exists) {
         roomJoinStore.setJoinError('😭 This game has already ended.')
+        return
       }
     })
   })
@@ -90,6 +98,13 @@ onMounted(() => {
   onUnmounted(() => clearTimeout(timeoutId))
 })
 
+onBeforeUnmount(() => {
+  if (unsubscribeNavigateToRoom) {
+    unsubscribeNavigateToRoom()
+    unsubscribeNavigateToRoom = null
+  }
+})
+
 onUnmounted(() => {
   unregisterRoomHubEvents()
   if (unsubscribeFromConnectionStatus) {
@@ -97,22 +112,6 @@ onUnmounted(() => {
     unsubscribeFromConnectionStatus = null
   }
 })
-
-const submitUsernameAndEnter = async () => {
-  if (!canSetUsername.value || !username.value.trim()) {
-    notificationStore.addGameNotification('Please enter a valid username.', true)
-    return
-  }
-  roomJoinStore.setLoading(true)
-
-  try {
-    playerStore.setUsername(username.value)
-    service.invoke('joinGame', roomCode.value, username.value)
-  } catch (error) {
-    console.error('Error submitting username or invoking joinGame:', error)
-    roomJoinStore.setJoinError('Failed to finalize username or join game. Please try again.')
-  }
-}
 </script>
 
 <template>
@@ -120,42 +119,40 @@ const submitUsernameAndEnter = async () => {
     <div
       class="text-color-default w-full max-w-md space-y-1 rounded-lg border border-gray-300 bg-white p-10 shadow-lg dark:border-gray-300/20 dark:bg-slate-500/10"
     >
-      <h2 class="text-center text-3xl font-extrabold">Join Room</h2>
+      <h2 class="text-center text-3xl font-extrabold">Joining Room...</h2>
       <h3 class="text-center text-lg font-medium">
         Room Code: <span class="font-bold">{{ roomCode }}</span>
       </h3>
-
-      <div class="pb-2" v-if="joinError">
+      <div v-if="joinError" class="pb-2">
         <p
           class="rounded-md border border-black/20 p-2 text-sm font-medium text-red-700 dark:border-white/10 dark:text-red-300"
         >
           {{ joinError }}
         </p>
       </div>
-      <form @submit.prevent="submitUsernameAndEnter" class="space-y-2">
-        <div>
-          <label for="username" class="mb-1 block text-sm font-medium">Username</label>
-          <StandardInput
-            id="username"
-            v-model="username"
-            class="cursor-text"
-            :placeholder="'Enter your username'"
-            :disabled="!canSetUsername || isLoading"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          :disabled="!canSetUsername || isLoading || !username.trim()"
-          class="btn-default w-full"
-        >
-          <span v-if="isLoading && canSetUsername">Joining...</span>
-          <span v-else>Join Room</span>
-        </button>
-      </form>
+      <div v-else class="flex flex-col items-center justify-center py-8">
+        <span class="loader mb-4"></span>
+        <span class="text-gray-600 dark:text-gray-300">Waiting for server...</span>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #6366f1;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>

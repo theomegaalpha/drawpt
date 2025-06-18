@@ -3,10 +3,15 @@ import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { EyeIcon, Loader2Icon, OctagonAlertIcon, Share2Icon } from 'lucide-vue-next'
+import { EyeIcon, Loader2Icon, LogInIcon, OctagonAlertIcon, Share2Icon, UserIcon } from 'lucide-vue-next'
 import api from '@/api/api'
 import ClosenessDisplay from '../common/ClosenessDisplay.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+const showLoginCta = ref(true)
 const guess = ref('')
 const shareText = ref('Share Results')
 const dailiesStore = useDailiesStore()
@@ -25,13 +30,22 @@ const defaultImageUrl = computed(() => {
   return '/images/daily-image-error.png'
 })
 
+const toggleLoginCta = () => {
+  showLoginCta.value = !showLoginCta.value
+}
+
 const handleImageError = (event: Event) => {
   console.error('Error loading daily image:', event)
 }
 
-const isLoading = computed(() => isAssessing || isLoadingDaily)
+const isLoading = computed(() => isAssessing.value || isLoadingDaily.value)
 
 const submitGuess = () => {
+  if (isLoading.value || isAssessing.value) {
+    console.warn('Already loading or assessing, ignoring guess submission.')
+    return
+  }
+
   var myGuess = guess.value.trim()
   if (myGuess) {
     console.log('Submitted guess:', myGuess)
@@ -84,8 +98,14 @@ const copyClosenessArrayToClipboard = async () => {
   }
 }
 
-onMounted(() => {
-  dailiesStore.initStore()
+onMounted(async () => {
+  await dailiesStore.initStore()
+
+  if (!isAuthenticated.value)
+    showLoginCta.value = true
+
+  if (dailiesStore.hasDailyAnswer)
+    showLoginCta.value = false
 })
 </script>
 
@@ -110,8 +130,8 @@ onMounted(() => {
       />
       <!-- loading scree -->
       <div
-        v-if="isLoading.value"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
+        v-if="isLoading"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center">
           <Loader2Icon class="h-12 w-12 animate-spin" />
@@ -120,7 +140,7 @@ onMounted(() => {
       <!-- error screen -->
       <div
         v-else-if="dailyError"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center">
           <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
@@ -131,7 +151,7 @@ onMounted(() => {
       <!-- assessment stats -->
       <div
         v-else-if="showAssessment"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white animate-fade-blur-in-fast"
       >
         <div class="flex flex-col items-center justify-center p-8">
           <p class="text-lg">
@@ -144,27 +164,56 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <div class="relative flex w-full pt-4" v-if="showLoginCta">
+      <button
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
+        @click="toggleLoginCta"
+      >
+        <UserIcon class="mr-4 h-4 w-4" />
+        Continue as Guest
+      </button>
+      <router-link
+        to="/login"
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
+        @click="toggleLoginCta"
+      >
+        <LogInIcon class="mr-4 h-4 w-4" />
+        Login
+      </router-link>
+    </div>
     <GuessInput
-      v-if="!dailiesStore.hasDailyAnswer"
+      v-else-if="!dailiesStore.hasDailyAnswer"
       class="mt-4"
       v-model="guess"
-      :isLoading="isLoading.value"
+      :isLoading="isLoading"
       :submitAction="submitGuess"
     />
     <div class="relative flex w-full pt-4" v-else>
       <button
         class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
         @click="dailiesStore.setShowAssessment(!showAssessment)"
       >
-        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <EyeIcon v-else class="mr-4 h-4 w-4" />
         {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
       </button>
       <button
         class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
         @click="copyClosenessArrayToClipboard"
       >
-        <Loader2Icon v-if="isLoading.value" class="mr-4 h-5 w-5 animate-spin" />
+        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <Share2Icon v-else class="mr-4 h-4 w-4" />
         {{ shareText }}
       </button>

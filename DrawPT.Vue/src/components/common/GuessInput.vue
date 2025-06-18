@@ -57,13 +57,19 @@ const localSubmitGuess = () => {
         v-model="inputValue"
         @keyup.enter="localSubmitGuess"
         :disabled="props.disabled"
+        :isLoading="props.isLoading"
       />
       <button
         @mousedown="handleRecordButtonMouseDown"
         @mouseup="handleRecordButtonMouseUp"
         @mouseleave="handleRecordButtonMouseUp"
+        :disabled="props.disabled || props.isLoading"
         class="absolute right-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors"
-        :class="{ 'cursor-not-allowed': disabled, 'hover:text-white': !disabled }"
+        :class="{
+          'cursor-not-allowed': disabled,
+          'hover:text-white': !disabled,
+          'cursor-wait': props.isLoading
+        }"
         aria-label="Use microphone"
       >
         <Loader2Icon v-if="props.isLoading" class="h-5 w-5 animate-spin" />
@@ -72,6 +78,11 @@ const localSubmitGuess = () => {
     </div>
     <button
       class="btn-primary ml-2 flex h-12 w-12 items-center justify-center rounded-full"
+      :class="{
+        'cursor-not-allowed': disabled,
+        'hover:text-white': !disabled,
+        'cursor-wait': props.isLoading
+      }"
       :disabled="inputValue === '' || props.isLoading"
       @click="localSubmitGuess"
     >
