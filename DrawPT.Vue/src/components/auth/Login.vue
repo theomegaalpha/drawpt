@@ -4,7 +4,7 @@
       class="w-full max-w-md space-y-8 rounded-lg border border-gray-300 bg-white p-10 shadow-lg dark:border-gray-300/20 dark:bg-slate-500/20"
     >
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 class="text-default mt-6 text-center text-3xl font-extrabold">
           Sign in to your account
         </h2>
       </div>
@@ -87,6 +87,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import type { GoogleCredentialResponse } from '@/types/google'
+import { usePlayerStore } from '@/stores/player'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const email = ref('')
@@ -95,6 +97,9 @@ const loading = ref(false)
 const error = ref('')
 const resendMessage = ref('')
 const showResendButton = ref(false)
+
+const playerStore = usePlayerStore()
+const { player } = storeToRefs(playerStore)
 
 const handleLogin = async () => {
   try {
@@ -115,7 +120,12 @@ const handleLogin = async () => {
     }
 
     if (data.user) {
-      router.push('/')
+      await playerStore.init()
+      if (!player.value.avatar) {
+        router.push('/profile')
+      } else {
+        router.push('/')
+      }
     }
   } catch (e: any) {
     error.value = e.message || 'An error occurred during sign in'
@@ -162,7 +172,12 @@ const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
     if (signInError) throw signInError
 
     if (data.user) {
-      router.push('/')
+      await playerStore.init()
+      if (!player.value.avatar) {
+        router.push('/profile')
+      } else {
+        router.push('/')
+      }
     }
   } catch (e: any) {
     error.value = e.message || 'An error occurred during Google sign in'
