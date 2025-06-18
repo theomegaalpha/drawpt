@@ -1,6 +1,7 @@
 using DrawPT.Common.Models.Daily;
 using DrawPT.Common.Services;
 using DrawPT.Common.Services.AI;
+using DrawPT.Common.Util;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
 
@@ -38,7 +39,7 @@ namespace DrawPT.Api.Controllers
                 return Unauthorized("User ID not found in claims.");
             }
 
-            var todaysAnswers = _dailiesRepository.GetDailyAnswersByPlayerId(Guid.Parse(userId), DateTime.Now.Date);
+            var todaysAnswers = _dailiesRepository.GetDailyAnswersByPlayerId(Guid.Parse(userId), TimezoneHelper.Now());
             if (todaysAnswers != null && todaysAnswers.Any())
             {
                 return Ok(todaysAnswers.FirstOrDefault());
@@ -53,7 +54,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet("top20")]
         public async Task<ActionResult<IEnumerable<DailyAnswerPublic>>> GetTop20DailyAnswers() // Changed to async Task
         {
-            var todaysAnswers = _dailiesRepository.GetDailyAnswers(DateTime.Now.Date);
+            var todaysAnswers = _dailiesRepository.GetDailyAnswers(TimezoneHelper.Now());
 
             if (todaysAnswers != null && todaysAnswers.Any())
             {
@@ -102,7 +103,7 @@ namespace DrawPT.Api.Controllers
             }
             try
             {
-                var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
+                var todaysQuestion = _dailiesRepository.GetDailyQuestion(TimezoneHelper.Now());
 
                 var saveToDb = false;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;

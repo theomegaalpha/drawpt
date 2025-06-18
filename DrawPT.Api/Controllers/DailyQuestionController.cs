@@ -1,5 +1,6 @@
 using DrawPT.Data.Repositories;
 using DrawPT.Common.Models.Daily;
+using DrawPT.Common.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrawPT.Api.Controllers
@@ -21,7 +22,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet]
         public ActionResult<DailyQuestionPublic> GetDailyQuestionPrompt()
         {
-            var todaysQuestion = _dailiesRepository.GetDailyQuestion(DateTime.Now.Date);
+            var todaysQuestion = _dailiesRepository.GetDailyQuestion(TimezoneHelper.Now());
             if (todaysQuestion != null)
             {
                 var dailyQuestionPublic = new DailyQuestionPublic

@@ -1,4 +1,5 @@
 using DrawPT.Common.Services.AI;
+using DrawPT.Common.Util;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(DateTime.Now);
+            return Ok(TimezoneHelper.Now());
         }
     }
 }
