@@ -3,10 +3,15 @@ import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { EyeIcon, Loader2Icon, OctagonAlertIcon, Share2Icon } from 'lucide-vue-next'
+import { EyeIcon, Loader2Icon, LogInIcon, OctagonAlertIcon, Share2Icon, UserIcon } from 'lucide-vue-next'
 import api from '@/api/api'
 import ClosenessDisplay from '../common/ClosenessDisplay.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+const showLoginCta = ref(true)
 const guess = ref('')
 const shareText = ref('Share Results')
 const dailiesStore = useDailiesStore()
@@ -24,6 +29,10 @@ const defaultImageUrl = computed(() => {
   if (isLoading.value) return '/images/daily-image-loading.png'
   return '/images/daily-image-error.png'
 })
+
+const toggleLoginCta = () => {
+  showLoginCta.value = !showLoginCta.value
+}
 
 const handleImageError = (event: Event) => {
   console.error('Error loading daily image:', event)
@@ -89,8 +98,14 @@ const copyClosenessArrayToClipboard = async () => {
   }
 }
 
-onMounted(() => {
-  dailiesStore.initStore()
+onMounted(async () => {
+  await dailiesStore.initStore()
+
+  if (!isAuthenticated.value)
+    showLoginCta.value = true
+
+  if (dailiesStore.hasDailyAnswer)
+    showLoginCta.value = false
 })
 </script>
 
@@ -149,8 +164,31 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <div class="relative flex w-full pt-4" v-if="showLoginCta">
+      <button
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
+        @click="toggleLoginCta"
+      >
+        <UserIcon class="mr-4 h-4 w-4" />
+        Continue as Guest
+      </button>
+      <router-link
+        to="/login"
+        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
+        @click="toggleLoginCta"
+      >
+        <LogInIcon class="mr-4 h-4 w-4" />
+        Login
+      </router-link>
+    </div>
     <GuessInput
-      v-if="!dailiesStore.hasDailyAnswer"
+      v-else-if="!dailiesStore.hasDailyAnswer"
       class="mt-4"
       v-model="guess"
       :isLoading="isLoading"

@@ -27,9 +27,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Computed property to check if user is authenticated
+  const isAuthenticated = () => {
+    return user.value !== null
+  }
+
   return {
     user,
     loading,
+    isAuthenticated,
     signOut
   }
 })
