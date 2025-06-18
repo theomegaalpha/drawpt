@@ -69,7 +69,7 @@ builder.Services.AddTransient<Supabase.Client>(sp =>
     client.InitializeAsync().Wait();
     return client;
 });
-builder.Services.AddTransient<ProfileService>();
+builder.Services.AddTransient<PlayerService>();
 
 
 builder.Services.AddTransient<StorageService>();

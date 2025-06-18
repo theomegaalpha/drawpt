@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
@@ -10,10 +10,12 @@ namespace DrawPT.Common.Services
     public class CacheService : ICacheService
     {
         private readonly IDistributedCache _cache;
-        private readonly int _ttlInHours = 2;
+        private readonly DistributedCacheEntryOptions _options;
+
         public CacheService(IDistributedCache cache)
         {
             _cache = cache;
+            _options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(2));
         }
 
         public async Task<Room?> GetRoomAsync(string code)
@@ -36,8 +38,7 @@ namespace DrawPT.Common.Services
             }
 
             var roomJson = JsonSerializer.Serialize(room);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"room:{room.Code}", roomJson, options);
+            await _cache.SetStringAsync($"room:{room.Code}", roomJson, _options);
             return room;
         }
 
@@ -47,8 +48,7 @@ namespace DrawPT.Common.Services
                 return false;
 
             var roomJson = JsonSerializer.Serialize(room);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"room:{room.Code}", roomJson, options);
+            await _cache.SetStringAsync($"room:{room.Code}", roomJson, _options);
             return true;
         }
 
@@ -82,8 +82,7 @@ namespace DrawPT.Common.Services
         public async Task SetGameState(IGameState gameState)
         {
             var gameStateJson = JsonSerializer.Serialize(gameState);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"gameState:{gameState.RoomCode}", gameStateJson, options);
+            await _cache.SetStringAsync($"gameState:{gameState.RoomCode}", gameStateJson, _options);
         }
 
         public async Task<bool> RoomExistsAsync(string code)
@@ -106,16 +105,14 @@ namespace DrawPT.Common.Services
         {
             var player = new Player();
             var playerJson = JsonSerializer.Serialize(player);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, options);
+            await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, _options);
             return player;
         }
 
         public async Task<Player> UpdatePlayerAsync(Player player)
         {
             var playerJson = JsonSerializer.Serialize(player);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, options);
+            await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, _options);
             return player;
         }
 
@@ -148,8 +145,7 @@ namespace DrawPT.Common.Services
         public async Task SetPlayerSessionAsync(string connectionId, Player player)
         {
             var playerJson = JsonSerializer.Serialize(player);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"connectionId:{connectionId}", playerJson, options);
+            await _cache.SetStringAsync($"connectionId:{connectionId}", playerJson, _options);
         }
 
         public async Task<List<Player>> GetRoomPlayersAsync(string roomCode)
@@ -179,8 +175,7 @@ namespace DrawPT.Common.Services
 
             players.Add(player.Id);
             await UpdatePlayerAsync(player);
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(players), options);
+            await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(players), _options);
         }
 
         public async Task RemovePlayerFromRoom(string roomCode, Player player)
@@ -199,8 +194,7 @@ namespace DrawPT.Common.Services
                 await _cache.RemoveAsync($"room:{roomCode}");
                 return;
             }
-            var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(_ttlInHours));
-            await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(parsedIds), options);
+            await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(parsedIds), _options);
         }
     }
 }

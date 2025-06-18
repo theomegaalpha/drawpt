@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
@@ -14,6 +14,10 @@ namespace DrawPT.Common.Models.Supabase
         [Column("username")]
         [JsonProperty("username")]
         public string Username { get; set; } = string.Empty;
+
+        [Column("avatar")]
+        [JsonProperty("avatar")]
+        public string? Avatar { get; set; }
 
         [Column("updated_at")]
         [JsonProperty("updated_at")]

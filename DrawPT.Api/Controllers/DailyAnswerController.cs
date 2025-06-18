@@ -15,9 +15,9 @@ namespace DrawPT.Api.Controllers
     {
         private readonly DailiesRepository _dailiesRepository;
         private readonly DailyAIService _dailyAIService;
-        private readonly ProfileService _profileService; // Added ProfileService
+        private readonly PlayerService _profileService; // Added ProfileService
 
-        public DailyAnswerController(DailiesRepository dailiesRepository, DailyAIService dailyAIService, ProfileService profileService) // Added profileService parameter
+        public DailyAnswerController(DailiesRepository dailiesRepository, DailyAIService dailyAIService, PlayerService profileService) // Added profileService parameter
         {
             _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "DailyAIService cannot be null.");
@@ -65,11 +65,12 @@ namespace DrawPT.Api.Controllers
                 var result = new List<DailyAnswerPublic>();
                 foreach (var answer in top20Answers)
                 {
-                    var profile = await _profileService.GetProfileAsync(answer.PlayerId);
+                    var profile = await _profileService.GetPlayerAsync(answer.PlayerId);
                     result.Add(new DailyAnswerPublic
                     {
                         PlayerId = answer.PlayerId,
                         Username = profile?.Username ?? "Unknown", // Use profile username, default to "Unknown"
+                        Avatar = profile?.Avatar,
                         Date = answer.Date,
                         Guess = answer.Guess,
                         Reason = answer.Reason,
