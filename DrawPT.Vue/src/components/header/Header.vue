@@ -98,7 +98,7 @@ const handleLogout = async () => {
                   />
                   <div
                     v-if="isProfileMenuOpen"
-                    class="absolute right-0 z-50 mt-2 flex w-48 flex-col items-end rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
+                    class="absolute right-0 z-50 mt-2 flex w-48 flex-col items-end rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-black"
                   >
                     <router-link
                       to="/profile"
