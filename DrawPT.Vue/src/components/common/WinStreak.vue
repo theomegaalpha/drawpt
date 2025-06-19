@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DailyAnswer } from '@/models/dailyModels'
-import { CheckIcon, FlameIcon } from 'lucide-vue-next'
+import { Check, FlameIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 interface Props {
@@ -39,6 +39,24 @@ const winStreak = computed(() => {
   })
 })
 
+const currentWinStreak = computed(() => {
+  // Sort history by date ascending
+  const sorted = [...props.dailyAnswerHistory].sort((a, b) => a.date.localeCompare(b.date))
+  let streak = 0
+  let day = new Date()
+  for (;;) {
+    const dayStr = day.toISOString().slice(0, 10)
+    const win = sorted.find((ans) => ans.date.slice(0, 10) === dayStr && ans.score > 0)
+    if (win) {
+      streak++
+      day.setDate(day.getDate() - 1)
+    } else {
+      break
+    }
+  }
+  return streak
+})
+
 const getDayLabel = (index: number): string => {
   // Show the day of week for each of the last 7 days
   const last7Days = getLast7Days()
@@ -49,9 +67,19 @@ const getDayLabel = (index: number): string => {
 
 <template>
   <div class="flex flex-col items-center">
-    <p class="text-color-default mb-2 text-sm font-medium">
-      <FlameIcon class="inline h-12 w-12 text-red-500" />
-    </p>
+    <div class="relative mb-2 flex flex-col items-center" style="width: 3rem; height: 3rem">
+      <FlameIcon
+        :fill="currentWinStreak > 0 ? 'red' : 'gray'"
+        class="absolute left-0 top-0 z-0 h-12 w-full text-gray-500"
+        :class="{ 'text-red-500': currentWinStreak > 0 }"
+      />
+      <span
+        v-if="currentWinStreak > 0"
+        class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/3 select-none text-2xl font-bold text-white drop-shadow-[0_0_2px_black]"
+      >
+        {{ currentWinStreak }}
+      </span>
+    </div>
     <div class="flex space-x-3">
       <div v-for="(isWin, index) in winStreak" :key="index" class="flex flex-col items-center">
         <div
@@ -63,7 +91,7 @@ const getDayLabel = (index: number): string => {
           ]"
         >
           <span v-if="isWin" class="text-sm font-bold text-white">
-            <CheckIcon class="h-4 w-4" />
+            <Check class="h-4 w-4" strokeWidth="{0}" />
           </span>
         </div>
         <span class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -73,7 +101,3 @@ const getDayLabel = (index: number): string => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any component-specific styles here if needed */
-</style>
