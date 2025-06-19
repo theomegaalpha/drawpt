@@ -90,7 +90,8 @@ const copyClosenessArrayToClipboard = async () => {
   }
   try {
     const emojiString = dailyAnswer.value.closenessArray.map(getEmojiForValue).join('')
-    const formattedString = `https://drawpt.ai  ${new Date().toISOString().slice(0, 10)}\nScore: ${dailyAnswer.value.score}% match\n${emojiString}`
+    let formattedString = `https://drawpt.ai  ${new Date(dailyAnswer.value.date).toISOString().slice(0, 10)}`
+    formattedString += `\nScore: ${dailyAnswer.value.score}% match\n${emojiString}`
     await navigator.clipboard.writeText(formattedString)
     console.debug('Closeness emoji copied to clipboard:', emojiString)
 
