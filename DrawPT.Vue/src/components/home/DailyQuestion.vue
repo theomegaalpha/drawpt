@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
@@ -9,7 +9,7 @@ import ClosenessDisplay from '../common/ClosenessDisplay.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-const isAuthenticated = computed(() => authStore.isAuthenticated)
+const { isAuthenticated } = storeToRefs(authStore)
 
 const showLoginCta = ref(true)
 const guess = ref('')
@@ -28,6 +28,12 @@ const {
 const defaultImageUrl = computed(() => {
   if (isLoading.value) return '/images/daily-image-loading.png'
   return '/images/daily-image-error.png'
+})
+
+watch(isAuthenticated, (newVal, _) => {
+  if (newVal) {
+    showLoginCta.value = false
+  }
 })
 
 const toggleLoginCta = () => {
@@ -101,8 +107,8 @@ const copyClosenessArrayToClipboard = async () => {
 onMounted(async () => {
   await dailiesStore.initStore()
 
-  if (!isAuthenticated.value)
-    showLoginCta.value = true
+  if (isAuthenticated.value)
+    showLoginCta.value = false
 
   if (dailiesStore.hasDailyAnswer)
     showLoginCta.value = false
@@ -192,6 +198,7 @@ onMounted(async () => {
       class="mt-4"
       v-model="guess"
       :isLoading="isLoading"
+      :disabled="dailyError"
       :submitAction="submitGuess"
     />
     <div class="relative flex w-full pt-4" v-else>
