@@ -51,6 +51,43 @@ namespace DrawPT.Api.Controllers
         /// <summary>
         /// Gets the daily answer for today.
         /// </summary>
+        [Authorize]
+        [HttpGet("history")]
+        public async Task<ActionResult<IEnumerable<DailyAnswerPublic>>> GetMyDailyAnswers()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in claims.");
+            }
+
+            var answerHistory = _dailiesRepository.GetDailyAnswersByPlayerId(Guid.Parse(userId));
+            if (answerHistory == null)
+                return NotFound("No daily answer found for today.");
+
+
+            var profile = await _profileService.GetPlayerAsync(Guid.Parse(userId));
+            var result = new List<DailyAnswerPublic>();
+            foreach (var answer in answerHistory)
+            {
+                result.Add(new DailyAnswerPublic
+                {
+                    PlayerId = answer.PlayerId,
+                    Username = profile?.Username ?? "Unknown",
+                    Avatar = profile?.Avatar,
+                    Date = answer.Date,
+                    Guess = answer.Guess,
+                    Reason = answer.Reason,
+                    ClosenessArray = answer.ClosenessArray,
+                    Score = answer.Score
+                });
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets the daily answer for today.
+        /// </summary>
         [HttpGet("top20")]
         public async Task<ActionResult<IEnumerable<DailyAnswerPublic>>> GetTop20DailyAnswers() // Changed to async Task
         {
