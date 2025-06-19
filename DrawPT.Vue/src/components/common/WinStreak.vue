@@ -90,8 +90,8 @@ const getDayLabel = (index: number): string => {
               : 'border-gray-300 bg-gray-200 dark:border-gray-500 dark:bg-gray-600'
           ]"
         >
-          <span v-if="isWin" class="text-sm font-bold text-white">
-            <Check class="h-4 w-4" strokeWidth="{0}" />
+          <span v-if="isWin" class="text-sm font-extrabold text-white">
+            <Check class="h-5 w-5" />
           </span>
         </div>
         <span class="mt-1 text-xs text-gray-500 dark:text-gray-400">
