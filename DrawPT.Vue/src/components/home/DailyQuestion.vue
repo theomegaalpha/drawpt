@@ -133,7 +133,7 @@ onMounted(async () => {
       <img
         :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
         :alt="dailyQuestion.theme"
-        class="animate-fade-blur-in -my-1 aspect-[3/4] h-auto w-full object-contain transition delay-1000"
+        class="animate-fade-blur-in-slow -my-1 aspect-[3/4] h-auto w-full object-contain transition delay-1000"
         @error="handleImageError"
       />
       <!-- loading scree -->
