@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
+  const isAuthenticated = ref(false)
 
   // Initialize auth state
   supabase.auth.getSession().then(({ data: { session } }) => {
@@ -16,6 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Listen for auth changes
   supabase.auth.onAuthStateChange((_event, session) => {
     user.value = session?.user ?? null
+    isAuthenticated.value = !!user.value
   })
 
   const signOut = async () => {
@@ -25,11 +27,6 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       console.error('Error signing out:', error)
     }
-  }
-
-  // Computed property to check if user is authenticated
-  const isAuthenticated = () => {
-    return user.value !== null
   }
 
   return {

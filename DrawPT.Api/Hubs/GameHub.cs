@@ -284,7 +284,7 @@ namespace DrawPT.Api.Hubs
             // Add player to SignalR group
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
             _logger.LogInformation($"Player {playerId} joined room {roomCode} with connection {Context.ConnectionId}");
-            
+
             player.RoomCode = roomCode;
             player.Username = username;
             await _cache.UpdatePlayerAsync(player);

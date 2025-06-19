@@ -3,8 +3,10 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+
 using System.Text;
 using System.Text.Json;
 
@@ -28,7 +30,7 @@ public class GameSession : IGameSession
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
         IGameCommunicationService gameCommunicationService,
-        
+
         ILogger<GameSession> logger)
     {
         _channel = rabbitMqConnection.CreateModel();
@@ -169,4 +171,4 @@ public class GameSession : IGameSession
                 break;
         }
     }
-} 
+}

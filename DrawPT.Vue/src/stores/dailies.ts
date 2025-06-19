@@ -10,14 +10,16 @@ export const useDailiesStore = defineStore('dailies', {
     isLoadingDaily: true,
     isAssessing: false,
     showAssessment: false,
-    imageLoaded: false,
     dailyError: false
   }),
   getters: {
     getDailyQuestion: (state) => state.dailyQuestion,
     hasDailyAnswer: (state) => state.dailyAnswer.guess !== undefined,
     isDailyQuestionLoaded: (state) => Object.keys(state.dailyQuestion).length > 0,
-    isDailyAnswerLoaded: (state) => Object.keys(state.dailyAnswer).length > 0
+    isDailyAnswerLoaded: (state) => Object.keys(state.dailyAnswer).length > 0,
+    imageLoaded: (state) => {
+      return state.dailyQuestion.imageUrl && state.dailyQuestion.imageUrl.length > 0
+    }
   },
   actions: {
     async initStore() {
@@ -27,13 +29,11 @@ export const useDailiesStore = defineStore('dailies', {
 
       this.dailyError = false
       this.isLoadingDaily = true
-      this.imageLoaded = false
       try {
         if (!this.isDailyQuestionLoaded) {
           const question = await api.getDailyQuestion()
           this.dailyQuestion = question
-          if (question?.imageUrl) this.imageLoaded = true
-          else this.dailyError = true
+          if (!question?.imageUrl) this.dailyError = true
         }
 
         if (await isAuthenticated()) {
@@ -77,9 +77,6 @@ export const useDailiesStore = defineStore('dailies', {
     },
     setIsLoading(loading: boolean) {
       this.isLoadingDaily = loading
-    },
-    setImageLoaded(loaded: boolean) {
-      this.imageLoaded = loaded
     },
     setIsAssessing(assessing: boolean) {
       this.isAssessing = assessing
