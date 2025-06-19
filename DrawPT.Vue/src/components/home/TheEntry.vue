@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { RouterLink } from 'vue-router'
 import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 import DailyQuestion from './DailyQuestion.vue'
+import { useDailiesStore } from '@/stores/dailies'
+
+const { dailyAnswerHistory } = storeToRefs(useDailiesStore())
 
 const scrollToPrompt = () => {
   const element = document.getElementById('prompt-of-the-day')
@@ -53,8 +57,7 @@ const scrollToPrompt = () => {
           <h2 class="mb-4 text-xl font-bold">Win Streak</h2>
           <WinStreak
             class="flex items-center justify-center"
-            :dailyStatus="[true, false, true, true, false, true, true]"
-            :currentDayIndex="0"
+            :dailyAnswerHistory="dailyAnswerHistory"
           />
         </div>
       </div>
