@@ -7,7 +7,6 @@ import { usePlayerStore } from '@/stores/player'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { registerRoomHubEvents, unregisterRoomHubEvents } from '@/services/roomEventHandlers'
 import api from '@/api/api'
-import { onBeforeUnmount } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,9 +20,6 @@ const roomCode = ref((route.params.roomCode as string) || '')
 // Computed properties from the store
 const joinError = computed(() => roomJoinStore.joinError)
 const canJoinRoom = computed(() => roomJoinStore.canJoinRoom)
-
-let unsubscribeFromConnectionStatus: (() => void) | null = null
-let unsubscribeNavigateToRoom: (() => void) | null = null
 
 const requestToJoin = async () => {
   roomJoinStore.setLoading(true)
@@ -62,55 +58,21 @@ onMounted(() => {
   api.getPlayer().then((res) => {
     playerStore.updatePlayer(res)
     username.value = res.username || ''
-    api.checkRoom(roomCode.value).then((exists) => {
+    api.checkRoom(roomCode.value).then(async (exists) => {
       if (!exists) {
         roomJoinStore.setJoinError('😭 This game has already ended.')
         return
       }
+      registerRoomHubEvents()
+      let timeoutId = await setTimeout(() => {}, 7000)
+      onUnmounted(() => clearTimeout(timeoutId))
+      requestToJoin()
     })
   })
-
-  console.warn('SetUsername: Waiting for SignalR connection from RoomWrapper...')
-  unsubscribeFromConnectionStatus = service.onConnectionStatusChanged((isConnected) => {
-    if (isConnected) {
-      console.log('Requesting to join.')
-      registerRoomHubEvents()
-      requestToJoin()
-      if (unsubscribeFromConnectionStatus) {
-        unsubscribeFromConnectionStatus()
-        unsubscribeFromConnectionStatus = null
-      }
-    } else {
-      // This case might occur if the connection drops while waiting
-      // roomJoinStore.setJoinError('Still waiting for server connection...');
-    }
-  })
-
-  // Fallback timeout in case the connection event is missed or never occurs
-  const timeoutId = setTimeout(() => {
-    if (!service.isConnected && unsubscribeFromConnectionStatus) {
-      roomJoinStore.setJoinError('Could not connect to server in a timely manner. Please refresh.')
-      unsubscribeFromConnectionStatus()
-      unsubscribeFromConnectionStatus = null
-    }
-  }, 7000) // 7 seconds timeout
-  // Clear timeout if component unmounts or connection established
-  onUnmounted(() => clearTimeout(timeoutId))
-})
-
-onBeforeUnmount(() => {
-  if (unsubscribeNavigateToRoom) {
-    unsubscribeNavigateToRoom()
-    unsubscribeNavigateToRoom = null
-  }
 })
 
 onUnmounted(() => {
   unregisterRoomHubEvents()
-  if (unsubscribeFromConnectionStatus) {
-    unsubscribeFromConnectionStatus()
-    unsubscribeFromConnectionStatus = null
-  }
 })
 </script>
 
