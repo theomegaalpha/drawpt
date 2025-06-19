@@ -34,6 +34,23 @@ export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   return (await response.json()) as DailyAnswer
 }
 
+export async function getDailyAnswerHistory(): Promise<DailyAnswer[]> {
+  const headers: HeadersInit = {}
+  if (await isAuthenticated()) {
+    headers['Authorization'] = `Bearer ${await getAccessToken()}`
+  }
+  const response = await fetch('/api/dailyanswer/history', {
+    headers
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch daily answer history')
+  }
+
+  return (await response.json()) as DailyAnswer[]
+}
+
 export async function getTop20DailyAnswers(): Promise<DailyAnswer[]> {
   const headers: HeadersInit = {}
   if (await isAuthenticated()) {

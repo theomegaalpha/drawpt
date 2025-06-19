@@ -7,6 +7,7 @@ export const useDailiesStore = defineStore('dailies', {
   state: () => ({
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
+    dailyAnswerHistory: [] as DailyAnswer[],
     isLoadingDaily: true,
     isAssessing: false,
     showAssessment: false,
@@ -23,6 +24,12 @@ export const useDailiesStore = defineStore('dailies', {
   },
   actions: {
     async initStore() {
+      if (this.dailyAnswerHistory.length === 0) {
+        console.log('Fetching daily answer history')
+        const history = await api.getDailyAnswerHistory()
+        this.dailyAnswerHistory = history
+      }
+
       if (this.isDailyQuestionLoaded && this.isDailyAnswerLoaded) {
         return
       }

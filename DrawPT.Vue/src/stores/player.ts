@@ -28,7 +28,12 @@ export const usePlayerStore = defineStore('player', () => {
     '/images/profile-photos/anime-7.png',
     '/images/profile-photos/anime-8.png',
     '/images/profile-photos/anime-9.png',
-    '/images/profile-photos/anime-10.png'
+    '/images/profile-photos/anime-10.png',
+    '/images/profile-photos/mech-1.png',
+    '/images/profile-photos/mech-2.png',
+    '/images/profile-photos/mech-3.png',
+    '/images/profile-photos/mech-4.png',
+    '/images/profile-photos/blank.png'
   ])
   const blankAvatar = ref<string>('/images/profile-photos/blank.png')
 

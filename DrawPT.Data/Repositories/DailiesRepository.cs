@@ -45,6 +45,11 @@ namespace DrawPT.Data.Repositories
             return _context.DailyAnswers.Where(da => da.PlayerId == playerId && da.Date == date.Date).ToList();
         }
 
+        public List<DailyAnswerEntity> GetDailyAnswersByPlayerId(Guid playerId)
+        {
+            return _context.DailyAnswers.Where(da => da.PlayerId == playerId).OrderByDescending(da => da.Date).ToList();
+        }
+
         public async Task SaveDailyQuestion(DailyQuestionEntity question)
         {
             var existingQuestion = await _context.DailyQuestions.FirstOrDefaultAsync(dq => dq.Date == question.Date);
