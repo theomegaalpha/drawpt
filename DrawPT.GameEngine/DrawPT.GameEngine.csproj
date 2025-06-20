@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Azure.Messaging.ServiceBus" Version="9.3.1" />
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.1" />
     <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="9.3.1" />
     <PackageReference Include="Aspire.RabbitMQ.Client" Version="9.3.1" />

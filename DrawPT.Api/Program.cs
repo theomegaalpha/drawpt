@@ -50,6 +50,7 @@ builder.Services.AddSwaggerGen();
 // TODO: Add Redis distributed cache
 builder.Services.AddDistributedMemoryCache();
 
+builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");

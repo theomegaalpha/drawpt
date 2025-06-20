@@ -1,13 +1,18 @@
-﻿using DrawPT.Common.Configuration;
+﻿using System.Text;
+using System.Text.Json;
+
+using Azure.Messaging.ServiceBus;
+
+using DrawPT.Common.Configuration;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
 
 namespace DrawPT.Api.Hubs
 {
@@ -20,16 +25,19 @@ namespace DrawPT.Api.Hubs
         protected readonly ICacheService _cache;
         protected readonly EventingBasicConsumer _consumer;
         protected readonly EventingBasicConsumer _interactionConsumer;
+        protected readonly ServiceBusClient _serviceBusClient;
 
         public GameHub(
             ILogger<GameHub> logger,
             ICacheService cacheService,
             IConnection rabbitMqConnection,
+            ServiceBusClient serviceBusClient,
             IHubContext<GameHub, IGameClient> hubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
             _cache = cacheService;
+            _serviceBusClient = serviceBusClient;
 
             #region broadcast setup
             // Set up RabbitMQ channel
@@ -350,6 +358,11 @@ namespace DrawPT.Api.Hubs
                                 routingKey: ApiMasterMQ.RoutingKeys.GameStarted(player.RoomCode),
                                 body: body);
 
+            // Send start game message to Azure Service Bus queue 'apiGlobal'
+            var serviceBusSender = _serviceBusClient.CreateSender("apiGlobal");
+            var serviceBusMessage = new ServiceBusMessage(message);
+            await serviceBusSender.SendMessageAsync(serviceBusMessage);
+
             return true;
         }
 
@@ -369,7 +382,7 @@ namespace DrawPT.Api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        public void Dispose()
+        public new void Dispose()
         {
             _channel?.Dispose();
         }

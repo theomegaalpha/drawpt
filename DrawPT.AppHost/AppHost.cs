@@ -1,3 +1,4 @@
+using Azure.Provisioning.ServiceBus;
 using Azure.Provisioning.Storage;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -10,6 +11,21 @@ var db = sql.AddDatabase("database");
 var signalr = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSignalR("signalr")
     : builder.AddConnectionString("signalr");
+
+
+var serviceBus = builder.AddAzureServiceBus("service-bus")
+    .ConfigureInfrastructure(infra =>
+    {
+        var serviceBusNamespace = infra.GetProvisionableResources()
+                                       .OfType<ServiceBusNamespace>()
+                                       .Single();
+
+        serviceBusNamespace.Tags.Add("drawpt", "DrawPT Game Engine");
+    })
+    .RunAsEmulator();
+serviceBus.AddServiceBusQueue("apiGlobal");
+serviceBus.AddServiceBusQueue("apiGame");
+serviceBus.AddServiceBusQueue("gameEngine");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -59,6 +75,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(openai)
     .WithReference(gemini)
     .WithReference(rabbitmq)
+    .WithReference(serviceBus)
     .WithReference(signalr)
     .WithReference(redis)
     .WithReference(insights)
@@ -102,6 +119,7 @@ builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
     .WaitFor(redis);
 
 builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
+    .WithReference(serviceBus)
     .WithReference(rabbitmq)
     .WithReference(storage)
     .WithReference(redis)

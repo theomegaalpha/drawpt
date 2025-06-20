@@ -20,6 +20,7 @@ var configuration = new ConfigurationBuilder()
 builder.AddServiceDefaults();
 builder.Services.AddSingleton<IConfiguration>(configuration);
 
+builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureBlobClient(connectionName: "blobs");
 builder.AddRedisDistributedCache(connectionName: "cache");
