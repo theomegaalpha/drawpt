@@ -52,6 +52,9 @@ export const useVolumeStore = defineStore('volume', {
     stopMusic() {
       this.isPlayingMusic = false
       this.musicUrl = null
+    },
+    stopSfx() {
+      this.sfxUrl = null
     }
   }
 })

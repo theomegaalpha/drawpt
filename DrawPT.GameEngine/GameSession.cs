@@ -148,6 +148,7 @@ public class GameSession : IGameSession
                     PlayerId = g.Key,
                     Score = g.Sum(a => a.Score + a.BonusPoints),
                     Username = originalPlayers.FirstOrDefault(p => p.Id == g.Key)?.Username ?? "Unknown",
+                    Avatar = originalPlayers.FirstOrDefault(p => p.Id == g.Key)?.Avatar
                 }
             );
         var finalScores = new GameResults

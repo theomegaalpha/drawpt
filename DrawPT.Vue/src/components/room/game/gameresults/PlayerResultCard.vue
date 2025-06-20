@@ -1,25 +1,16 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import type { PlayerResult } from '@/models/player'
-import { computed } from 'vue'
-const props = defineProps<{
+import { usePlayerStore } from '@/stores/player'
+import Avatar from '@/components/common/Avatar.vue'
+
+const playerStore = usePlayerStore()
+const { blankAvatar } = storeToRefs(playerStore)
+
+defineProps<{
   isYou?: boolean
   playerResult: PlayerResult
 }>()
-
-const initials = computed(() => {
-  const names = props.playerResult.username?.split(' ')
-  if (!names) return ''
-  let initials = names[0].substring(0, 1).toUpperCase()
-
-  if (names.length > 1) {
-    initials += names[names.length - 1].substring(0, 1).toUpperCase()
-  }
-
-  return initials
-})
-const avatarColor = computed(() => {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16)
-})
 </script>
 
 <template>
@@ -30,12 +21,12 @@ const avatarColor = computed(() => {
           class="relative z-10 ml-4 flex w-full items-center rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur dark:bg-white/10"
         >
           <div class="flex items-center space-x-2">
-            <div
-              class="flex h-10 w-10 cursor-default items-center justify-center rounded-full p-2 text-sm font-bold text-white"
-              :style="{ backgroundColor: avatarColor }"
-              aria-label="avatar"
-            >
-              {{ initials }}
+            <div class="mr-2 flex cursor-default" aria-label="avatar">
+              <Avatar
+                :size="10"
+                :username="playerResult.username"
+                :avatar="playerResult.avatar || blankAvatar"
+              />
             </div>
             <span class="ml-12 text-sm font-medium">
               {{ playerResult.username }}

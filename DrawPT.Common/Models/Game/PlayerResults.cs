@@ -11,6 +11,7 @@ namespace DrawPT.Common.Models.Game
         public Guid PlayerId { get; set; } = Guid.NewGuid();
 
         public string Username { get; set; } = string.Empty;
+        public string? Avatar { get; set; }
 
         /// <summary>
         /// Player's current score

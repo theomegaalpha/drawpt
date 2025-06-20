@@ -19,7 +19,7 @@ const closeModal = () => {
 
 <template>
   <div>
-    <button @click="openModal" class="btn-default rounded px-4 py-2 text-white">
+    <button @click="openModal" class="btn-default text-color-default rounded px-4 py-2">
       <Volume2 :size="24" />
     </button>
 
@@ -28,7 +28,9 @@ const closeModal = () => {
       class="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-50"
       @click.self="closeModal"
     >
-      <div class="min-w-[300px] rounded-lg bg-white p-5 shadow-lg">
+      <div
+        class="min-w-[300px] rounded-lg border border-black/10 bg-white p-5 shadow-lg dark:border-white/10 dark:bg-black"
+      >
         <h2 class="mb-4 mt-0 text-xl font-semibold"></h2>
         <div class="mb-4">
           <label for="sfxVolume" class="mb-1 block text-sm font-medium text-gray-700"

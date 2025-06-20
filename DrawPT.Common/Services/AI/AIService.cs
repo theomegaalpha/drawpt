@@ -44,6 +44,7 @@ json
         'PlayerId': '<unique identifier of original Player ID>',
         'ConnectionId': '<unique identifier of original Connection ID>',
         'Username': '<contestant's username>',
+        'Avatar': '<contestant's avatar URL>',
         'Guess': '<contestant's guessed phrase>',
         'Score': '<integer from 0 to 20>',
         'Reason': '<explanation for the given score>',
@@ -125,6 +126,7 @@ Now, the original phrase is:";
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
+            return await GenerateFakeGameQuestionAsync(theme);
             var prompt = await GenerateImagePromptAsync(theme);
             var imageUrl = await GenerateImageAsync($"{prompt} {_imageEnhancePrompt}");
             return new GameQuestion()
