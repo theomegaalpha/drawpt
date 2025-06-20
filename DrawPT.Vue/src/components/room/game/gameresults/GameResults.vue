@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { usePlayerStore } from '@/stores/player'
 import { useVolumeStore } from '@/stores/volume'
@@ -7,7 +7,7 @@ import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 
 const scoreboardStore = useScoreboardStore()
-const { setSfxUrl, stopMusic } = useVolumeStore()
+const { setSfxUrl, stopMusic, stopSfx } = useVolumeStore()
 const { gameResults } = scoreboardStore
 const { player: you } = usePlayerStore()
 
@@ -37,13 +37,13 @@ function frame() {
 }
 
 onMounted(() => {
+  frame()
   setSfxUrl('/sounds/victory.mp3')
   stopMusic()
 })
 
-onMounted(() => {
-  // start the animation
-  frame()
+onUnmounted(() => {
+  stopSfx()
 })
 </script>
 
