@@ -1,29 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
-const props = defineProps<{
-  size?: string
+defineProps<{
+  size?: number
   username: string
-  color: string
+  avatar: string
 }>()
-
-const initials = computed(() => {
-  const names = props.username.split(' ')
-  if (!names) return ''
-  let initials = names[0].substring(0, 1).toUpperCase()
-
-  if (names.length > 1) {
-    initials += names[names.length - 1].substring(0, 1).toUpperCase()
-  }
-
-  return initials
-})
 </script>
 
 <template>
   <div
-    :class="`cursor-default rounded-full ${size ?? 'h-10 w-10'} bg-${color} flex items-center justify-center font-semibold text-white`"
+    :class="`cursor-default rounded-full ${size ? 'h- ' + size + ' w- ' + size : 'h-10 w-10'} border-2 border-gray-500 dark:border-white`"
   >
-    <span>{{ initials }}</span>
+    <img :src="avatar" :alt="username" class="h-full w-full rounded-full object-cover" />
   </div>
 </template>

@@ -51,6 +51,7 @@ export interface PlayerAnswer {
   id: string
   connectionId: string
   username: string
+  avatar: string | null
   guess: string
   score: number
   bonusPoints: number

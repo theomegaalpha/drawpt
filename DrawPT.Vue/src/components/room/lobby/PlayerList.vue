@@ -2,20 +2,26 @@
 import Avatar from '@/components/common/Avatar.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useRoomStore } from '@/stores/room'
+import type { Player } from '@/models/player'
 
-const { player } = usePlayerStore()
+const { player, blankAvatar } = usePlayerStore()
 const { room } = useRoomStore()
+
+const isYou = (p: Player) => {
+  return p.id === player.id
+}
 </script>
 
 <template>
   <div class="cursor-default px-4 md:px-8 xl:px-12">
     <h2 class="mb-5 text-center text-2xl font-bold">Players</h2>
     <div
-      class="animate-slide-in-left mt-2 flex flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-900 dark:bg-black"
+      class="mt-2 flex animate-slide-in-left flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-900 dark:bg-black"
+      :class="{ 'bg-indigo-200 dark:bg-indigo-950': isYou(p) }"
       v-for="p in room.players"
       :key="p.id"
     >
-      <Avatar :username="p.username" :color="p.color" />
+      <Avatar :username="p.username" :avatar="p.avatar || blankAvatar" />
       <p class="ml-2 xl:ml-4">{{ p.username }}</p>
     </div>
     <div
