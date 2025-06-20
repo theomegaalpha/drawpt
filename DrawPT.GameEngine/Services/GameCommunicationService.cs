@@ -98,6 +98,7 @@ public class GameCommunicationService : IGameCommunicationService
         answer.ConnectionId = player.ConnectionId;
         answer.PlayerId = player.Id;
         answer.Username = player.Username;
+        answer.Avatar = player.Avatar;
 
         BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
         return answer;

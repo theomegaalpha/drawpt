@@ -1,11 +1,12 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { GameResults, RoundResults } from '@/models/gameModels'
+import type { PlayerResult } from '@/models/player'
 
 export const useScoreboardStore = defineStore('scoreboard', () => {
   const roundNumber = ref(0)
   const gameResults = ref({
-    playerResults: [],
+    playerResults: [] as PlayerResult[],
     totalRounds: 8,
     endedAt: '',
     wasCompleted: true

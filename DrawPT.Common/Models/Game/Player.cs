@@ -18,7 +18,7 @@ namespace DrawPT.Common.Models
         /// <summary>
         /// Player's avatar
         /// </summary>
-        public string? Avatar{ get; set; }
+        public string? Avatar { get; set; }
 
         /// <summary>
         /// Player's connection ID for real-time communication

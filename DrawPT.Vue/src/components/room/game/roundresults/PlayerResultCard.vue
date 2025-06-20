@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { PlayerAnswer } from '@/models/gameModels'
 import { usePlayerStore } from '@/stores/player'
+import Avatar from '@/components/common/Avatar.vue'
 
 const playerStore = usePlayerStore()
 const { blankAvatar } = storeToRefs(playerStore)
@@ -23,14 +24,11 @@ const showReason = ref(props.isYou)
           class="relative z-10 ml-4 flex w-full items-center rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur dark:bg-white/10"
         >
           <div class="flex items-center space-x-2">
-            <div
-              class="flex h-10 w-10 cursor-default items-center justify-center rounded-full p-2 text-sm font-bold text-white"
-              aria-label="avatar"
-            >
-              <img
-                :src="props.answer.avatar ?? blankAvatar"
-                :alt="props.answer.username"
-                class="h-10 w-10 rounded-full object-cover"
+            <div class="mr-2 flex cursor-default" aria-label="avatar">
+              <Avatar
+                :size="10"
+                :username="answer.username"
+                :avatar="answer.avatar || blankAvatar"
               />
             </div>
             <span class="text-sm font-medium">
