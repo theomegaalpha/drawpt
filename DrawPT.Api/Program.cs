@@ -55,7 +55,6 @@ builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.AddRedisDistributedCache(connectionName: "cache");
-builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
 builder.Services.AddTransient<Supabase.Client>(sp =>

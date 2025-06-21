@@ -1,7 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.Common.Models.Game;
-using RabbitMQ.Client;
 using System.Text.Json;
 
 namespace DrawPT.GameEngine.BackgroundWorkers;
@@ -9,19 +8,16 @@ namespace DrawPT.GameEngine.BackgroundWorkers;
 public class GameEventListener : BackgroundService
 {
     private readonly ILogger<GameEventListener> _logger;
-    private readonly IModel _channel;
     private readonly IGameSession _gameEngine;
     private readonly ServiceBusClient _serviceBusClient;
 
     public GameEventListener(
         ILogger<GameEventListener> logger,
-        IConnection rabbitMqConnection,
         ServiceBusClient serviceBusClient,
         IGameSession gameEngine)
     {
         _logger = logger;
         _serviceBusClient = serviceBusClient;
-        _channel = rabbitMqConnection.CreateModel();
         _gameEngine = gameEngine;
     }
 
@@ -57,7 +53,6 @@ public class GameEventListener : BackgroundService
 
     public override void Dispose()
     {
-        _channel?.Dispose();
         base.Dispose();
     }
 }

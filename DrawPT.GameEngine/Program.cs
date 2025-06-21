@@ -8,7 +8,6 @@ using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Services;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Services.AI;
-using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +21,6 @@ builder.AddServiceDefaults();
 builder.Services.AddSingleton<IConfiguration>(configuration);
 
 builder.AddAzureServiceBusClient(connectionName: "service-bus");
-builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureBlobClient(connectionName: "blobs");
 builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddAzureOpenAIClient(connectionName: "openai");

@@ -57,8 +57,6 @@ var openai = builder.ExecutionContext.IsPublishMode
 var gemini = builder.AddConnectionString("gemini");
 var freepikKey = builder.AddParameter("FreepikApiKey", true);
 
-var rabbitmq = builder.AddRabbitMQ("messaging");
-
 var redis = builder.AddRedis("cache");
 
 var insights = builder.ExecutionContext.IsPublishMode
@@ -76,7 +74,6 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(storage)
     .WithReference(openai)
     .WithReference(gemini)
-    .WithReference(rabbitmq)
     .WithReference(serviceBus)
     .WithReference(signalr)
     .WithReference(redis)
@@ -89,6 +86,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
+    .WaitFor(serviceBus)
     .WaitForCompletion(migrationService);
 
 var customDomain = builder.AddParameter("customDomain");
@@ -114,15 +112,13 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
 
 
 builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
-    .WithReference(rabbitmq)
     .WithReference(redis)
     .WithReference(insights)
-    .WaitFor(rabbitmq)
+    .WithReference(serviceBus)
     .WaitFor(redis);
 
 builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(serviceBus)
-    .WithReference(rabbitmq)
     .WithReference(storage)
     .WithReference(redis)
     .WithReference(db)

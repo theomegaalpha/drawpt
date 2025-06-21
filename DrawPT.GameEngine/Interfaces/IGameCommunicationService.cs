@@ -1,6 +1,5 @@
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
-using System.Diagnostics.CodeAnalysis;
 
 namespace DrawPT.GameEngine.Interfaces;
 

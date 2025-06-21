@@ -16,18 +16,15 @@ public class GameSession : IGameSession
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<GameSession> _logger;
-    private readonly ServiceBusClient _serviceBusClient;
 
     public GameSession(
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
-        ServiceBusClient serviceBusClient,
         IGameCommunicationService gameCommunicationService,
         ILogger<GameSession> logger)
     {
-        _serviceBusClient = serviceBusClient;
         _cacheService = cacheService;
         _gameStateService = gameStateService;
         _gameCommunicationService = gameCommunicationService;
