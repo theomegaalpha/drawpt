@@ -1,11 +1,18 @@
 using Azure.Provisioning.ServiceBus;
+using Azure.Provisioning.Sql;
 using Azure.Provisioning.Storage;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure SQL Server
 var sql = builder.AddAzureSqlServer("sql")
-                 .RunAsContainer(c => c.WithLifetime(ContainerLifetime.Persistent));
+                .ConfigureInfrastructure(infra =>
+                {
+                    var resources = infra.GetProvisionableResources();
+                    var dbRes = resources.OfType<SqlDatabase>().Single();
+                    dbRes.FreeLimitExhaustionBehavior = FreeLimitExhaustionBehavior.BillOverUsage;
+                })
+                .RunAsContainer(c => c.WithLifetime(ContainerLifetime.Persistent));
 var db = sql.AddDatabase("database");
 
 var signalr = builder.ExecutionContext.IsPublishMode
