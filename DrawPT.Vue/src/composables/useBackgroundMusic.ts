@@ -3,7 +3,18 @@ import { useVolumeStore } from '@/stores/volume'
 
 export function useBackgroundMusic() {
   const audio = ref<HTMLAudioElement | null>(null)
+  const sfxAudio = ref<HTMLAudioElement | null>(null)
   const volumeStore = useVolumeStore()
+
+  const cleanupSfxAudio = () => {
+    if (sfxAudio.value) {
+      sfxAudio.value.pause()
+      sfxAudio.value.removeAttribute('src')
+      sfxAudio.value.load()
+      sfxAudio.value.onerror = null
+      sfxAudio.value = null
+    }
+  }
 
   const cleanupAudio = () => {
     if (audio.value) {
@@ -89,20 +100,49 @@ export function useBackgroundMusic() {
     { immediate: true } // Set initial volume when composable is used
   )
 
-  // Watch for changes in the store's sfxUrl and play the sound effect once
+  // Watch for SFX playback state and URL, mirror music logic
   watch(
-    () => volumeStore.sfxUrl,
-    (newSfxUrl, oldSfxUrl) => {
-      if (newSfxUrl && newSfxUrl !== oldSfxUrl) {
-        const sfxAudio = new Audio(newSfxUrl)
-        const sfxVolumePercent = volumeStore.sfxVolume
-        const sfxVolumeNormalized = Math.max(0, Math.min(100, sfxVolumePercent)) / 100
-        sfxAudio.volume = sfxVolumeNormalized
-        sfxAudio.play().catch((error) => {
-          console.error('Error playing SFX:', error, 'URL:', newSfxUrl)
-        })
+    () => ({ isPlaying: volumeStore.isPlayingSfx, url: volumeStore.sfxUrl }),
+    (newState) => {
+      const { isPlaying, url } = newState
+      if (isPlaying) {
+        if (url) {
+          if (!sfxAudio.value || sfxAudio.value.src !== url) {
+            cleanupSfxAudio()
+            sfxAudio.value = new Audio(url)
+            const vol = Math.max(0, Math.min(100, volumeStore.sfxVolume)) / 100
+            sfxAudio.value.volume = vol
+            // When SFX ends, reset playback state
+            sfxAudio.value.onended = () => {
+              volumeStore.stopSfx()
+            }
+          }
+          sfxAudio.value?.play().catch((error) => {
+            console.error('Error playing SFX:', error, 'URL:', url)
+            if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
+          })
+        } else {
+          cleanupSfxAudio()
+          if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
+        }
+      } else {
+        if (sfxAudio.value && !sfxAudio.value.paused) {
+          sfxAudio.value.pause()
+        }
       }
-    }
+    },
+    { deep: true, immediate: true }
+  )
+
+  // Watch for changes in SFX volume
+  watch(
+    () => volumeStore.sfxVolume,
+    (newVol) => {
+      if (sfxAudio.value) {
+        sfxAudio.value.volume = Math.max(0, Math.min(100, newVol)) / 100
+      }
+    },
+    { immediate: true }
   )
 
   const setVolume = (volumePercent: number) => {
@@ -113,6 +153,8 @@ export function useBackgroundMusic() {
     cleanupAudio()
     volumeStore.setMusicUrl(null)
     if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
+    cleanupSfxAudio()
+    volumeStore.stopSfx()
   })
 
   return {

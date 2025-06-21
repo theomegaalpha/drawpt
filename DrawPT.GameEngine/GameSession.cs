@@ -38,28 +38,6 @@ public class GameSession : IGameSession
 
     public async Task PlayGameAsync(string roomCode)
     {
-        // Listen for control messages
-        var sessionProcessor = _serviceBusClient.CreateSessionProcessor(
-            "apiGame",
-            new ServiceBusSessionProcessorOptions
-            {
-                SessionIds = { roomCode },
-                AutoCompleteMessages = false
-            });
-        sessionProcessor.ProcessMessageAsync += async args =>
-        {
-            var content = args.Message.Body.ToString();
-            _logger.LogInformation($"Service Bus control msg for {roomCode}: {content}");
-            // TODO: handle control commands (pause/stop)
-            await args.CompleteMessageAsync(args.Message);
-        };
-        sessionProcessor.ProcessErrorAsync += args =>
-        {
-            _logger.LogError(args.Exception, "SessionProcessor error");
-            return Task.CompletedTask;
-        };
-        await sessionProcessor.StartProcessingAsync();
-
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction, gameState);
@@ -139,21 +117,5 @@ public class GameSession : IGameSession
             TotalRounds = gameState.TotalRounds
         };
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameResultsAction, finalScores);
-    }
-
-
-    private async Task HandleApiBroadcast(string roomCode, string action, string message)
-    {
-        switch (action)
-        {
-            case ApiPlayerMQ.PlayerLeftAction:
-                var player = JsonSerializer.Deserialize<Player>(message);
-                if (player != null)
-                {
-                    await _cacheService.RemovePlayerFromRoom(roomCode, player);
-                    _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerLeftAction, player);
-                }
-                break;
-        }
     }
 }

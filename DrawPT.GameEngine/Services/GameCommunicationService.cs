@@ -92,7 +92,6 @@ public class GameCommunicationService : IGameCommunicationService
             : themes[new Random().Next(themes.Count)];
 
         _logger.LogDebug($"[{player.RoomCode}] Theme selected for player {player.Id}: {selectedTheme}");
-        BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerThemeSelectedAction, selectedTheme);
         return selectedTheme;
     }
 

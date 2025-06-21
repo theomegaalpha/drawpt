@@ -56,7 +56,7 @@ namespace DrawPT.Api.Hubs
                 await Clients.Caller.RoomIsFull();
                 return;
             }
-             
+
             var parsedId = Guid.Parse(userId);
             var player = await _cache.GetPlayerAsync(parsedId);
             if (player == null)

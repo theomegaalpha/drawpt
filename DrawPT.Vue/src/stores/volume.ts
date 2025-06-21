@@ -18,7 +18,8 @@ export const useVolumeStore = defineStore('volume', {
     modalOpen: false,
     musicUrl: null as string | null,
     sfxUrl: null as string | null,
-    isPlayingMusic: false
+    isPlayingMusic: false,
+    isPlayingSfx: false
   }),
   getters: {
     musicVolumePercent: (state) => state.musicVolume / 100,
@@ -26,7 +27,8 @@ export const useVolumeStore = defineStore('volume', {
     isModalOpen: (state) => state.modalOpen,
     getCurrentMusicUrl: (state) => state.musicUrl,
     getCurrentSfxUrl: (state) => state.sfxUrl,
-    getIsPlayingMusic: (state) => state.isPlayingMusic
+    getIsPlayingMusic: (state) => state.isPlayingMusic,
+    getIsPlayingSfx: (state) => state.isPlayingSfx
   },
   actions: {
     setMusicVolume(newVolume: number) {
@@ -45,6 +47,7 @@ export const useVolumeStore = defineStore('volume', {
     },
     setSfxUrl(newUrl: string | null) {
       this.sfxUrl = newUrl
+      this.isPlayingSfx = newUrl !== null
     },
     togglePlayMusic() {
       this.isPlayingMusic = !this.isPlayingMusic
@@ -54,6 +57,7 @@ export const useVolumeStore = defineStore('volume', {
       this.musicUrl = null
     },
     stopSfx() {
+      this.isPlayingSfx = false
       this.sfxUrl = null
     }
   }
