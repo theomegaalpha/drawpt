@@ -26,6 +26,8 @@ var serviceBus = builder.AddAzureServiceBus("service-bus")
 serviceBus.AddServiceBusQueue("apiGlobal");
 serviceBus.AddServiceBusQueue("apiGame");
 serviceBus.AddServiceBusQueue("gameEngine");
+serviceBus.AddServiceBusQueue("gameEngineRequest");
+serviceBus.AddServiceBusQueue("gameEngineResponse");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)

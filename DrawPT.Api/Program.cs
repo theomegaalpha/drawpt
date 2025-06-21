@@ -96,6 +96,9 @@ builder.Services.AddHealthChecks();
 // Add Application Insights Telemetry
 builder.Services.AddApplicationInsightsTelemetry();
 
+// Add GameEngineProxyService background listener
+builder.Services.AddHostedService<GameEngineProxyService>();
+
 var app = builder.Build();
 
 // Build ReferenceCache at startup

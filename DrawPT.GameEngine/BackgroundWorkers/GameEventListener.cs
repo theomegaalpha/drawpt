@@ -1,6 +1,8 @@
 using Azure.Messaging.ServiceBus;
 using DrawPT.GameEngine.Interfaces;
+using DrawPT.Common.Models.Game;
 using RabbitMQ.Client;
+using System.Text.Json;
 
 namespace DrawPT.GameEngine.BackgroundWorkers;
 
@@ -33,12 +35,9 @@ public class GameEventListener : BackgroundService
         {
             var body = args.Message.Body.ToString();
             _logger.LogInformation($"Received Service Bus message: {body}");
-            if (body.StartsWith("game:"))
-            {
-                var roomCode = body.Substring("game:".Length);
-                _logger.LogInformation($"Game start event for room: {roomCode}");
-                _ = Task.Run(async () => await _gameEngine.PlayGameAsync(roomCode));
-            }
+            var gameState = JsonSerializer.Deserialize<GameState>(body);
+            _logger.LogInformation($"Game start event for room: {gameState.RoomCode}");
+            _ = Task.Run(async () => await _gameEngine.PlayGameAsync(gameState.RoomCode));
             await args.CompleteMessageAsync(args.Message);
         };
         processor.ProcessErrorAsync += args =>

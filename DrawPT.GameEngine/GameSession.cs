@@ -3,11 +3,7 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-
-using System.Text;
+using Azure.Messaging.ServiceBus;
 using System.Text.Json;
 
 namespace DrawPT.GameEngine;
@@ -20,64 +16,49 @@ public class GameSession : IGameSession
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<GameSession> _logger;
-    private readonly IModel _channel;
-    private readonly EventingBasicConsumer _consumer;
+    private readonly ServiceBusClient _serviceBusClient;
 
     public GameSession(
-        IConnection rabbitMqConnection,
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
+        ServiceBusClient serviceBusClient,
         IGameCommunicationService gameCommunicationService,
-
         ILogger<GameSession> logger)
     {
-        _channel = rabbitMqConnection.CreateModel();
+        _serviceBusClient = serviceBusClient;
         _cacheService = cacheService;
         _gameStateService = gameStateService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
         _assessmentService = assessmentService;
         _logger = logger;
-
-
-        _channel.ExchangeDeclare(ApiPlayerMQ.ExchangeName, ExchangeType.Topic);
-        _consumer = new EventingBasicConsumer(_channel);
-        _consumer.Received += async (model, ea) =>
-        {
-            byte[] body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
-            var routingKey = ea.RoutingKey;
-
-            _logger.LogInformation($"Received message with routing key: {routingKey}");
-
-            try
-            {
-                // Extract room code from routing key (format: client_broadcast.{roomCode}.{action})
-                var parts = routingKey.Split('.');
-                var roomCode = parts[1];
-                var action = parts[2];
-                await HandleApiBroadcast(roomCode, action, message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error handling api broadcast: {message}");
-            }
-        };
     }
 
     public async Task PlayGameAsync(string roomCode)
     {
-        _channel.QueueDeclare(
-            queue: ApiPlayerMQ.QueueName(roomCode),
-            durable: false,
-            exclusive: false,
-            autoDelete: true
-        );
-        _channel.QueueBind(ApiPlayerMQ.QueueName(roomCode),
-            ApiPlayerMQ.ExchangeName, ApiPlayerMQ.RoutingKey(roomCode));
-        _channel.BasicConsume(queue: ApiPlayerMQ.QueueName(roomCode), autoAck: true, consumer: _consumer);
+        // Listen for control messages
+        var sessionProcessor = _serviceBusClient.CreateSessionProcessor(
+            "apiGame",
+            new ServiceBusSessionProcessorOptions
+            {
+                SessionIds = { roomCode },
+                AutoCompleteMessages = false
+            });
+        sessionProcessor.ProcessMessageAsync += async args =>
+        {
+            var content = args.Message.Body.ToString();
+            _logger.LogInformation($"Service Bus control msg for {roomCode}: {content}");
+            // TODO: handle control commands (pause/stop)
+            await args.CompleteMessageAsync(args.Message);
+        };
+        sessionProcessor.ProcessErrorAsync += args =>
+        {
+            _logger.LogError(args.Exception, "SessionProcessor error");
+            return Task.CompletedTask;
+        };
+        await sessionProcessor.StartProcessingAsync();
 
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
@@ -167,8 +148,11 @@ public class GameSession : IGameSession
         {
             case ApiPlayerMQ.PlayerLeftAction:
                 var player = JsonSerializer.Deserialize<Player>(message);
-                await _cacheService.RemovePlayerFromRoom(roomCode, player);
-                _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerLeftAction, player);
+                if (player != null)
+                {
+                    await _cacheService.RemovePlayerFromRoom(roomCode, player);
+                    _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerLeftAction, player);
+                }
                 break;
         }
     }

@@ -3,84 +3,144 @@ using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using Azure.Messaging.ServiceBus;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text;
 using System.Text.Json;
 
 namespace DrawPT.GameEngine.Services;
 
 public class GameCommunicationService : IGameCommunicationService
 {
-    private readonly IModel _channel;
     private readonly IThemeService _themeService;
+    private readonly ServiceBusClient _sbClient;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests;
     private readonly ILogger<GameCommunicationService> _logger;
 
     public GameCommunicationService(
         IThemeService themeService,
-        IConnection rabbitMqConnection,
+        ServiceBusClient sbClient,
         ILogger<GameCommunicationService> logger)
     {
         _themeService = themeService;
-
-        _channel = rabbitMqConnection.CreateModel();
-        _channel.ExchangeDeclare(ApiResponseMQ.ExchangeName, ExchangeType.Topic);
-        _channel.ExchangeDeclare(GameEngineBroadcastMQ.ExchangeName, ExchangeType.Topic);
-        _channel.ExchangeDeclare(GameEngineRequestMQ.ExchangeName, ExchangeType.Topic);
+        _sbClient = sbClient;
         _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
         _logger = logger;
     }
 
     public void BroadcastGameEvent(string roomCode, string gameAction, object? message = null)
     {
-        var routingKey = $"{GameEngineBroadcastMQ.QueueName(roomCode)}.{gameAction}";
-        var payloadJson = JsonSerializer.Serialize(message);
-        var messageBytes = Encoding.UTF8.GetBytes(payloadJson);
-        _channel.BasicPublish(exchange: GameEngineBroadcastMQ.ExchangeName,
-                              routingKey: routingKey,
-                              basicProperties: null,
-                              body: messageBytes);
-        _logger.LogDebug($"[{roomCode}] Broadcasted game event: {gameAction} with message: {message}");
+        // Build the Service Bus message payload
+        var payload = new
+        {
+            Action = gameAction,
+            Payload = message
+        };
+        string json = JsonSerializer.Serialize(payload);
+
+        // Send to the 'gameEngine' queue
+        ServiceBusSender sender = _sbClient.CreateSender("gameEngine");
+        var sbMessage = new ServiceBusMessage(json)
+        {
+            SessionId = roomCode
+        };
+        // Synchronously send the message
+        sender.SendMessageAsync(sbMessage).GetAwaiter().GetResult();
+
+        _logger.LogDebug($"[{roomCode}] Broadcasted game event via SB: {gameAction} with message: {message}");
     }
 
     public async Task<string> AskPlayerThemeAsync(Player player, int timeoutInSeconds)
     {
+        // Prepare request message for Service Bus
         var themes = _themeService.GetRandomThemes();
-        var themesJson = JsonSerializer.Serialize(themes);
-        var routingKey = GameEngineRequestMQ.RoutingKeys.AskTheme(player.ConnectionId);
-        var selectedTheme = await RequestUserInputAsync(routingKey, themesJson, player.ConnectionId, timeoutInSeconds * 1000);
+        var requestObj = new { Action = GameEngineRequestMQ.Theme, Payload = themes };
+        var requestPayload = JsonSerializer.Serialize(requestObj);
 
-        if (string.IsNullOrEmpty(selectedTheme))
+        // Send via Service Bus and await response
+        var correlationId = Guid.NewGuid().ToString();
+        var replyQueue = "gameEngineResponse";  // ensure this queue exists and proxy uses it
+        var processor = _sbClient.CreateProcessor(replyQueue, new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+        var tcs = new TaskCompletionSource<string>();
+        processor.ProcessMessageAsync += async args =>
         {
-            _logger.LogDebug($"[{player.RoomCode}] No theme selected by player {player.Id} within the timeout period.");
-            return themes[new Random().Next(themes.Count)];
-        }
+            if (args.Message.CorrelationId == correlationId)
+            {
+                tcs.TrySetResult(args.Message.Body.ToString());
+                await args.CompleteMessageAsync(args.Message);
+            }
+        };
+        processor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
+        await processor.StartProcessingAsync();
+
+        var sender = _sbClient.CreateSender("gameEngineRequest");
+        var requestMsg = new ServiceBusMessage(requestPayload)
+        {
+            SessionId = player.ConnectionId,
+            CorrelationId = correlationId,
+            ReplyTo = replyQueue
+        };
+        await sender.SendMessageAsync(requestMsg);
+
+        // Wait for response or timeout
+        var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
+        var completed = await Task.WhenAny(tcs.Task, delay);
+        await processor.StopProcessingAsync();
+
+        string selectedTheme = completed == tcs.Task
+            ? tcs.Task.Result
+            : themes[new Random().Next(themes.Count)];
+
+        _logger.LogDebug($"[{player.RoomCode}] Theme selected for player {player.Id}: {selectedTheme}");
+        BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerThemeSelectedAction, selectedTheme);
         return selectedTheme;
     }
 
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
-        Stopwatch stopwatch = new();
+        Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var questionJson = JsonSerializer.Serialize(question);
-        var routingKey = GameEngineRequestMQ.RoutingKeys.AskQuestion(player.ConnectionId);
-        var answerString = await RequestUserInputAsync(routingKey, questionJson, player.ConnectionId, timeoutInSeconds * 1000);
-        PlayerAnswerBase? answerBase;
-        try 
+        // Build SB request message
+        var requestObj = new { Action = GameEngineRequestMQ.Question, Payload = question };
+        var requestPayload = JsonSerializer.Serialize(requestObj);
+
+        var correlationId = Guid.NewGuid().ToString();
+        var replyQueue = "gameEngineResponse";
+        var processor = _sbClient.CreateProcessor(replyQueue, new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+        var tcs = new TaskCompletionSource<string>();
+        processor.ProcessMessageAsync += async args =>
         {
-            answerBase = JsonSerializer.Deserialize<PlayerAnswerBase>(answerString);
-        }
-        catch
+            if (args.Message.CorrelationId == correlationId)
+            {
+                tcs.TrySetResult(args.Message.Body.ToString());
+                await args.CompleteMessageAsync(args.Message);
+            }
+        };
+        processor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
+        await processor.StartProcessingAsync();
+
+        var sender = _sbClient.CreateSender("gameEngineRequest");
+        var requestMsg = new ServiceBusMessage(requestPayload)
         {
-            answerBase = null;
-        }
+            SessionId = player.ConnectionId,
+            CorrelationId = correlationId,
+            ReplyTo = replyQueue
+        };
+        await sender.SendMessageAsync(requestMsg);
+
+        // Wait for response or timeout
+        var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
+        var completed = await Task.WhenAny(tcs.Task, delay);
+        await processor.StopProcessingAsync();
+
+        string answerString = completed == tcs.Task ? tcs.Task.Result : string.Empty;
+
+        // Deserialize and build PlayerAnswer
+        PlayerAnswerBase? answerBase = null;
+        try { answerBase = JsonSerializer.Deserialize<PlayerAnswerBase>(answerString); } catch { }
 
         var answer = new PlayerAnswer();
-
         if (answerBase == null)
         {
             _logger.LogDebug($"[{player.RoomCode}] No answer given by player {player.Id} within the timeout period.");
@@ -93,8 +153,7 @@ public class GameCommunicationService : IGameCommunicationService
         }
 
         stopwatch.Stop();
-        double elapsedTime = stopwatch.Elapsed.TotalSeconds;
-        answer.BonusPoints = CalculateBonusPoints(elapsedTime);
+        answer.BonusPoints = CalculateBonusPoints(stopwatch.Elapsed.TotalSeconds);
         answer.ConnectionId = player.ConnectionId;
         answer.PlayerId = player.Id;
         answer.Username = player.Username;
@@ -111,56 +170,6 @@ public class GameCommunicationService : IGameCommunicationService
         if (elapsedTime >= 15)
             return 0;
         // Linear decrease from 5 to 0 between 3 and 15 seconds
-        return (int)Math.Ceiling(5 * (1 - (elapsedTime - 3) / 12));
-    }
-
-    private async Task<string> RequestUserInputAsync(string routingKey, string requestPayload, string connectionId, int timeoutMilliseconds)
-    {
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += (model, ea) =>
-        {
-            var body = ea.Body.ToArray();
-            var response = Encoding.UTF8.GetString(body);
-            var correlationId = ea.BasicProperties.CorrelationId;
-
-            if (_pendingRequests.TryRemove(correlationId, out var tcs))
-            {
-                tcs.TrySetResult(response);
-            }
-        };
-        _channel.QueueDeclare(queue: ApiResponseMQ.QueueName(connectionId));
-        _channel.QueueBind(ApiResponseMQ.QueueName(connectionId),
-            ApiResponseMQ.ExchangeName, ApiResponseMQ.RoutingKey(connectionId));
-        _channel.BasicConsume(queue: ApiResponseMQ.QueueName(connectionId), autoAck: true, consumer: consumer);
-
-        var correlationId = Guid.NewGuid().ToString();
-        var replyQueue = ApiResponseMQ.QueueName(connectionId);
-
-        var properties = _channel.CreateBasicProperties();
-        properties.CorrelationId = correlationId;
-        properties.ReplyTo = replyQueue;
-
-        var messageBytes = Encoding.UTF8.GetBytes(requestPayload);
-
-        // Create a TaskCompletionSource to wait for the response
-        var tcs = new TaskCompletionSource<string>();
-        _pendingRequests[correlationId] = tcs;
-
-        _channel.BasicPublish(exchange: GameEngineRequestMQ.ExchangeName,
-                              routingKey: routingKey,
-                              basicProperties: properties,
-                              body: messageBytes);
-
-        Console.WriteLine($"[x] Sent request with CorrelationId: {correlationId}");
-
-        // Wait synchronously for response or timeout
-        var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutMilliseconds));
-
-        if (completedTask == tcs.Task)
-            return tcs.Task.Result;
-
-        _pendingRequests.TryRemove(correlationId, out _);
-        _logger.LogDebug("No response received from client within the timeout period.");
-        return string.Empty;
+        return (int) Math.Ceiling(5 * (1 - (elapsedTime - 3) / 12));
     }
 }
