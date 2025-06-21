@@ -6,13 +6,18 @@ import { ref } from 'vue'
 
 const { player } = usePlayerStore()
 const { room } = useRoomStore()
-const isCopied = ref(false) // Reactive variable for feedback
+const isCopied = ref(false)
+const isLoading = ref(false)
 
 const startGame = async () => {
+  if (isLoading.value) return
+
+  isLoading.value = true
   var gameStarted = await service.invoke('startGame')
   if (!gameStarted) {
     console.error('Game could not be started')
   }
+  isLoading.value = false
 }
 
 const copyRoomCodeToClipboard = () => {
@@ -40,9 +45,11 @@ const copyRoomCodeToClipboard = () => {
     <button
       v-if="room.players.length > 0 && room.players[0].id === player.id"
       class="btn-primary my-5 px-10"
+      :class="{ 'cursor-progress': isLoading }"
       @click="startGame"
     >
-      Start Game
+      <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
+      <span v-else>Start Game</span>
     </button>
     <h2
       @click="copyRoomCodeToClipboard"
