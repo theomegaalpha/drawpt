@@ -72,7 +72,7 @@ public class GameSession : IGameSession
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, i + 1);
-            await Task.Delay(100);
+            await Task.Delay(500);
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);

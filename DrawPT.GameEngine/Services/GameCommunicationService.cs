@@ -59,7 +59,7 @@ public class GameCommunicationService : IGameCommunicationService
 
         // Send via Service Bus and await response
         var correlationId = Guid.NewGuid().ToString();
-        var replyQueue = "gameEngineResponse";  // ensure this queue exists and proxy uses it
+        var replyQueue = "gameEngineResponse";
         var processor = _sbClient.CreateProcessor(replyQueue, new ServiceBusProcessorOptions { AutoCompleteMessages = false });
         var tcs = new TaskCompletionSource<string>();
         processor.ProcessMessageAsync += async args =>

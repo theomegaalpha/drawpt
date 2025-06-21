@@ -9,12 +9,10 @@ namespace DrawPT.Common.Services
     public class PlayerService
     {
         private readonly Client _supabase;
-        private readonly ICacheService _cacheService;
 
-        public PlayerService(Client supabase, ICacheService cacheService)
+        public PlayerService(Client supabase)
         {
             _supabase = supabase;
-            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService), "CacheService cannot be null.");
         }
 
         public async Task<Player?> GetPlayerAsync(Guid userId)
@@ -27,7 +25,6 @@ namespace DrawPT.Common.Services
                 return null;
 
             var player = new Player() { Id = userId, Username = profile.Username, Avatar = profile.Avatar };
-            await _cacheService.UpdatePlayerAsync(player);
             return player;
         }
 
@@ -41,8 +38,6 @@ namespace DrawPT.Common.Services
               .Set(x => x.Username, player.Username)
               .Set(x => x.Avatar, player.Avatar)
               .Update();
-
-            await _cacheService.UpdatePlayerAsync(player);
         }
     }
 }

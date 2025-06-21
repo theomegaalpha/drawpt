@@ -130,6 +130,8 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(gemini)
     .WithReference(insights)
     .WithEnvironment("FreepikApiKey", freepikKey)
+    .WithEnvironment("SupabaseUrl", supabaseUrl)
+    .WithEnvironment("SupabaseApiKey", supabaseApiKey)
     .WaitFor(api);
 
 

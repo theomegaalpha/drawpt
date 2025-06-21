@@ -4,7 +4,6 @@ using DrawPT.Api.Hubs;
 using DrawPT.Common.Configuration;
 using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.SignalR;
-using System.Diagnostics;
 
 namespace DrawPT.Api.Services
 {
@@ -82,17 +81,10 @@ namespace DrawPT.Api.Services
                             }
                         case GameEngineRequestMQ.Question:
                             {
-                                Stopwatch stopwatch = new Stopwatch();
-                                stopwatch.Start();
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
                                 using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(35));
                                 var answerBase = await client.AskQuestion(question, ctsQuestion.Token);
-
-                                stopwatch.Stop();
-                                var answer = new PlayerAnswer();
-                                answer.BonusPoints = CalculateBonusPoints(stopwatch.Elapsed.TotalSeconds);
-                                answer.ConnectionId = connectionId;
-                                response = JsonSerializer.Serialize(answer);
+                                response = JsonSerializer.Serialize(answerBase);
                                 break;
                             }
                         default:
@@ -159,16 +151,30 @@ namespace DrawPT.Api.Services
                         await _hubContext.Clients.Group(roomCode).ThemeSelected(theme!);
                         break;
                     case GameEngineBroadcastMQ.PlayerScoreUpdateAction:
-                        var results = payload.Deserialize<DrawPT.Common.Models.Game.PlayerResults>();
+                        var results = payload.Deserialize<PlayerResults>();
                         await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(results!.PlayerId, results.Score);
                         break;
                     case GameEngineBroadcastMQ.PlayerLeftAction:
-                        var left = payload.Deserialize<DrawPT.Common.Models.Player>();
+                        var left = payload.Deserialize<Common.Models.Player>();
                         await _hubContext.Clients.Group(roomCode).PlayerLeft(left!);
                         break;
                     case GameEngineBroadcastMQ.GameResultsAction:
-                        var resultsAll = payload.Deserialize<DrawPT.Common.Models.Game.GameResults>();
+                        var resultsAll = payload.Deserialize<GameResults>();
                         await _hubContext.Clients.Group(roomCode).BroadcastFinalResults(resultsAll!);
+                        break;
+                    case GameEngineBroadcastMQ.RoundResultsAction:
+                        var roundResults = payload.Deserialize<RoundResults>();
+                        await _hubContext.Clients.Group(roomCode).RoundResults(roundResults!);
+                        break;
+                    case GameEngineBroadcastMQ.AssessingAnswersAction:
+                        await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing answers.");
+                        break;
+                    case GameEngineBroadcastMQ.PlayerAnsweredAction:
+                        var playerAnswer = payload.Deserialize<PlayerAnswer>();
+                        if (playerAnswer != null)
+                        {
+                            await _hubContext.Clients.Group(roomCode).WriteMessage($"{playerAnswer.Username} answered!");
+                        }
                         break;
                     default:
                         _logger.LogWarning($"Unhandled GameEngine action: {action}");

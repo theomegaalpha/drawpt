@@ -8,6 +8,7 @@ using DrawPT.GameEngine.Interfaces;
 using DrawPT.GameEngine.Services;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Services.AI;
+using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,18 @@ services.AddTransient<IGameCommunicationService, GameCommunicationService>();
 services.AddTransient<IGameStateService, GameStateService>();
 services.AddTransient<IGameSession, GameSession>();
 services.AddTransient<ReferenceRepository>();
+// Register Supabase client for PlayerService dependency
+builder.Services.AddTransient<Supabase.Client>(sp =>
+{
+    var url = builder.Configuration["SupabaseUrl"];
+    var secretKey = builder.Configuration["SupabaseApiKey"];
+    var options = new Supabase.SupabaseOptions { AutoConnectRealtime = true };
+    var client = new Supabase.Client(url, secretKey, options);
+    client.InitializeAsync().Wait();
+    return client;
+});
+// Register PlayerService so CacheService can resolve it
+services.AddTransient<PlayerService>();
 
 builder.Services.AddSingleton<ThemeCache>();
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");

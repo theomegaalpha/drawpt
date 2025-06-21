@@ -1,18 +1,9 @@
-﻿using System.Text;
-using System.Text.Json;
-
+﻿using System.Text.Json;
 using Azure.Messaging.ServiceBus;
-
-using DrawPT.Common.Configuration;
 using DrawPT.Common.Interfaces;
-using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace DrawPT.Api.Hubs
 {
@@ -65,16 +56,15 @@ namespace DrawPT.Api.Hubs
                 await Clients.Caller.RoomIsFull();
                 return;
             }
-
-            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
+             
+            var parsedId = Guid.Parse(userId);
+            var player = await _cache.GetPlayerAsync(parsedId);
             if (player == null)
             {
-                player = await _cache.CreatePlayerAsync();
-                player.Id = Guid.Parse(userId);
+                player = await _cache.CreatePlayerAsync(parsedId);
             }
             player.RoomCode = roomCode;
             player.ConnectionId = Context.ConnectionId;
-            await _cache.SetPlayerSessionAsync(Context.ConnectionId, player);
             await _cache.UpdatePlayerAsync(player);
 
             // Check if player already exists in the room
@@ -97,16 +87,16 @@ namespace DrawPT.Api.Hubs
         public async Task JoinGame(string roomCode, string username)
         {
             // check if user is allowed to be in the room
-            var playerIdClaim = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-            if (playerIdClaim == null)
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
             {
                 _logger.LogError("user_id not found in claim while joining a room!");
                 await Clients.Caller.ErrorJoiningRoom("Failed to join room.  Please refresh and try again.");
                 return;
             }
 
-            var playerId = Guid.Parse(playerIdClaim);
-            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+            var playerId = Guid.Parse(userId);
+            var player = await _cache.GetPlayerAsync(playerId);
             if (player == null)
                 return;
 
@@ -120,7 +110,9 @@ namespace DrawPT.Api.Hubs
 
             player.RoomCode = roomCode;
             player.Username = username;
+            player.ConnectionId = Context.ConnectionId;
             await _cache.UpdatePlayerAsync(player);
+            await _cache.AddPlayerToRoom(roomCode, player);
 
             var gameState = await _cache.GetGameState(roomCode);
             if (gameState == null)
@@ -145,7 +137,7 @@ namespace DrawPT.Api.Hubs
                 return false;
             }
 
-            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
             if (player == null)
             {
                 _logger.LogWarning("The user that started the game can not be found in cache!");
@@ -167,7 +159,15 @@ namespace DrawPT.Api.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var player = await _cache.GetPlayerSessionAsync(Context.ConnectionId);
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in claim while disconnecting!");
+                return;
+            }
+
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
 
             if (player == null)
             {
@@ -177,7 +177,6 @@ namespace DrawPT.Api.Hubs
 
             await _hubContext.Clients.GroupExcept(player.RoomCode, player.ConnectionId).PlayerLeft(player);
             await _cache.RemovePlayerFromRoom(player.RoomCode, player);
-            await _cache.ClearPlayerSessionAsync(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
     }
