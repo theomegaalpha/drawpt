@@ -3,11 +3,7 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-
-using System.Text;
+using Azure.Messaging.ServiceBus;
 using System.Text.Json;
 
 namespace DrawPT.GameEngine;
@@ -20,65 +16,25 @@ public class GameSession : IGameSession
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<GameSession> _logger;
-    private readonly IModel _channel;
-    private readonly EventingBasicConsumer _consumer;
 
     public GameSession(
-        IConnection rabbitMqConnection,
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
         IGameCommunicationService gameCommunicationService,
-
         ILogger<GameSession> logger)
     {
-        _channel = rabbitMqConnection.CreateModel();
         _cacheService = cacheService;
         _gameStateService = gameStateService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
         _assessmentService = assessmentService;
         _logger = logger;
-
-
-        _channel.ExchangeDeclare(ApiPlayerMQ.ExchangeName, ExchangeType.Topic);
-        _consumer = new EventingBasicConsumer(_channel);
-        _consumer.Received += async (model, ea) =>
-        {
-            byte[] body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
-            var routingKey = ea.RoutingKey;
-
-            _logger.LogInformation($"Received message with routing key: {routingKey}");
-
-            try
-            {
-                // Extract room code from routing key (format: client_broadcast.{roomCode}.{action})
-                var parts = routingKey.Split('.');
-                var roomCode = parts[1];
-                var action = parts[2];
-                await HandleApiBroadcast(roomCode, action, message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error handling api broadcast: {message}");
-            }
-        };
     }
 
     public async Task PlayGameAsync(string roomCode)
     {
-        _channel.QueueDeclare(
-            queue: ApiPlayerMQ.QueueName(roomCode),
-            durable: false,
-            exclusive: false,
-            autoDelete: true
-        );
-        _channel.QueueBind(ApiPlayerMQ.QueueName(roomCode),
-            ApiPlayerMQ.ExchangeName, ApiPlayerMQ.RoutingKey(roomCode));
-        _channel.BasicConsume(queue: ApiPlayerMQ.QueueName(roomCode), autoAck: true, consumer: _consumer);
-
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction, gameState);
@@ -91,7 +47,7 @@ public class GameSession : IGameSession
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundStartedAction, i + 1);
-            await Task.Delay(100);
+            await Task.Delay(500);
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
@@ -158,18 +114,5 @@ public class GameSession : IGameSession
             TotalRounds = gameState.TotalRounds
         };
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameResultsAction, finalScores);
-    }
-
-
-    private async Task HandleApiBroadcast(string roomCode, string action, string message)
-    {
-        switch (action)
-        {
-            case ApiPlayerMQ.PlayerLeftAction:
-                var player = JsonSerializer.Deserialize<Player>(message);
-                await _cacheService.RemovePlayerFromRoom(roomCode, player);
-                _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.PlayerLeftAction, player);
-                break;
-        }
     }
 }

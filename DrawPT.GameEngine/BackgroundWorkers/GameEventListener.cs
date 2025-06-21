@@ -1,76 +1,58 @@
-using DrawPT.Common.Configuration;
+using Azure.Messaging.ServiceBus;
 using DrawPT.GameEngine.Interfaces;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
+using DrawPT.Common.Models.Game;
+using System.Text.Json;
 
 namespace DrawPT.GameEngine.BackgroundWorkers;
 
 public class GameEventListener : BackgroundService
 {
     private readonly ILogger<GameEventListener> _logger;
-    private readonly IModel _channel;
     private readonly IGameSession _gameEngine;
+    private readonly ServiceBusClient _serviceBusClient;
 
     public GameEventListener(
         ILogger<GameEventListener> logger,
-        IConnection rabbitMqConnection,
+        ServiceBusClient serviceBusClient,
         IGameSession gameEngine)
     {
         _logger = logger;
-        _channel = rabbitMqConnection.CreateModel();
+        _serviceBusClient = serviceBusClient;
         _gameEngine = gameEngine;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Declare exchange and queue
-        _channel.ExchangeDeclare(ApiMasterMQ.ExchangeName, ExchangeType.Topic);
-        _channel.QueueDeclare(
-            queue: ApiMasterMQ.QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null
-        );
-        _channel.QueueBind(ApiMasterMQ.QueueName, ApiMasterMQ.ExchangeName, ApiMasterMQ.RoutingKey);
+        // Configure Azure Service Bus processor for 'apiGlobal' queue
+        var processor = _serviceBusClient.CreateProcessor("apiGlobal");
 
-        // Set up consumer
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += (model, ea) =>
+        // Handle incoming Service Bus messages
+        processor.ProcessMessageAsync += async args =>
         {
-            var body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
-            var routingKey = ea.RoutingKey;
-            var roomCode = routingKey.Split('.')[1];
-
-            _logger.LogInformation($"Received message with routing key: {routingKey}");
-            _logger.LogInformation($"Message content: {message}");
-
-            // Handle game started event
-            if (routingKey.EndsWith(ApiMasterMQ.GameStartedAction))
-            {
-                _logger.LogInformation($"Game started event received for room: {roomCode}");
-
-                // TODO: implement way of tracking used threads and clean up when game ends
-                _ = Task.Run(async () => await _gameEngine.PlayGameAsync(roomCode));
-            }
+            var body = args.Message.Body.ToString();
+            _logger.LogInformation($"Received Service Bus message: {body}");
+            var gameState = JsonSerializer.Deserialize<GameState>(body);
+            _logger.LogInformation($"Game start event for room: {gameState.RoomCode}");
+            _ = Task.Run(async () => await _gameEngine.PlayGameAsync(gameState.RoomCode));
+            await args.CompleteMessageAsync(args.Message);
+        };
+        processor.ProcessErrorAsync += args =>
+        {
+            _logger.LogError(args.Exception, "Error processing Service Bus message");
+            return Task.CompletedTask;
         };
 
-        _channel.BasicConsume(
-            queue: ApiMasterMQ.QueueName,
-            autoAck: true,
-            consumer: consumer
-        );
+        // Stop processing on cancellation
+        stoppingToken.Register(async () => await processor.StopProcessingAsync());
+        await processor.StartProcessingAsync();
 
         _logger.LogInformation("Started consuming from game queue");
 
-        return Task.CompletedTask;
+        return;
     }
 
     public override void Dispose()
     {
-        _channel?.Dispose();
         base.Dispose();
     }
 }

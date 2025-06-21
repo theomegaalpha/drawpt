@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces.Game;
+using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 
 namespace DrawPT.Common.Interfaces
@@ -11,11 +11,8 @@ namespace DrawPT.Common.Interfaces
         void CloseRoom(string roomCode);
         Task<bool> RoomExistsAsync(string code);
         Task<Player?> GetPlayerAsync(Guid id);
-        Task<Player> CreatePlayerAsync();
+        Task<Player> CreatePlayerAsync(Guid id);
         Task<Player> UpdatePlayerAsync(Player player);
-        Task<Player?> GetPlayerSessionAsync(string connectionId);
-        Task ClearPlayerSessionAsync(string connectionId);
-        Task SetPlayerSessionAsync(string connectionId, Player player);
 
         Task<List<Player>> GetRoomPlayersAsync(string roomCode);
         Task AddPlayerToRoom(string roomCode, Player player);

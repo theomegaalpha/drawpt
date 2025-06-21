@@ -20,7 +20,7 @@ var configuration = new ConfigurationBuilder()
 builder.AddServiceDefaults();
 builder.Services.AddSingleton<IConfiguration>(configuration);
 
-builder.AddRabbitMQClient(connectionName: "messaging");
+builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddAzureBlobClient(connectionName: "blobs");
 builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddAzureOpenAIClient(connectionName: "openai");
@@ -40,6 +40,18 @@ services.AddTransient<IGameCommunicationService, GameCommunicationService>();
 services.AddTransient<IGameStateService, GameStateService>();
 services.AddTransient<IGameSession, GameSession>();
 services.AddTransient<ReferenceRepository>();
+// Register Supabase client for PlayerService dependency
+builder.Services.AddTransient<Supabase.Client>(sp =>
+{
+    var url = builder.Configuration["SupabaseUrl"];
+    var secretKey = builder.Configuration["SupabaseApiKey"];
+    var options = new Supabase.SupabaseOptions { AutoConnectRealtime = true };
+    var client = new Supabase.Client(url, secretKey, options);
+    client.InitializeAsync().Wait();
+    return client;
+});
+// Register PlayerService so CacheService can resolve it
+services.AddTransient<PlayerService>();
 
 builder.Services.AddSingleton<ThemeCache>();
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");

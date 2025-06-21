@@ -50,11 +50,11 @@ builder.Services.AddSwaggerGen();
 // TODO: Add Redis distributed cache
 builder.Services.AddDistributedMemoryCache();
 
+builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.AddRedisDistributedCache(connectionName: "cache");
-builder.AddRabbitMQClient(connectionName: "messaging");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
 builder.Services.AddTransient<Supabase.Client>(sp =>
@@ -94,6 +94,9 @@ builder.Services.AddHealthChecks();
 
 // Add Application Insights Telemetry
 builder.Services.AddApplicationInsightsTelemetry();
+
+// Add GameEngineProxyService background listener
+builder.Services.AddHostedService<GameEngineProxyService>();
 
 var app = builder.Build();
 

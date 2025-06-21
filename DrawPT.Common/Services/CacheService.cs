@@ -11,11 +11,13 @@ namespace DrawPT.Common.Services
     {
         private readonly IDistributedCache _cache;
         private readonly DistributedCacheEntryOptions _options;
+        private readonly PlayerService _profileService;
 
-        public CacheService(IDistributedCache cache)
+        public CacheService(IDistributedCache cache, PlayerService profileService)
         {
             _cache = cache;
             _options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(2));
+            _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "PlayerService cannot be null.");
         }
 
         public async Task<Room?> GetRoomAsync(string code)
@@ -101,9 +103,18 @@ namespace DrawPT.Common.Services
             return player;
         }
 
-        public async Task<Player> CreatePlayerAsync()
+        public async Task<Player> CreatePlayerAsync(Guid id)
         {
-            var player = new Player();
+            var player = await _profileService.GetPlayerAsync(id);
+            if (player != null)
+            {
+                return player;
+            }
+
+            player = new Player()
+            {
+                Id = id
+            };
             var playerJson = JsonSerializer.Serialize(player);
             await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, _options);
             return player;
@@ -114,38 +125,6 @@ namespace DrawPT.Common.Services
             var playerJson = JsonSerializer.Serialize(player);
             await _cache.SetStringAsync("player:" + player.Id.ToString(), playerJson, _options);
             return player;
-        }
-
-        /// <summary>
-        /// Get player session by Connection ID.
-        /// </summary>
-        /// <param name="connectionId">Connection ID</param>
-        /// <returns></returns>
-        public async Task<Player?> GetPlayerSessionAsync(string connectionId)
-        {
-            var playerJson = await _cache.GetStringAsync($"connectionId:{connectionId}");
-            if (playerJson is null)
-                return null;
-
-            var player = JsonSerializer.Deserialize<Player>(playerJson);
-            return player;
-        }
-
-        public async Task ClearPlayerSessionAsync(string connectionId)
-        {
-            await _cache.RemoveAsync("connectionId:" + connectionId);
-        }
-
-        /// <summary>
-        /// Set player session by Connection ID.
-        /// </summary>
-        /// <param name="connectionId">Connection ID</param>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        public async Task SetPlayerSessionAsync(string connectionId, Player player)
-        {
-            var playerJson = JsonSerializer.Serialize(player);
-            await _cache.SetStringAsync($"connectionId:{connectionId}", playerJson, _options);
         }
 
         public async Task<List<Player>> GetRoomPlayersAsync(string roomCode)
@@ -171,7 +150,7 @@ namespace DrawPT.Common.Services
             var playerIds = await _cache.GetStringAsync($"room:{roomCode}:players");
             List<Guid> players = string.IsNullOrEmpty(playerIds) ? new () : JsonSerializer.Deserialize<List<Guid>>(playerIds) ?? new ();
             if (players.Any(p => p == player.Id))
-                return; // Player already exists in the room
+                return;
 
             players.Add(player.Id);
             await UpdatePlayerAsync(player);

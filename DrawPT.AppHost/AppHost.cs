@@ -1,3 +1,4 @@
+using Azure.Provisioning.ServiceBus;
 using Azure.Provisioning.Storage;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -10,6 +11,23 @@ var db = sql.AddDatabase("database");
 var signalr = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureSignalR("signalr")
     : builder.AddConnectionString("signalr");
+
+
+var serviceBus = builder.AddAzureServiceBus("service-bus")
+    .ConfigureInfrastructure(infra =>
+    {
+        var serviceBusNamespace = infra.GetProvisionableResources()
+                                       .OfType<ServiceBusNamespace>()
+                                       .Single();
+
+        serviceBusNamespace.Tags.Add("drawpt", "DrawPT Game Engine");
+    })
+    .RunAsEmulator();
+serviceBus.AddServiceBusQueue("apiGlobal");
+serviceBus.AddServiceBusQueue("apiGame");
+serviceBus.AddServiceBusQueue("gameEngine");
+serviceBus.AddServiceBusQueue("gameEngineRequest");
+serviceBus.AddServiceBusQueue("gameEngineResponse");
 
 var migrationService = builder.AddProject<Projects.DrawPT_MigrationService>("migration")
     .WithReference(db)
@@ -39,8 +57,6 @@ var openai = builder.ExecutionContext.IsPublishMode
 var gemini = builder.AddConnectionString("gemini");
 var freepikKey = builder.AddParameter("FreepikApiKey", true);
 
-var rabbitmq = builder.AddRabbitMQ("messaging");
-
 var redis = builder.AddRedis("cache");
 
 var insights = builder.ExecutionContext.IsPublishMode
@@ -58,7 +74,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithReference(storage)
     .WithReference(openai)
     .WithReference(gemini)
-    .WithReference(rabbitmq)
+    .WithReference(serviceBus)
     .WithReference(signalr)
     .WithReference(redis)
     .WithReference(insights)
@@ -70,6 +86,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
     .WithExternalHttpEndpoints()
     .WaitFor(signalr)
     .WaitFor(db)
+    .WaitFor(serviceBus)
     .WaitForCompletion(migrationService);
 
 var customDomain = builder.AddParameter("customDomain");
@@ -95,14 +112,13 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
 
 
 builder.AddProject<Projects.DrawPT_Matchmaking>("drawpt-matchmaking")
-    .WithReference(rabbitmq)
     .WithReference(redis)
     .WithReference(insights)
-    .WaitFor(rabbitmq)
+    .WithReference(serviceBus)
     .WaitFor(redis);
 
 builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
-    .WithReference(rabbitmq)
+    .WithReference(serviceBus)
     .WithReference(storage)
     .WithReference(redis)
     .WithReference(db)
@@ -110,6 +126,8 @@ builder.AddProject<Projects.DrawPT_GameEngine>("drawpt-gameengine")
     .WithReference(gemini)
     .WithReference(insights)
     .WithEnvironment("FreepikApiKey", freepikKey)
+    .WithEnvironment("SupabaseUrl", supabaseUrl)
+    .WithEnvironment("SupabaseApiKey", supabaseApiKey)
     .WaitFor(api);
 
 
