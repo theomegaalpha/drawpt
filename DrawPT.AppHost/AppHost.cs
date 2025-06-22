@@ -12,7 +12,11 @@ var sql = builder.AddAzureSqlServer("sql")
                     var dbRes = resources.OfType<SqlDatabase>().Single();
                     dbRes.FreeLimitExhaustionBehavior = FreeLimitExhaustionBehavior.BillOverUsage;
                 })
-                .RunAsContainer(c => c.WithLifetime(ContainerLifetime.Persistent));
+                .RunAsContainer(c =>
+                {
+                    c.WithLifetime(ContainerLifetime.Persistent);
+                    c.WithHostPort(52106);
+                });
 var db = sql.AddDatabase("database");
 
 var signalr = builder.ExecutionContext.IsPublishMode
@@ -52,9 +56,12 @@ var storage = builder.AddAzureStorage("storage")
         storageAccount.AllowBlobPublicAccess = true;
     })
     .RunAsEmulator(azurite =>
-                    {
-                        azurite.WithLifetime(ContainerLifetime.Persistent);
-                    })
+                {
+                    azurite
+                        .WithBlobPort(51566)
+                        .WithContainerName("images")
+                        .WithLifetime(ContainerLifetime.Persistent);
+                })
     .AddBlobs("blobs");
 
 // Add AI
