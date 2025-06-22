@@ -17,8 +17,13 @@ const generate = () => {
   api
     .createQuestion(new Date(selectedDate.value))
     .then((response) => {
-      console.log('Daily question generated:', response)
-      //dailiesStore.fetchDailyQuestion(selectedDate.value)
+      // if exists update or push otherwise
+      const existingIndex = futureQuestions.value.findIndex((q) => q.date === response.date)
+      if (existingIndex !== -1) {
+        futureQuestions.value[existingIndex] = response
+      } else {
+        futureQuestions.value.push(response)
+      }
     })
     .catch((error) => {
       console.error('Error generating daily question:', error)

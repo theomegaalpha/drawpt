@@ -68,7 +68,7 @@ export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   return (await response.json()) as DailyAnswer
 }
 
-export async function createQuestion(date: Date): Promise<DailyAnswer> {
+export async function createQuestion(date: Date): Promise<DailyQuestion> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json'
   }
@@ -86,7 +86,7 @@ export async function createQuestion(date: Date): Promise<DailyAnswer> {
     throw new Error('Failed to fetch player data')
   }
 
-  return (await response.json()) as DailyAnswer
+  return (await response.json()) as DailyQuestion
 }
 
 export async function getDailyAnswerHistory(): Promise<DailyAnswer[]> {
