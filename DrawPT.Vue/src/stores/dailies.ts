@@ -25,11 +25,6 @@ export const useDailiesStore = defineStore('dailies', {
   },
   actions: {
     async initStore() {
-      if (this.dailyAnswerHistory.length === 0) {
-        const history = await api.getDailyAnswerHistory()
-        this.dailyAnswerHistory = history
-      }
-
       if (this.dailyQuestions.length === 0) {
         const questions = await api.getDailyQuestions()
         this.dailyQuestions = questions
