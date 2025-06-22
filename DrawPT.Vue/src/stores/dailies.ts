@@ -5,6 +5,7 @@ import type { DailyAnswer, DailyQuestion } from '@/models/dailyModels'
 
 export const useDailiesStore = defineStore('dailies', {
   state: () => ({
+    dailyQuestions: [] as DailyQuestion[],
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
     dailyAnswerHistory: [] as DailyAnswer[],
@@ -24,10 +25,9 @@ export const useDailiesStore = defineStore('dailies', {
   },
   actions: {
     async initStore() {
-      if (this.dailyAnswerHistory.length === 0) {
-        console.log('Fetching daily answer history')
-        const history = await api.getDailyAnswerHistory()
-        this.dailyAnswerHistory = history
+      if (this.dailyQuestions.length === 0) {
+        const questions = await api.getDailyQuestions()
+        this.dailyQuestions = questions
       }
 
       if (this.isDailyQuestionLoaded && this.isDailyAnswerLoaded) {

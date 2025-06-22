@@ -27,7 +27,7 @@ namespace DrawPT.Common.Services.AI
             _logger = logger;
         }
 
-        public async Task<string?> GenerateAndSaveImageAsync(string prompt)
+        public async Task<string?> GenerateAndSaveImageAsync(string prompt, DateTime date)
         {
             if (string.IsNullOrEmpty(prompt))
             {
@@ -123,7 +123,7 @@ namespace DrawPT.Common.Services.AI
                         if (statusFreepikResponse.Data.Generated != null && statusFreepikResponse.Data.Generated.Any())
                         {
                             imageUrlToDownload = statusFreepikResponse.Data.Generated.FirstOrDefault();
-                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{DateTime.UtcNow.AddDays(1).Date:yyyyMMdd}.png");
+                            var imageUrl = await _storageService.DownloadImageAsync(imageUrlToDownload!, $"dailies/{date:yyyyMMdd}.png");
                             return imageUrl;
                         }
                         else

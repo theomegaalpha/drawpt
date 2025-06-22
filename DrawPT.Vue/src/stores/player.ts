@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Player } from '@/models/player'
 import { avatarColors } from '@/components/constants/colors'
+import { isAuthenticated } from '@/lib/auth'
 import api from '@/api/api'
 
 export const usePlayerStore = defineStore('player', () => {
@@ -57,7 +58,7 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   async function init() {
-    if (!player.value.id) {
+    if (!player.value.id && (await isAuthenticated())) {
       try {
         const playerData = await api.getPlayer()
         updatePlayer(playerData)
