@@ -1,9 +1,11 @@
 using System.Text.Json;
 using DrawPT.Common.Models.Daily;
 using DrawPT.Common.Models.Game;
+using DrawPT.Common.Util;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DrawPT.Common.Services.AI
 {
@@ -116,10 +118,10 @@ Weight prioritization: Subject + Scene + Action > Single Noun Identification";
             return null;
         }
 
-        public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
+        public async Task<GameQuestion> GenerateGameQuestionAsync(string theme, DateTime? date = null)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            var imageUrl = await GenerateImageAsync(prompt);
+            var imageUrl = await GenerateImageAsync(prompt, date ?? TimezoneHelper.Now());
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
@@ -173,14 +175,14 @@ Weight prioritization: Subject + Scene + Action > Single Noun Identification";
         }
 
         // create a GenerateImageAsync method here
-        private async Task<string?> GenerateImageAsync(string prompt)
+        private async Task<string?> GenerateImageAsync(string prompt, DateTime date)
         {
-            return await GenerateImageRestfullyAsync(prompt);
+            return await GenerateImageRestfullyAsync(prompt, date);
         }
 
-        private async Task<string?> GenerateImageRestfullyAsync(string prompt)
+        private async Task<string?> GenerateImageRestfullyAsync(string prompt, DateTime date)
         {
-            return await _freepikImageService.GenerateAndSaveImageAsync(prompt);
+            return await _freepikImageService.GenerateAndSaveImageAsync(prompt, date);
         }
     }
 }

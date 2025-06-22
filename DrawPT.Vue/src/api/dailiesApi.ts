@@ -18,6 +18,40 @@ export async function getDailyQuestion(): Promise<DailyQuestion> {
   return (await response.json()) as DailyQuestion
 }
 
+export async function getDailyQuestions(): Promise<DailyQuestion[]> {
+  const headers: HeadersInit = {}
+  if (await isAuthenticated()) {
+    headers['Authorization'] = `Bearer ${await getAccessToken()}`
+  }
+  const response = await fetch('/api/dailyquestion/list', {
+    headers
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch player data')
+  }
+
+  return (await response.json()) as DailyQuestion[]
+}
+
+export async function getFutureDailyQuestions(): Promise<DailyQuestion[]> {
+  const headers: HeadersInit = {}
+  if (await isAuthenticated()) {
+    headers['Authorization'] = `Bearer ${await getAccessToken()}`
+  }
+  const response = await fetch('/api/dailyquestion/future', {
+    headers
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch player data')
+  }
+
+  return (await response.json()) as DailyQuestion[]
+}
+
 export async function getDailyAnswer(): Promise<DailyAnswer | null> {
   const headers: HeadersInit = {}
   if (await isAuthenticated()) {
@@ -29,6 +63,27 @@ export async function getDailyAnswer(): Promise<DailyAnswer | null> {
 
   if (!response.ok) {
     return null
+  }
+
+  return (await response.json()) as DailyAnswer
+}
+
+export async function createQuestion(date: Date): Promise<DailyAnswer> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json'
+  }
+  if (await isAuthenticated()) {
+    headers['Authorization'] = `Bearer ${await getAccessToken()}`
+  }
+  const response = await fetch(`/api/dailyquestion`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(date)
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to fetch player data')
   }
 
   return (await response.json()) as DailyAnswer
