@@ -1,4 +1,5 @@
 using DrawPT.Common.Services.AI;
+using DrawPT.Common.Util;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
 
@@ -83,16 +84,17 @@ namespace DrawPT.ScheduledService
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dailiesRepository = scope.ServiceProvider.GetRequiredService<DailiesRepository>();
+                    var date = TimezoneHelper.Now().AddDays(1).Date;
 
-                    if (dailiesRepository.GetDailyQuestion(DateTime.Now.AddDays(1).Date) != null)
+                    if (dailiesRepository.GetDailyQuestion(date) != null)
                         return;
 
                     var randomTheme = dailiesRepository.GetDailyThemes().OrderBy(_ => Guid.NewGuid()).First();
 
-                    var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme);
+                    var question = await _dailyAIService.GenerateGameQuestionAsync(randomTheme.Theme, date);
                     var daily = new DailyQuestionEntity
                     {
-                        Date = DateTime.Now.AddDays(1).Date,
+                        Date = date,
                         Style = randomTheme.Style,
                         Theme = randomTheme.Theme,
                         ImageUrl = question.ImageUrl,
