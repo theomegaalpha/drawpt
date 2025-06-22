@@ -50,6 +50,10 @@ export const useDailiesStore = defineStore('dailies', {
             this.dailyAnswer = answer
             this.setShowAssessment(answer?.guess ? true : false)
           }
+          if (!this.dailyAnswerHistory.length) {
+            const history = await api.getDailyAnswerHistory()
+            this.dailyAnswerHistory = history
+          }
         } else if (!this.isDailyAnswerLoaded) {
           const storedData = localStorage.getItem('dailyAnswer')
           if (storedData) {
