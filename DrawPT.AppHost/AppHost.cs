@@ -21,7 +21,7 @@ var sql = builder.AddAzureSqlServer("sql")
                 });
 var db = sql.AddDatabase("database");
 
-var signalr = builder.AddAzureSignalR("signalr", AzureSignalRServiceMode.Serverless)
+var signalr = builder.AddAzureSignalR("signalr")
                      .RunAsEmulator();
 
 var serviceBus = builder.AddAzureServiceBus("service-bus")
