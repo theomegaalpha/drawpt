@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mx-auto h-[70vmin] w-[70vmin]" :aria-labelledby="`carousel-heading-${id}`">
+  <div class="relative mx-auto h-[80vmin] w-[70vmin]" :aria-labelledby="`carousel-heading-${id}`">
     <ul
       class="absolute mx-[-4vmin] flex transition-transform duration-1000 ease-in-out"
       :style="{ transform: `translateX(-${current * (100 / dailies.length)}%)` }"
