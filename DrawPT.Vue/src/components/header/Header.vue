@@ -16,7 +16,10 @@ const isAuthenticated = computed(() => {
   return !!authStore.user
 })
 
-const menuItems = [{ name: 'About', href: '/about' }]
+const menuItems = [
+  { name: 'About', href: '/about', role: '' },
+  { name: 'Admin', href: '/admin', role: 'admin' }
+]
 const isMobileMenuOpen = ref(false) // State for mobile menu
 
 const toggleMobileMenu = () => {
@@ -26,9 +29,6 @@ const toggleMobileMenu = () => {
 const isProfileMenuOpen = ref(false)
 const toggleProfileMenu = () => {
   isProfileMenuOpen.value = !isProfileMenuOpen.value
-}
-const goToEditProfile = () => {
-  router.push('/profile')
 }
 
 const handleLogout = async () => {
@@ -72,6 +72,7 @@ const handleLogout = async () => {
             >
               <li v-for="(item, index) in menuItems" :key="index">
                 <router-link
+                  v-if="!item.role || item.role === authStore.role"
                   :to="item.href"
                   class="text-muted-foreground hover:text-accent-foreground block duration-150"
                 >
