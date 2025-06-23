@@ -15,8 +15,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = false
   })
 
-  supabase.auth.getClaims().then(({ data: { claims } }) => {
-    role.value = claims?.user_role || ''
+  supabase.auth.getClaims().then(({ data }) => {
+    role.value = data?.claims?.user_role || ''
   })
 
   // Listen for auth changes
