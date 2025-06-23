@@ -53,17 +53,18 @@ const router = createRouter({
     },
     {
       path: '/admin',
+      meta: { requiresAuth: true, requiresRole: 'admin' },
       children: [
         {
           path: '',
           name: 'admin-home',
-          meta: { requiresAuth: true },
+          meta: { requiresAuth: true, requiresRole: 'admin' },
           component: () => import('@/views/admin/IndexView.vue')
         },
         {
           path: 'dailies',
           name: 'admin-dailies',
-          meta: { requiresAuth: true },
+          meta: { requiresAuth: true, requiresRole: 'admin' },
           component: () => import('@/views/admin/DailiesView.vue')
         }
       ]
@@ -100,9 +101,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiredRole = to.matched.find((record: any) => record.meta.requiresRole)?.meta
+    .requiresRole as string | undefined
   const isAuthenticated = !!authStore.user
 
-  if (requiresAuth && !isAuthenticated) {
+  if ((requiresAuth && !isAuthenticated) || (requiredRole && requiredRole !== authStore.role)) {
     next({ name: 'login' })
   } else if (isAuthenticated && (to.name === 'login' || to.name === 'register')) {
     next({ name: 'home' })

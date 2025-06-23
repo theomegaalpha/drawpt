@@ -95,6 +95,13 @@ builder.Services.AddHealthChecks();
 // Add Application Insights Telemetry
 builder.Services.AddApplicationInsightsTelemetry();
 
+// Add authorization policy for admin users
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("user_role", "admin"));
+});
+
 // Add GameEngineProxyService background listener
 builder.Services.AddHostedService<GameEngineProxyService>();
 
@@ -117,6 +124,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Ensure authentication runs before authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

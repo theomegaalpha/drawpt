@@ -3,6 +3,7 @@ using DrawPT.Common.Services.AI;
 using DrawPT.Common.Util;
 using DrawPT.Data.Repositories;
 using DrawPT.Data.Repositories.Game;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrawPT.Api.Controllers
@@ -65,6 +66,7 @@ namespace DrawPT.Api.Controllers
 
 
         [HttpGet("future")]
+        [Authorize(Policy = "AdminOnly")]
         public ActionResult<DailyQuestionPublic> GetFutureDailyQuestions()
         {
             var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date >= TimezoneHelper.Now()).ToList();

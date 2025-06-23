@@ -5,13 +5,18 @@ import type { User } from '@supabase/supabase-js'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const loading = ref(true)
   const isAuthenticated = ref(false)
+  const role = ref<string>('')
+  const loading = ref(true)
 
   // Initialize auth state
   supabase.auth.getSession().then(({ data: { session } }) => {
     user.value = session?.user ?? null
     loading.value = false
+  })
+
+  supabase.auth.getClaims().then(({ data: { claims } }) => {
+    role.value = claims?.user_role || ''
   })
 
   // Listen for auth changes
@@ -31,6 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
+    role,
     loading,
     isAuthenticated,
     signOut
