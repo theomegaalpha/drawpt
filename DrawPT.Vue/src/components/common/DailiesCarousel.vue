@@ -1,25 +1,33 @@
 <template>
   <div class="relative mx-auto w-full max-w-lg overflow-hidden" aria-labelledby="DailiesCarousel">
     <ul
-      class="flex transition-transform duration-500 ease-in-out"
-      :style="{ transform: `translateX(-${current * 100}%)` }"
+      class="mx-24 flex transition-transform duration-500 ease-in-out"
+      :style="{ transform: `translateX(calc(-${currentIndex * 100}%))` }"
     >
       <li
         v-for="(daily, index) in dailies"
         :key="index"
         class="flex w-full flex-none items-center justify-center"
       >
-        <img
-          :src="daily.imageUrl"
-          @click="goTo(index)"
-          class="w-full transform rounded-lg object-cover transition-opacity duration-500"
+        <div
+          class="relative mr-0 transition-transform duration-500"
           :class="{
-            'scale-100 opacity-100': index === current,
-            'scale-90 opacity-50': index === current - 1 || index === current + 1,
-            'scale-75 opacity-30':
-              index !== current && index !== current - 1 && index !== current + 1
+            'z-20': index === currentIndex,
+            'z-10': index === currentIndex - 1 || index === currentIndex + 1,
+            'z-0':
+              index !== currentIndex && index !== currentIndex - 1 && index !== currentIndex + 1
           }"
-        />
+          :style="{
+            transform: getTransformByIndex(index)
+          }"
+        >
+          <img
+            :src="daily.imageUrl"
+            @click="goTo(index)"
+            class="transform rounded-lg object-cover transition-all duration-500"
+            :class="getImageStyle(index)"
+          />
+        </div>
       </li>
     </ul>
 
@@ -40,7 +48,7 @@
         <ArrowRight class="text-gray-700" />
       </button>
     </div>
-    <div class="flex">{{ current + 1 }} / {{ dailies.length }}</div>
+    <div class="flex">{{ currentIndex + 1 }} / {{ dailies.length }}</div>
   </div>
 </template>
 
@@ -51,16 +59,36 @@ import type { DailyQuestion } from '@/models/dailyModels'
 
 const props = defineProps<{ dailies: DailyQuestion[] }>()
 
-const current = ref(0)
+const currentIndex = ref(0)
+
+function getTransformByIndex(index: number) {
+  if (index === currentIndex.value) return ''
+  else if (index === currentIndex.value - 1) return `translateX(calc(+80%))`
+  else if (index === currentIndex.value + 1) return `translateX(calc(-80%))`
+  else if (index === currentIndex.value - 2) return `translateX(calc(+160%))`
+  else if (index === currentIndex.value + 2) return `translateX(calc(-160%))`
+
+  return `translateX(calc(10% - ${index * 70}%))`
+}
+
+function getImageStyle(index: number) {
+  if (index === currentIndex.value) return 'w-4/5 scale-100 opacity-100'
+  else if (index === currentIndex.value - 1 || index === currentIndex.value + 1)
+    return 'w-4/5 scale-90 opacity-50'
+  else if (index === currentIndex.value - 2 || index === currentIndex.value + 2)
+    return 'w-4/5 scale-75 opacity-30'
+
+  return 'hidden'
+}
 
 function prev() {
-  current.value = current.value === 0 ? props.dailies.length - 1 : current.value - 1
+  currentIndex.value = currentIndex.value === 0 ? props.dailies.length - 1 : currentIndex.value - 1
 }
 function next() {
-  current.value = current.value === props.dailies.length - 1 ? 0 : current.value + 1
+  currentIndex.value = currentIndex.value === props.dailies.length - 1 ? 0 : currentIndex.value + 1
 }
 function goTo(index: number) {
-  if (current.value !== index) current.value = index
+  if (currentIndex.value !== index) currentIndex.value = index
 }
 
 onMounted(() => {})
