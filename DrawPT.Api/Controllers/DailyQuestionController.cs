@@ -69,7 +69,7 @@ namespace DrawPT.Api.Controllers
         [Authorize(Policy = "AdminOnly")]
         public ActionResult<DailyQuestionEntity> GetFutureDailyQuestions()
         {
-            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date >= TimezoneHelper.Now()).ToList();
+            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date >= TimezoneHelper.Now().Date).ToList();
 
             if (dailyQuestions.Count == 0)
             {

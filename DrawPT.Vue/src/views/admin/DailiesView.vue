@@ -49,7 +49,7 @@ onMounted(() => {
       <button @click="generate" class="btn-default">Generate</button>
     </div>
     <div class="flex space-x-4 overflow-x-auto py-4">
-      <DailiesCarousel :dailies="[dailyQuestion]" />
+      <DailiesCarousel :dailies="futureQuestions" />
     </div>
   </div>
 </template>
