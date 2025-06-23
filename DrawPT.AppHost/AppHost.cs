@@ -1,3 +1,5 @@
+using Aspire.Hosting.Azure;
+
 using Azure.Provisioning.ServiceBus;
 using Azure.Provisioning.Sql;
 using Azure.Provisioning.Storage;
@@ -19,10 +21,8 @@ var sql = builder.AddAzureSqlServer("sql")
                 });
 var db = sql.AddDatabase("database");
 
-var signalr = builder.ExecutionContext.IsPublishMode
-    ? builder.AddAzureSignalR("signalr")
-    : builder.AddConnectionString("signalr");
-
+var signalr = builder.AddAzureSignalR("signalr", AzureSignalRServiceMode.Serverless)
+                     .RunAsEmulator();
 
 var serviceBus = builder.AddAzureServiceBus("service-bus")
     .ConfigureInfrastructure(infra =>

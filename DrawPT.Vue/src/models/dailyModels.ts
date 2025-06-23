@@ -15,3 +15,9 @@ export interface DailyQuestion {
   theme: string
   imageUrl: string
 }
+
+export interface DailyQuestionEntity extends DailyQuestion {
+  id: string
+  originalPrompt: string
+  createdAt: string
+}

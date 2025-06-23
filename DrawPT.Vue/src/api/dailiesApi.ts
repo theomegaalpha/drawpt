@@ -1,4 +1,4 @@
-import type { DailyAnswer, DailyQuestion } from '@/models/dailyModels'
+import type { DailyAnswer, DailyQuestionEntity, DailyQuestion } from '@/models/dailyModels'
 import { getAccessToken, isAuthenticated } from '@/lib/auth'
 
 export async function getDailyQuestion(): Promise<DailyQuestion> {
@@ -35,7 +35,7 @@ export async function getDailyQuestions(): Promise<DailyQuestion[]> {
   return (await response.json()) as DailyQuestion[]
 }
 
-export async function getFutureDailyQuestions(): Promise<DailyQuestion[]> {
+export async function getFutureDailyQuestions(): Promise<DailyQuestionEntity[]> {
   const headers: HeadersInit = {}
   if (await isAuthenticated()) {
     headers['Authorization'] = `Bearer ${await getAccessToken()}`
@@ -49,7 +49,7 @@ export async function getFutureDailyQuestions(): Promise<DailyQuestion[]> {
     throw new Error('Failed to fetch player data')
   }
 
-  return (await response.json()) as DailyQuestion[]
+  return (await response.json()) as DailyQuestionEntity[]
 }
 
 export async function getDailyAnswer(): Promise<DailyAnswer | null> {
