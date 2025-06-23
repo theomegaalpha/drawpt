@@ -1,8 +1,8 @@
 <template>
   <div class="relative mx-auto w-full max-w-lg overflow-hidden" aria-labelledby="DailiesCarousel">
     <ul
-      class="mx-24 flex transition-transform duration-500 ease-in-out"
-      :style="{ transform: `translateX(calc(-${currentIndex * 100}%))` }"
+      class="mr-32 flex transition-transform duration-500 ease-in-out"
+      :style="{ transform: `translateX(calc(30% - ${currentIndex * 100}%))` }"
     >
       <li
         v-for="(daily, index) in dailies"
@@ -10,7 +10,7 @@
         class="flex w-full flex-none items-center justify-center"
       >
         <div
-          class="relative mr-0 transition-transform duration-500"
+          class="relative mr-0 pr-0 transition-transform duration-500"
           :class="{
             'z-20': index === currentIndex,
             'z-10': index === currentIndex - 1 || index === currentIndex + 1,
