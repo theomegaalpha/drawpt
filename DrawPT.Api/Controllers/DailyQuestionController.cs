@@ -47,7 +47,7 @@ namespace DrawPT.Api.Controllers
         [HttpGet("list")]
         public ActionResult<DailyQuestionPublic> GetDailyQuestions()
         {
-            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date <= TimezoneHelper.Now()).ToList();
+            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date <= TimezoneHelper.Now().Date).ToList();
 
             if (dailyQuestions.Count == 0)
             {
