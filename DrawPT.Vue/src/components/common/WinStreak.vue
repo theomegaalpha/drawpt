@@ -9,44 +9,50 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] // Sun, Mon, Tue, Wed, Thu, Fri, Sat
+// Labels for days Sunday (0) through Saturday (6)
+const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
-// Helper to get the last 7 days (including today) as date strings (YYYY-MM-DD)
-function getLast7Days(): string[] {
-  const days: string[] = []
-  const today = new Date()
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today)
-    d.setDate(today.getDate() - i)
-    days.push(d.toISOString().slice(0, 10))
-  }
-  return days
+// Helper to format a Date as local YYYY-MM-DD
+function formatDateLocal(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
-// Compute a 7-day win streak array from dailyAnswerHistory
-const winStreak = computed(() => {
-  console.log(
-    'Calculating win streak for last 7 days...',
-    props.dailyAnswerHistory.length,
-    'answers found.'
-  )
-  const last7Days = getLast7Days()
-  return last7Days.map((date) => {
-    // Mark as win if there is an answer for this date and score > 0
-    return props.dailyAnswerHistory.some(
-      (ans) => new Date(ans.date).toISOString().slice(0, 10) === date && ans.score > 0
-    )
+// Helper to get dates for current week Sunday through Saturday
+function getCurrentWeekDates(): string[] {
+  const today = new Date()
+  const sunday = new Date(today)
+  sunday.setDate(today.getDate() - today.getDay())
+  return Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(sunday)
+    d.setDate(sunday.getDate() + i)
+    return formatDateLocal(d)
   })
+}
+
+// Compute a weekly win array for current calendar week (Sun–Sat)
+const winStreak = computed(() => {
+  const weekDates = getCurrentWeekDates()
+  return weekDates.map((date) =>
+    props.dailyAnswerHistory.some((ans) => {
+      const ansDate = new Date(ans.date)
+      return formatDateLocal(ansDate) === date && ans.score > 0
+    })
+  )
 })
 
+// Compute consecutive wins ending today, normalized to local dates
 const currentWinStreak = computed(() => {
-  // Sort history by date ascending
-  const sorted = [...props.dailyAnswerHistory].sort((a, b) => a.date.localeCompare(b.date))
   let streak = 0
   let day = new Date()
   for (;;) {
-    const dayStr = day.toISOString().slice(0, 10)
-    const win = sorted.find((ans) => ans.date.slice(0, 10) === dayStr && ans.score > 0)
+    const dayStr = formatDateLocal(day)
+    const win = props.dailyAnswerHistory.some((ans) => {
+      const ansDate = new Date(ans.date)
+      return formatDateLocal(ansDate) === dayStr && ans.score > 0
+    })
     if (win) {
       streak++
       day.setDate(day.getDate() - 1)
@@ -57,12 +63,8 @@ const currentWinStreak = computed(() => {
   return streak
 })
 
-const getDayLabel = (index: number): string => {
-  // Show the day of week for each of the last 7 days
-  const last7Days = getLast7Days()
-  const date = new Date(last7Days[index])
-  return daysOfWeek[date.getDay()]
-}
+// Label for each column based on fixed week day order
+const getDayLabel = (index: number): string => daysOfWeek[index]
 </script>
 
 <template>

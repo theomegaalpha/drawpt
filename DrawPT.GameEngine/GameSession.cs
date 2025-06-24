@@ -51,6 +51,11 @@ public class GameSession : IGameSession
 
             // ask player for theme
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
+
+            // empty game check
+            if (players.Count == 0)
+                break;
+
             // add players that are missing from original list into originalPlayers
             foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
                 originalPlayers.Add(player);
