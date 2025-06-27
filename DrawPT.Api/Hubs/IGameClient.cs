@@ -24,6 +24,7 @@ namespace DrawPT.Api.Hubs
         Task WriteError(string message);
 
 
+        Task AnnouncerSpeaks();
 
         Task ThemeSelection(List<string> themes);
         Task ThemeSelected(string theme);
@@ -31,5 +32,9 @@ namespace DrawPT.Api.Hubs
 
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
+
+        // Streaming audio chunks
+        Task ReceiveAudio(byte[] audioChunk);
+        Task AudioStreamCompleted();
     }
 }

@@ -3,8 +3,6 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-using Azure.Messaging.ServiceBus;
-using System.Text.Json;
 
 namespace DrawPT.GameEngine;
 

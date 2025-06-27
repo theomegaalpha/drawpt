@@ -50,6 +50,9 @@ builder.Services.AddSwaggerGen();
 // TODO: Add Redis distributed cache
 builder.Services.AddDistributedMemoryCache();
 
+// Register Text-to-Speech service for streaming audio
+builder.Services.AddTransient<TtsService>();
+
 builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
