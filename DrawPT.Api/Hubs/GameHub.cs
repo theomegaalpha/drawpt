@@ -4,6 +4,7 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using DrawPT.Api.Services;
 
 namespace DrawPT.Api.Hubs
 {
@@ -14,19 +15,40 @@ namespace DrawPT.Api.Hubs
         protected readonly IHubContext<GameHub, IGameClient> _hubContext;
         protected readonly ICacheService _cache;
         protected readonly ServiceBusClient _serviceBusClient;
+        private readonly TtsService _ttsService;
 
         public GameHub(
             ILogger<GameHub> logger,
             ICacheService cacheService,
             ServiceBusClient serviceBusClient,
-            IHubContext<GameHub, IGameClient> hubContext)
+            IHubContext<GameHub, IGameClient> hubContext,
+            TtsService ttsService)
         {
             _logger = logger;
             _hubContext = hubContext;
             _cache = cacheService;
             _serviceBusClient = serviceBusClient;
+            _ttsService = ttsService;
 
             _logger.LogInformation("Started consuming from client_broadcast queue");
+        }
+
+        public async Task TestAnnouncer(string text)
+        {
+            // Resolve the caller's room code and stream TTS audio
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in TestAnnouncer call");
+                return;
+            }
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
+            if (player == null || string.IsNullOrEmpty(player.RoomCode))
+            {
+                _logger.LogWarning("Player or room not found for TestAnnouncer");
+                return;
+            }
+            await _ttsService.GenerateAudio(text, player.RoomCode);
         }
 
         public async Task RequestToJoinGame(string roomCode)
