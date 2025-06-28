@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
@@ -42,13 +42,7 @@ namespace DrawPT.Api.Hubs
                 _logger.LogWarning("user_id not found in TestAnnouncer call");
                 return;
             }
-            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
-            if (player == null || string.IsNullOrEmpty(player.RoomCode))
-            {
-                _logger.LogWarning("Player or room not found for TestAnnouncer");
-                return;
-            }
-            await _ttsService.GenerateAudio(text, player.RoomCode);
+            await _ttsService.GenerateAudioToPlayer(text, Context.ConnectionId);
         }
 
         public async Task RequestToJoinGame(string roomCode)
