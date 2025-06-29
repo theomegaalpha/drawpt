@@ -6,7 +6,7 @@ import GameNotifications from '@/components/room/GameNotifications.vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 import VolumeControls from '@/components/room/volume/VolumeControls.vue'
 
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
@@ -20,6 +20,7 @@ import {
   unregisterBaseGameHubEvents
 } from '@/services/gameEventHandlers'
 import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 
 useBackgroundMusic()
 
@@ -45,6 +46,7 @@ onMounted(async () => {
       notificationStore.addGameNotification('Connected to game server.', false)
     }
     registerBaseGameHubEvents()
+    registerAudioEvents()
   } catch (err) {
     console.error('SignalR connection failed in RoomWrapper:', err)
     notificationStore.addGameNotification('Failed to connect to the game server.', true)
@@ -54,6 +56,7 @@ onMounted(async () => {
 onUnmounted(() => {
   scoreboardStore.clearScoreboard()
   unregisterBaseGameHubEvents()
+  unregisterAudioEvents()
   if (service.isConnected) {
     service.stopConnection()
     notificationStore.addGameNotification('Disconnected from game server.', false)

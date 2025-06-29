@@ -1,8 +1,11 @@
+using DrawPT.Common.Models.Game;
+using DrawPT.Common.Models;
+
 namespace DrawPT.GameEngine.Interfaces
 {
     public interface IGameAnnouncerService
     {
-        string GenerateRoundResultAnnouncement();
+        Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults);
         string GenerateGameResultAnnouncement();
     }
 }

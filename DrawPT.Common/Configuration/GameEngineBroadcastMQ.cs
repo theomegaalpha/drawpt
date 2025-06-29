@@ -19,6 +19,8 @@ namespace DrawPT.Common.Configuration
         public const string RoundResultsAction = "round_results";
         public const string GameResultsAction = "game_ended";
 
+        public const string AnnouncerAction = "announcer";
+
         public const string WriteMessageAction = "write_message";
         public static class RoutingKeys
         {

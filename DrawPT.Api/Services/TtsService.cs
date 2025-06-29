@@ -19,7 +19,7 @@ namespace DrawPT.Api.Services
         /// <summary>
         /// Generates speech audio, chunks it, and streams to clients in the specified room.
         /// </summary>
-        public async Task GenerateAudio(string text, string roomCode)
+        public async Task GenerateAudio(string text, IGameClient client)
         {
             BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy);
             byte[] data = speech.ToArray();
@@ -29,9 +29,9 @@ namespace DrawPT.Api.Services
                 int count = Math.Min(chunkSize, data.Length - offset);
                 byte[] chunk = new byte[count];
                 Array.Copy(data, offset, chunk, 0, count);
-                await _hubContext.Clients.Group(roomCode).ReceiveAudio(chunk);
+                await client.ReceiveAudio(chunk);
             }
-            await _hubContext.Clients.Group(roomCode).AudioStreamCompleted();
+            await client.AudioStreamCompleted();
         }
 
         public async Task GenerateAudioToPlayer(string text, string connectionId)

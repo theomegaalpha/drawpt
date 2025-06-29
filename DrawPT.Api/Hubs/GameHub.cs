@@ -15,34 +15,19 @@ namespace DrawPT.Api.Hubs
         protected readonly IHubContext<GameHub, IGameClient> _hubContext;
         protected readonly ICacheService _cache;
         protected readonly ServiceBusClient _serviceBusClient;
-        private readonly TtsService _ttsService;
 
         public GameHub(
             ILogger<GameHub> logger,
             ICacheService cacheService,
             ServiceBusClient serviceBusClient,
-            IHubContext<GameHub, IGameClient> hubContext,
-            TtsService ttsService)
+            IHubContext<GameHub, IGameClient> hubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
             _cache = cacheService;
             _serviceBusClient = serviceBusClient;
-            _ttsService = ttsService;
 
             _logger.LogInformation("Started consuming from client_broadcast queue");
-        }
-
-        public async Task TestAnnouncer(string text)
-        {
-            // Resolve the caller's room code and stream TTS audio
-            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-            if (userId == null)
-            {
-                _logger.LogWarning("user_id not found in TestAnnouncer call");
-                return;
-            }
-            await _ttsService.GenerateAudioToPlayer(text, Context.ConnectionId);
         }
 
         public async Task RequestToJoinGame(string roomCode)
