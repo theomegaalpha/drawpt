@@ -2,6 +2,7 @@ using DrawPT.GameEngine.Interfaces;
 using DrawPT.Common.Models.Game;
 using OpenAI;
 using OpenAI.Chat;
+using Newtonsoft.Json;
 
 namespace DrawPT.GameEngine.Services
 {
@@ -41,7 +42,7 @@ Use friendly, humorous language with lots of personality. Be energetic but conci
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(_roundResultPrompt),
-                new UserChatMessage($"original prompt: {originalPrompt}\nresults: {roundResults.Answers.Select(a => a.Guess).ToString()}")
+                new UserChatMessage($"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score + a.BonusPoints }))}")
             };
 
             try
