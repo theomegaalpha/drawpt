@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Models;
+using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.Common.Interfaces.Game;
 
@@ -34,7 +34,7 @@ namespace DrawPT.Api.Hubs
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
 
         // Streaming audio chunks
-        Task ReceiveAudio(byte[] audioChunk);
+        Task ReceiveAudio(string audioChunk);
         Task AudioStreamCompleted();
     }
 }

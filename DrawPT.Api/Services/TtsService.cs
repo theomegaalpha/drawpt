@@ -21,32 +21,36 @@ namespace DrawPT.Api.Services
         /// </summary>
         public async Task GenerateAudio(string text, IGameClient client)
         {
-            BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy);
-            byte[] data = speech.ToArray();
-            const int chunkSize = 8192;
-            for (int offset = 0; offset < data.Length; offset += chunkSize)
+            var options = new SpeechGenerationOptions
             {
-                int count = Math.Min(chunkSize, data.Length - offset);
-                byte[] chunk = new byte[count];
-                Array.Copy(data, offset, chunk, 0, count);
-                await client.ReceiveAudio(chunk);
-            }
-            await client.AudioStreamCompleted();
-        }
+                ResponseFormat = "opus"
+            };
 
-        public async Task GenerateAudioToPlayer(string text, string connectionId)
-        {
-            BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy);
-            byte[] data = speech.ToArray();
+
+            // 1) synthesize full PCM buffer
+            BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy, options);
+            byte[] pcm = speech.ToArray();
+
+            // 2) break into chunks
             const int chunkSize = 8192;
-            for (int offset = 0; offset < data.Length; offset += chunkSize)
+            for (int offset = 0; offset < pcm.Length; offset += chunkSize)
             {
-                int count = Math.Min(chunkSize, data.Length - offset);
-                byte[] chunk = new byte[count];
-                Array.Copy(data, offset, chunk, 0, count);
-                await _hubContext.Clients.Client(connectionId).ReceiveAudio(chunk);
+                int count = Math.Min(chunkSize, pcm.Length - offset);
+                byte[] slice = new byte[count];
+                Array.Copy(pcm, offset, slice, 0, count);
+
+                // 3) Base64‐encode that slice
+                string base64 = Convert.ToBase64String(slice);
+
+                // 4) push to the caller
+                await client.ReceiveAudio(base64);
+
+                // optional pacing so the stream doesn’t overwhelm the client
+                await Task.Delay(20);
             }
-            await _hubContext.Clients.Client(connectionId).AudioStreamCompleted();
+
+            // 5) tell the client we’re done
+            await client.AudioStreamCompleted();
         }
 
         public void Stop()

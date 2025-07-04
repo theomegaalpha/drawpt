@@ -8,8 +8,9 @@ const announcerMessage = ref<string>('')
 
 /** Send text to server for TTS streaming */
 async function submitAnnouncerMessage(value: string) {
+  announcerMessage.value = value
   if (!value) return
-  await signalRService.invoke('TestAnnouncer', value)
+  signalRService.invoke('TestAudio', value)
 }
 
 onMounted(async () => {

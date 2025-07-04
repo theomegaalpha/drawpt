@@ -1,17 +1,17 @@
 import signalRService from '@/services/signalRService'
-import { useAnnouncer } from '@/composables/useAnnouncer'
+import { useAudioPlayer } from '@/composables/useAudioPlayer'
 
 // Singleton announcer instance to buffer and play audio chunks
-const announcer = useAnnouncer()
+const announcer = useAudioPlayer()
 
 export function registerAudioEvents() {
   // Stream incoming audio chunks into announcer
-  signalRService.on('receiveAudio', (chunk: Uint8Array | number[]) => {
-    announcer.enqueueChunk(chunk)
+  signalRService.on('receiveAudio', (chunk: string) => {
+    announcer.play(chunk)
   })
   // Play assembled audio when stream completes
   signalRService.on('audioStreamCompleted', () => {
-    announcer.streamCompleted()
+    // announcer.streamCompleted()
   })
 }
 
