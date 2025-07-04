@@ -4,6 +4,8 @@ import { AudioPlayerService } from '@/services/audioPlayerService'
 
 export function useAudioPlayer(sampleRate = 24000) {
   const player = ref(new AudioPlayerService())
+  // initialize right away (handles non-Vue usage like signal events)
+  player.value.init(sampleRate)
 
   onMounted(() => {
     player.value.init(sampleRate)
@@ -14,15 +16,18 @@ export function useAudioPlayer(sampleRate = 24000) {
   })
 
   function playBase64(base64: string) {
-    console.log('Playing audio:', base64)
-    const bin = atob(base64)
-    const u8 = Uint8Array.from(bin, (c) => c.charCodeAt(0))
-    player.value.playBuffer(new Int16Array(u8.buffer))
+    // buffer incoming Opus chunk
+    player.value.appendOpusChunk(base64)
+    player.value.playOpusStream()
   }
 
   function stop() {
     player.value.stop()
   }
 
-  return { play: playBase64, stop }
+  function streamCompleted() {
+    player.value.playOpusStream()
+  }
+
+  return { play: playBase64, stop, streamCompleted }
 }

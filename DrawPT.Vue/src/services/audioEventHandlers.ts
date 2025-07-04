@@ -7,11 +7,13 @@ const announcer = useAudioPlayer()
 export function registerAudioEvents() {
   // Stream incoming audio chunks into announcer
   signalRService.on('receiveAudio', (chunk: string) => {
+    console.debug('[AudioEvent] receiveAudio - chunk length:', chunk.length)
     announcer.play(chunk)
   })
   // Play assembled audio when stream completes
   signalRService.on('audioStreamCompleted', () => {
-    // announcer.streamCompleted()
+    console.debug('[AudioEvent] audioStreamCompleted - invoking streamCompleted')
+    announcer.streamCompleted()
   })
 }
 

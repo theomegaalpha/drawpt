@@ -2,6 +2,8 @@
 export class AudioPlayerService {
   private audioContext: AudioContext | null = null
   private node: AudioWorkletNode | null = null
+  // buffer list for incoming Opus chunks
+  private chunks: Uint8Array[] = []
 
   async init(sampleRate = 24000) {
     this.audioContext = new AudioContext({ sampleRate })
@@ -14,6 +16,46 @@ export class AudioPlayerService {
     await this.audioContext.audioWorklet.addModule(moduleUrl)
     this.node = new AudioWorkletNode(this.audioContext, 'audio-playback-worklet')
     this.node.connect(this.audioContext.destination)
+  }
+
+  /**
+   * Append a base64-encoded Opus chunk to the buffer list
+   */
+  appendOpusChunk(base64: string) {
+    const binary = atob(base64)
+    const u8 = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+    this.chunks.push(u8)
+  }
+
+  /**
+   * Decode accumulated Opus data and play via Web Audio API
+   */
+  async playOpusStream() {
+    console.debug('[AudioPlayer] playOpusStream called, chunks count:', this.chunks.length)
+    if (!this.audioContext) return
+    // concatenate all chunks
+    const total = this.chunks.reduce((sum, c) => sum + c.length, 0)
+    const merged = new Uint8Array(total)
+    let offset = 0
+    for (const c of this.chunks) {
+      merged.set(c, offset)
+      offset += c.length
+    }
+    // clear buffer list
+    this.chunks = []
+    console.debug('[AudioPlayer] merged buffer length:', merged.byteLength)
+    // decode and play with error logging
+    try {
+      const audioBuffer = await this.audioContext.decodeAudioData(merged.buffer)
+      console.debug('[AudioPlayer] decodeAudioData success, duration:', audioBuffer.duration)
+      const src = this.audioContext.createBufferSource()
+      src.buffer = audioBuffer
+      src.connect(this.audioContext.destination)
+      src.start()
+      console.debug('[AudioPlayer] playback started')
+    } catch (err) {
+      console.error('decodeAudioData failed:', err)
+    }
   }
 
   playBuffer(pcm: Int16Array) {

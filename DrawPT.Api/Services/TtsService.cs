@@ -26,30 +26,23 @@ namespace DrawPT.Api.Services
                 ResponseFormat = "opus"
             };
 
-
-            // 1) synthesize full PCM buffer
             BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy, options);
-            byte[] pcm = speech.ToArray();
-
-            // 2) break into chunks
-            const int chunkSize = 8192;
-            for (int offset = 0; offset < pcm.Length; offset += chunkSize)
+            byte[] buffer = speech.ToArray();
+            const byte O1 = 0x4F, O2 = 0x67, O3 = 0x67, O4 = 0x53;
+            for (int pos = 0; pos < buffer.Length;)
             {
-                int count = Math.Min(chunkSize, pcm.Length - offset);
-                byte[] slice = new byte[count];
-                Array.Copy(pcm, offset, slice, 0, count);
-
-                // 3) Base64‐encode that slice
-                string base64 = Convert.ToBase64String(slice);
-
-                // 4) push to the caller
-                await client.ReceiveAudio(base64);
-
-                // optional pacing so the stream doesn’t overwhelm the client
-                await Task.Delay(20);
+                // find next sync after pos+1
+                int idx = Array.FindIndex(buffer, pos + 1, b => b == O1);
+                int next = (idx > 0 && idx + 3 < buffer.Length
+                            && buffer[idx + 1] == O2 && buffer[idx + 2] == O3 && buffer[idx + 3] == O4)
+                           ? idx
+                           : buffer.Length;
+                int len = next - pos;
+                var page = new byte[len];
+                Array.Copy(buffer, pos, page, 0, len);
+                await client.ReceiveAudio(Convert.ToBase64String(page));
+                pos = next;
             }
-
-            // 5) tell the client we’re done
             await client.AudioStreamCompleted();
         }
 
