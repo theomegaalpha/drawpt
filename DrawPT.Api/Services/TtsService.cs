@@ -26,7 +26,7 @@ namespace DrawPT.Api.Services
                 ResponseFormat = "opus"
             };
 
-            BinaryData speech = await _audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Alloy, options);
+            BinaryData speech = await _audioClient.GenerateSpeechAsync(text, "ballad", options);
             byte[] buffer = speech.ToArray();
             const byte O1 = 0x4F, O2 = 0x67, O3 = 0x67, O4 = 0x53;
             for (int pos = 0; pos < buffer.Length;)
