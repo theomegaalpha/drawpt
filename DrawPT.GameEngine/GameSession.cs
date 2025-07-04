@@ -3,14 +3,13 @@ using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
-using Azure.Messaging.ServiceBus;
-using System.Text.Json;
 
 namespace DrawPT.GameEngine;
 
 public class GameSession : IGameSession
 {
     private readonly IGameCommunicationService _gameCommunicationService;
+    private readonly IGameAnnouncerService _announcerService;
     private readonly IAssessmentService _assessmentService;
     private readonly IGameStateService _gameStateService;
     private readonly IQuestionService _questionService;
@@ -22,11 +21,13 @@ public class GameSession : IGameSession
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
+        IGameAnnouncerService gameAnnouncerService,
         IGameCommunicationService gameCommunicationService,
         ILogger<GameSession> logger)
     {
         _cacheService = cacheService;
         _gameStateService = gameStateService;
+        _announcerService = gameAnnouncerService;
         _gameCommunicationService = gameCommunicationService;
         _questionService = questionService;
         _assessmentService = assessmentService;
@@ -93,6 +94,12 @@ public class GameSession : IGameSession
                 Answers = assessedAnswers
             };
             allRoundResults.Add(roundResults);
+
+
+            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
+            if (announcerMessage != null)
+                _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.AnnouncerAction, announcerMessage);
+
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.RoundResultsAction, roundResults);
             await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
         }

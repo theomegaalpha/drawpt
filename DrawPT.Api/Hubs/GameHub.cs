@@ -1,9 +1,10 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using DrawPT.Api.Services;
 
 namespace DrawPT.Api.Hubs
 {
@@ -14,17 +15,20 @@ namespace DrawPT.Api.Hubs
         protected readonly IHubContext<GameHub, IGameClient> _hubContext;
         protected readonly ICacheService _cache;
         protected readonly ServiceBusClient _serviceBusClient;
+        protected readonly TtsService _ttsService;
 
         public GameHub(
             ILogger<GameHub> logger,
             ICacheService cacheService,
             ServiceBusClient serviceBusClient,
+            TtsService ttsService,
             IHubContext<GameHub, IGameClient> hubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
             _cache = cacheService;
             _serviceBusClient = serviceBusClient;
+            _ttsService = ttsService;
 
             _logger.LogInformation("Started consuming from client_broadcast queue");
         }
@@ -83,6 +87,10 @@ namespace DrawPT.Api.Hubs
             await Clients.Caller.NavigateToRoom();
         }
 
+        public async Task TestAudio(string text)
+        {
+            await _ttsService.GenerateAudio(text, Clients.Caller);
+        }
 
         public async Task JoinGame(string roomCode, string username)
         {

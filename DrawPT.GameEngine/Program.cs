@@ -30,6 +30,7 @@ services.AddHostedService<GameEventListener>();
 services.AddTransient<GeminiImageGenerator>();
 services.AddTransient<FreepikFastService>();
 services.AddTransient<IAIService, AIService>();
+services.AddTransient<IGameAnnouncerService, GameAnnouncerService>();
 services.AddTransient<IAssessmentService, AssessmentService>();
 services.AddTransient<ICacheService, CacheService>();
 services.AddTransient<IStorageService, StorageService>();

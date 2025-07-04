@@ -30,7 +30,7 @@ namespace DrawPT.Common.Models.Game
         /// <summary>
         /// Delay between rounds in seconds
         /// </summary>
-        public int TransitionDelay { get; set; } = 25;
+        public int TransitionDelay { get; set; } = 50;
 
         /// <summary>
         /// Whether gambling is enabled in this game

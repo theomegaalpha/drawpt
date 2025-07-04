@@ -49,17 +49,16 @@ const localSubmitGuess = () => {
 </script>
 
 <template>
-  <div class="relative flex w-full">
+  <form @submit.prevent="localSubmitGuess" class="relative flex w-full">
     <div class="relative w-full">
-      <!-- Use inputValue for v-model on StandardInput. -->
       <StandardInput
         placeholder="Guess the prompt"
         v-model="inputValue"
-        @keyup.enter="localSubmitGuess"
         :disabled="props.disabled"
         :isLoading="props.isLoading"
       />
       <button
+        type="button"
         @mousedown="handleRecordButtonMouseDown"
         @mouseup="handleRecordButtonMouseUp"
         @mouseleave="handleRecordButtonMouseUp"
@@ -77,6 +76,7 @@ const localSubmitGuess = () => {
       </button>
     </div>
     <button
+      type="submit"
       class="btn-primary ml-2 flex h-12 w-12 items-center justify-center rounded-full"
       :class="{
         'cursor-not-allowed': disabled,
@@ -84,10 +84,9 @@ const localSubmitGuess = () => {
         'cursor-wait': props.isLoading
       }"
       :disabled="inputValue === '' || props.isLoading"
-      @click="localSubmitGuess"
     >
       <Loader2Icon v-if="props.isLoading" class="h-5 w-5 animate-spin" />
       <SendIcon v-else class="h-4 w-4" />
     </button>
-  </div>
+  </form>
 </template>

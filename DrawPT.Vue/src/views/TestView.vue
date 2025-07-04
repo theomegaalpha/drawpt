@@ -1,48 +1,34 @@
 <script setup lang="ts">
-import { onBeforeMount } from 'vue'
-import GameResults from '@/components/room/game/gameresults/GameResults.vue'
-import { useScoreboardStore } from '@/stores/scoreboard'
-import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
+import GuessInput from '@/components/common/GuessInput.vue'
+import signalRService from '@/services/signalRService'
+import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 
-useBackgroundMusic()
-const { updateGameResults } = useScoreboardStore()
-var result = {
-  playerResults: [
-    {
-      id: 'player1-uuid',
-      connectionId: 'conn1',
-      avatar: null,
-      color: 'blue',
-      username: 'PlayerOne',
-      score: 150
-    },
-    {
-      id: 'player2-uuid',
-      connectionId: 'conn1',
-      avatar: null,
-      color: 'blue',
-      username: 'PlayerTwo',
-      score: 140
-    },
-    {
-      id: 'player3-uuid',
-      connectionId: 'conn3',
-      avatar: null,
-      color: 'red',
-      username: 'PlayerThree',
-      score: 200
-    }
-  ],
-  totalRounds: 10,
-  wasCompleted: true,
-  endedAt: '2025-06-12T10:00:00Z'
+const announcerMessage = ref<string>('')
+
+/** Send text to server for TTS streaming */
+async function submitAnnouncerMessage(value: string) {
+  announcerMessage.value = value
+  if (!value) return
+  signalRService.invoke('TestAudio', value)
 }
-onBeforeMount(() => {
-  console.log('Adding round result')
-  updateGameResults(result)
+
+onMounted(async () => {
+  try {
+    if (!signalRService.isConnected) {
+      await signalRService.startConnection('/gamehub')
+    }
+    registerAudioEvents()
+  } catch (err) {
+    console.error('SignalR connection failed in RoomWrapper:', err)
+  }
+})
+
+onBeforeUnmount(() => {
+  unregisterAudioEvents()
 })
 </script>
 
 <template>
-  <GameResults />
+  <GuessInput v-model="announcerMessage" :submitAction="submitAnnouncerMessage" />
 </template>
