@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import api from '@/api/api'
 import { isAuthenticated } from '@/lib/auth'
-import type { DailyAnswer, DailyQuestion } from '@/models/dailyModels'
+import type { DailyAnswer, DailyQuestion, DailyQuestionEntity } from '@/models/dailyModels'
 
 export const useDailiesStore = defineStore('dailies', {
   state: () => ({
-    dailyQuestions: [] as DailyQuestion[],
+    dailyQuestions: [] as DailyQuestionEntity[],
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
     dailyAnswerHistory: [] as DailyAnswer[],
@@ -46,9 +46,10 @@ export const useDailiesStore = defineStore('dailies', {
         if (await isAuthenticated()) {
           if (!this.isDailyAnswerLoaded) {
             const answer = await api.getDailyAnswer()
-            if (!answer) return
-            this.dailyAnswer = answer
-            this.setShowAssessment(answer?.guess ? true : false)
+            if (answer) {
+              this.dailyAnswer = answer
+              this.setShowAssessment(answer?.guess ? true : false)
+            }
           }
           if (!this.dailyAnswerHistory.length) {
             const history = await api.getDailyAnswerHistory()
@@ -98,19 +99,26 @@ export const useDailiesStore = defineStore('dailies', {
     async setDailyAnswer(answer: DailyAnswer) {
       this.dailyAnswer = answer
       this.setShowAssessment(answer.guess ? true : false)
+      this.upsertToAnswerHistory(answer)
       if (!(await isAuthenticated())) {
         try {
           const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
           const dataToStore = {
             answer: answer,
             storedDate: today
-            // Optional: Consider storing questionId for more robust validation on load
-            // questionId: this.dailyQuestion.id
           }
           localStorage.setItem('dailyAnswer', JSON.stringify(dataToStore))
         } catch (e) {
           console.error('Failed to save dailyAnswer to localStorage', e)
         }
+      }
+    },
+    upsertToAnswerHistory(answer: DailyAnswer) {
+      const existing = this.dailyAnswerHistory.find((a) => a.date === answer.date)
+      if (existing) {
+        Object.assign(existing, answer)
+      } else {
+        this.dailyAnswerHistory.push(answer)
       }
     }
   }

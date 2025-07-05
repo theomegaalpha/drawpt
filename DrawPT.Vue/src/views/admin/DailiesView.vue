@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useDailiesStore } from '@/stores/dailies'
 import DailiesCarousel from '@/components/common/DailiesCarousel.vue'
 import StandardInput from '@/components/common/StandardInput.vue'
 import api from '@/api/api'
 import type { DailyQuestionEntity } from '@/models/dailyModels'
 
-const dailiesStore = useDailiesStore()
-const { dailyQuestion } = storeToRefs(dailiesStore)
 const futureQuestions = ref([] as DailyQuestionEntity[])
 
 const selectedDate = ref(new Date().toISOString().substr(0, 10))
@@ -29,7 +25,9 @@ const populateFutureQuestions = () => {
   api
     .getFutureDailyQuestions()
     .then((response) => {
-      futureQuestions.value = response
+      futureQuestions.value = response.sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
       console.log('Future daily questions:', futureQuestions.value)
     })
     .catch((error) => {

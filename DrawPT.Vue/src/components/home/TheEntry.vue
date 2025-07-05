@@ -5,8 +5,9 @@ import WinStreak from '../common/WinStreak.vue'
 import Leaderboard from './leaderboard/Leaderboard.vue'
 import DailyQuestion from './DailyQuestion.vue'
 import { useDailiesStore } from '@/stores/dailies'
+import DailiesCarousel from '../common/DailiesCarousel.vue'
 
-const { dailyAnswerHistory } = storeToRefs(useDailiesStore())
+const { dailyQuestions, dailyAnswerHistory } = storeToRefs(useDailiesStore())
 
 const scrollToPrompt = () => {
   const element = document.getElementById('prompt-of-the-day')
@@ -62,80 +63,11 @@ const scrollToPrompt = () => {
         </div>
       </div>
     </div>
-    <!-- Features Section -->
-    <div class="bg-surface-default mb-10 rounded-xl p-8 shadow-md">
-      <h2 class="mb-6 text-center text-2xl font-bold">Game Features</h2>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div class="p-4 text-center">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="text-indigo-600 dark:text-indigo-400"
-            >
-              <path d="M12 17.8 5.8 21 7 14.1 2 9.3l7-1L12 2l3 6.3 7 1-5 4.8 1.2 6.9-6.2-3.2Z" />
-            </svg>
-          </div>
-          <h3 class="text-color-default mb-2 text-lg font-bold">AI-Generated Art</h3>
-          <p class="text-color-muted">Unique drawings created by advanced AI algorithms</p>
-        </div>
-        <div class="p-4 text-center">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="text-indigo-600 dark:text-indigo-400"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          </div>
-          <h3 class="text-color-default mb-2 text-lg font-bold">Multiplayer Mode</h3>
-          <p class="text-color-muted">Compete with friends to see who can guess fastest</p>
-        </div>
-        <div class="p-4 text-center">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="text-indigo-600 dark:text-indigo-400"
-            >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg>
-          </div>
-          <h3 class="text-color-default mb-2 text-lg font-bold">Creative Prompts</h3>
-          <p class="text-color-muted">Challenging and unique concepts to test your skills</p>
-        </div>
+    <!-- Dailies Carousel -->
+    <div class="mb-10 animate-blur-in">
+      <h2 class="mb-4 text-center text-xl font-bold">Past Dailies</h2>
+      <div class="flex space-x-4 overflow-x-auto py-4">
+        <DailiesCarousel :dailies="dailyQuestions" />
       </div>
     </div>
   </main>

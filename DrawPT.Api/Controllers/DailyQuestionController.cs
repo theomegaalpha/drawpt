@@ -45,22 +45,16 @@ namespace DrawPT.Api.Controllers
 
 
         [HttpGet("list")]
-        public ActionResult<DailyQuestionPublic> GetDailyQuestions()
+        public ActionResult<DailyQuestionEntity> GetDailyQuestions()
         {
-            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date <= TimezoneHelper.Now().Date).ToList();
+            var dailyQuestions = _dailiesRepository.GetDailyQuestions().Where(dq => dq.Date < TimezoneHelper.Now().Date).ToList();
 
             if (dailyQuestions.Count == 0)
             {
-                return Ok(new List<DailyQuestionPublic>());
+                return Ok(new List<DailyQuestionEntity>());
             }
 
-            var dailyQuestionsPublic = dailyQuestions.Select(dq => new DailyQuestionPublic
-            {
-                Date = dq.Date,
-                Style = dq.Style,
-                Theme = dq.Theme,
-                ImageUrl = dq.ImageUrl,
-            }).ToList();
+            var dailyQuestionsPublic = dailyQuestions.OrderBy(dq => dq.Date).Take(5).ToList();
             return Ok(dailyQuestionsPublic);
         }
 
