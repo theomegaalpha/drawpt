@@ -60,7 +60,7 @@ namespace DrawPT.Api.Controllers
                 Style = dq.Style,
                 Theme = dq.Theme,
                 ImageUrl = dq.ImageUrl,
-            }).ToList();
+            }).OrderBy(dq => dq.Date).Take(5).ToList();
             return Ok(dailyQuestionsPublic);
         }
 

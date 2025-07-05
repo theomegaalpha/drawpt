@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next'
 import type { DailyQuestion } from '@/models/dailyModels'
 
@@ -37,7 +37,26 @@ function goTo(index: number) {
   if (currentIndex.value !== index) currentIndex.value = index
 }
 
-onMounted(() => {})
+// Re-calculate the closest date index whenever dailies prop updates
+watch(
+  () => props.dailies,
+  (dailies) => {
+    if (dailies.length) {
+      const today = new Date()
+      let closest = 0
+      let minDiff = Infinity
+      dailies.forEach((daily, idx) => {
+        const diff = Math.abs(new Date(daily.date).getTime() - today.getTime())
+        if (diff < minDiff) {
+          minDiff = diff
+          closest = idx
+        }
+      })
+      currentIndex.value = closest
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
