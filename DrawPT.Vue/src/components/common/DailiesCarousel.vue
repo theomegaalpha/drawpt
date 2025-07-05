@@ -95,26 +95,24 @@ watch(
           >
             {{ daily.date.split('T')[0] }}
           </span>
+          <button
+            v-if="index === currentIndex"
+            class="absolute -left-2 top-1/2 -translate-y-1/2 transform rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
+            title="Previous"
+            @click="prev"
+          >
+            <ArrowLeft class="text-gray-700" />
+          </button>
+          <button
+            v-if="index === currentIndex"
+            class="absolute -right-2 top-1/2 -translate-y-1/2 transform rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
+            title="Next"
+            @click="next"
+          >
+            <ArrowRight class="text-gray-700" />
+          </button>
         </div>
       </li>
     </ul>
-
-    <!-- Navigation buttons -->
-    <div class="flex">
-      <button
-        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
-        title="Previous"
-        @click="prev"
-      >
-        <ArrowLeft class="text-gray-700" />
-      </button>
-      <button
-        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
-        title="Next"
-        @click="next"
-      >
-        <ArrowRight class="text-gray-700" />
-      </button>
-    </div>
   </div>
 </template>
