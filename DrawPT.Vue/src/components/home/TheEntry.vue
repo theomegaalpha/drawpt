@@ -65,7 +65,7 @@ const scrollToPrompt = () => {
     </div>
     <!-- Dailies Carousel -->
     <div class="mb-10 animate-blur-in">
-      <h2 class="mb-4 text-xl font-bold">Past Dailies</h2>
+      <h2 class="mb-4 text-center text-xl font-bold">Past Dailies</h2>
       <div class="flex space-x-4 overflow-x-auto py-4">
         <DailiesCarousel :dailies="dailyQuestions" />
       </div>
