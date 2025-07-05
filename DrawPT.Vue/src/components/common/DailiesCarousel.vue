@@ -18,7 +18,7 @@ function getTransformByIndex(index: number) {
 }
 
 function getImageStyle(index: number) {
-  if (index === currentIndex.value) return 'w-4/5 scale-100 opacity-100'
+  if (index === currentIndex.value) return 'scale-100 opacity-100'
   else if (index === currentIndex.value - 1 || index === currentIndex.value + 1)
     return 'w-4/5 scale-90 opacity-50'
   else if (index === currentIndex.value - 2 || index === currentIndex.value + 2)
@@ -52,7 +52,8 @@ onMounted(() => {})
         class="flex w-full flex-none items-center justify-center"
       >
         <div
-          class="relative mr-0 pr-0 transition-transform duration-500"
+          id="img-container"
+          class="relative mr-0 w-fit pr-0 transition-transform duration-500"
           :class="{
             'z-20': index === currentIndex,
             'z-10': index === currentIndex - 1 || index === currentIndex + 1,
