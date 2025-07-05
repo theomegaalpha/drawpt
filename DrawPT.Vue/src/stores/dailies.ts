@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import api from '@/api/api'
 import { isAuthenticated } from '@/lib/auth'
-import type { DailyAnswer, DailyQuestion } from '@/models/dailyModels'
+import type { DailyAnswer, DailyQuestion, DailyQuestionEntity } from '@/models/dailyModels'
 
 export const useDailiesStore = defineStore('dailies', {
   state: () => ({
-    dailyQuestions: [] as DailyQuestion[],
+    dailyQuestions: [] as DailyQuestionEntity[],
     dailyQuestion: {} as DailyQuestion,
     dailyAnswer: {} as DailyAnswer,
     dailyAnswerHistory: [] as DailyAnswer[],
