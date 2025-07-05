@@ -1,57 +1,3 @@
-<template>
-  <div class="relative mx-auto w-full max-w-lg overflow-hidden" aria-labelledby="DailiesCarousel">
-    <ul
-      class="mr-32 flex transition-transform duration-500 ease-in-out"
-      :style="{ transform: `translateX(calc(30% - ${currentIndex * 100}%))` }"
-    >
-      <li
-        v-for="(daily, index) in dailies"
-        :key="index"
-        class="flex w-full flex-none items-center justify-center"
-      >
-        <div
-          class="relative mr-0 pr-0 transition-transform duration-500"
-          :class="{
-            'z-20': index === currentIndex,
-            'z-10': index === currentIndex - 1 || index === currentIndex + 1,
-            'z-0':
-              index !== currentIndex && index !== currentIndex - 1 && index !== currentIndex + 1
-          }"
-          :style="{
-            transform: getTransformByIndex(index)
-          }"
-        >
-          <img
-            :src="daily.imageUrl"
-            @click="goTo(index)"
-            class="transform rounded-lg object-cover transition-all duration-500"
-            :class="getImageStyle(index)"
-          />
-        </div>
-      </li>
-    </ul>
-
-    <!-- Navigation buttons -->
-    <div class="flex">
-      <button
-        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
-        title="Previous"
-        @click="prev"
-      >
-        <ArrowLeft class="text-gray-700" />
-      </button>
-      <button
-        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
-        title="Next"
-        @click="next"
-      >
-        <ArrowRight class="text-gray-700" />
-      </button>
-    </div>
-    <div class="flex">{{ currentIndex + 1 }} / {{ dailies.length }}</div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ArrowLeft, ArrowRight } from 'lucide-vue-next'
@@ -93,3 +39,62 @@ function goTo(index: number) {
 
 onMounted(() => {})
 </script>
+
+<template>
+  <div class="relative mx-auto w-full max-w-lg overflow-hidden" aria-labelledby="DailiesCarousel">
+    <ul
+      class="mr-32 flex transition-transform duration-500 ease-in-out"
+      :style="{ transform: `translateX(calc(30% - ${currentIndex * 100}%))` }"
+    >
+      <li
+        v-for="(daily, index) in dailies"
+        :key="index"
+        class="flex w-full flex-none items-center justify-center"
+      >
+        <div
+          class="relative mr-0 pr-0 transition-transform duration-500"
+          :class="{
+            'z-20': index === currentIndex,
+            'z-10': index === currentIndex - 1 || index === currentIndex + 1,
+            'z-0':
+              index !== currentIndex && index !== currentIndex - 1 && index !== currentIndex + 1
+          }"
+          :style="{
+            transform: getTransformByIndex(index)
+          }"
+        >
+          <img
+            :src="daily.imageUrl"
+            @click="goTo(index)"
+            class="transform rounded-lg object-cover transition-all duration-500"
+            :class="getImageStyle(index)"
+          />
+          <span
+            v-if="index === currentIndex"
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-white bg-opacity-25 px-2 py-1 text-sm"
+          >
+            {{ daily.date.split('T')[0] }}
+          </span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Navigation buttons -->
+    <div class="flex">
+      <button
+        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
+        title="Previous"
+        @click="prev"
+      >
+        <ArrowLeft class="text-gray-700" />
+      </button>
+      <button
+        class="rounded-full bg-white bg-opacity-75 p-2 shadow hover:bg-opacity-100 focus:outline-none"
+        title="Next"
+        @click="next"
+      >
+        <ArrowRight class="text-gray-700" />
+      </button>
+    </div>
+  </div>
+</template>
