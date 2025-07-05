@@ -98,19 +98,26 @@ export const useDailiesStore = defineStore('dailies', {
     async setDailyAnswer(answer: DailyAnswer) {
       this.dailyAnswer = answer
       this.setShowAssessment(answer.guess ? true : false)
+      this.upsertToAnswerHistory(answer)
       if (!(await isAuthenticated())) {
         try {
           const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
           const dataToStore = {
             answer: answer,
             storedDate: today
-            // Optional: Consider storing questionId for more robust validation on load
-            // questionId: this.dailyQuestion.id
           }
           localStorage.setItem('dailyAnswer', JSON.stringify(dataToStore))
         } catch (e) {
           console.error('Failed to save dailyAnswer to localStorage', e)
         }
+      }
+    },
+    upsertToAnswerHistory(answer: DailyAnswer) {
+      const existing = this.dailyAnswerHistory.find((a) => a.date === answer.date)
+      if (existing) {
+        Object.assign(existing, answer)
+      } else {
+        this.dailyAnswerHistory.push(answer)
       }
     }
   }
