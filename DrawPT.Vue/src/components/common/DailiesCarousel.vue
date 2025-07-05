@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { ArrowLeft, ArrowRight } from 'lucide-vue-next'
-import type { DailyQuestion } from '@/models/dailyModels'
+import { ArrowLeft, ArrowRight, EyeClosedIcon, EyeIcon } from 'lucide-vue-next'
+import type { DailyQuestionEntity } from '@/models/dailyModels'
 
-const props = defineProps<{ dailies: DailyQuestion[] }>()
+const props = defineProps<{ dailies: DailyQuestionEntity[] }>()
 
 const currentIndex = ref(0)
+const showPrompt = ref(false)
 
 function getTransformByIndex(index: number) {
   if (index === currentIndex.value) return ''
@@ -90,8 +91,24 @@ watch(
             :class="getImageStyle(index)"
           />
           <span
+            v-if="index === currentIndex && showPrompt"
+            class="absolute left-1/2 top-1/2 w-4/5 -translate-x-1/2 -translate-y-1/2 transform rounded bg-black bg-opacity-50 px-3 py-4 text-sm drop-shadow-lg"
+          >
+            {{ daily.originalPrompt }}
+          </span>
+          <div
             v-if="index === currentIndex"
-            class="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-white bg-opacity-25 px-2 py-1 text-sm"
+            class="absolute left-1/2 top-8 inline-flex -translate-x-1/2 cursor-pointer items-center space-x-1 rounded bg-black bg-opacity-50 px-2 py-1 text-white hover:text-gray-200"
+            @click="showPrompt = !showPrompt"
+            :title="showPrompt ? 'Hide Answer' : 'Show Answer'"
+          >
+            <EyeIcon v-if="!showPrompt" class="inline-block" />
+            <EyeClosedIcon v-else class="inline-block" />
+            <span>{{ showPrompt ? 'Hide Answer' : 'Show Answer' }}</span>
+          </div>
+          <span
+            v-if="index === currentIndex"
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-black bg-opacity-50 px-2 py-1 text-sm"
           >
             {{ daily.date.split('T')[0] }}
           </span>
