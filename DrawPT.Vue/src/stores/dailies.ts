@@ -46,9 +46,10 @@ export const useDailiesStore = defineStore('dailies', {
         if (await isAuthenticated()) {
           if (!this.isDailyAnswerLoaded) {
             const answer = await api.getDailyAnswer()
-            if (!answer) return
-            this.dailyAnswer = answer
-            this.setShowAssessment(answer?.guess ? true : false)
+            if (answer) {
+              this.dailyAnswer = answer
+              this.setShowAssessment(answer?.guess ? true : false)
+            }
           }
           if (!this.dailyAnswerHistory.length) {
             const history = await api.getDailyAnswerHistory()
