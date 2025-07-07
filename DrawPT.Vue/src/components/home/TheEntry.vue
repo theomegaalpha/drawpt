@@ -44,7 +44,7 @@ const scrollToPrompt = () => {
       <div class="aspect-video w-full max-w-3xl">
         <iframe
           class="h-full w-full"
-          src="https://www.youtube.com/embed/X4Dwuj5fBUc"
+          src="https://www.youtube.com/embed/tctpLLkZbWQ"
           title="YouTube video player"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
