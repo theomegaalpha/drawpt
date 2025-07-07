@@ -40,6 +40,18 @@ const scrollToPrompt = () => {
         </RouterLink>
       </div>
     </div>
+    <div class="mb-24 flex justify-center">
+      <div class="aspect-video w-full max-w-3xl">
+        <iframe
+          class="h-full w-full"
+          src="https://www.youtube.com/embed/X4Dwuj5fBUc"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
     <div id="prompt-of-the-day" class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div class="bg-surface-default rounded-xl p-6 shadow-md">
         <DailyQuestion />
