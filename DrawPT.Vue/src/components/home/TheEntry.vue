@@ -23,7 +23,7 @@ const scrollToPrompt = () => {
     <div class="mb-10 animate-blur-in px-6 py-16 text-center">
       <h1 class="text-color-accent mb-4 text-4xl font-bold md:text-5xl">AI Draws, You Decipher</h1>
       <p class="text-color-default mx-auto max-w-3xl text-lg">
-        AI-powered Pictionary where you decode abstract creations based on complex phrases.
+        Art guessing party game where you decode AI-powered creations based on complex phrases.
       </p>
       <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg font-semibold">
         Can you beat the algorithm?
