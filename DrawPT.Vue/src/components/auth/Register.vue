@@ -1,8 +1,10 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
+  <div class="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div
+      class="w-full max-w-md space-y-8 rounded-lg border border-gray-300 bg-white p-10 shadow-lg dark:border-gray-300/20 dark:bg-slate-500/20"
+    >
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+        <h2 class="text-default mt-6 text-center text-3xl font-extrabold">Create your account</h2>
       </div>
       <form class="mt-8 space-y-6" @submit.prevent="handleRegister">
         <div class="-space-y-px rounded-md shadow-sm">
@@ -51,8 +53,11 @@
             class="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <span v-if="loading">Loading...</span>
-            <span v-else>Sign up</span>
+            <span v-else>Sign up with email</span>
           </button>
+          <div class="my-4 text-center">
+            <div class="g_id_signin"></div>
+          </div>
         </div>
 
         <div v-if="error" class="text-center text-sm text-red-500">
@@ -71,8 +76,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
+import type { GoogleCredentialResponse } from '@/types/google'
+import { usePlayerStore } from '@/stores/player'
+
+const playerStore = usePlayerStore()
+const { player } = storeToRefs(playerStore)
 
 const router = useRouter()
 const email = ref('')
@@ -107,4 +119,34 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
+
+const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
+  try {
+    loading.value = true
+    error.value = ''
+
+    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: response.credential
+    })
+
+    if (signInError) throw signInError
+
+    if (data.user) {
+      await playerStore.init()
+      if (!player.value.avatar) {
+        router.push('/profile')
+      } else {
+        router.push('/')
+      }
+    }
+  } catch (e: any) {
+    error.value = e.message || 'An error occurred during Google sign in'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Initialize Google Sign-In when component mounts
+useGoogleSignIn(handleSignInWithGoogle)
 </script>
