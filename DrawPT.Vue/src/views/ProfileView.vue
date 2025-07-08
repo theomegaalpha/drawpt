@@ -57,6 +57,13 @@ const toggleShowAvatarOptions = () => {
             class="h-full w-full object-cover"
           />
         </div>
+        <div
+          v-if="!showAvatarOptions"
+          class="cursor-pointer rounded border px-2 py-1"
+          @click="toggleShowAvatarOptions"
+        >
+          Select Avatar
+        </div>
 
         <h2 class="mb-2 text-sm font-medium" v-if="showAvatarOptions">Select Avatar</h2>
         <div class="grid grid-cols-3 gap-2" v-if="showAvatarOptions">

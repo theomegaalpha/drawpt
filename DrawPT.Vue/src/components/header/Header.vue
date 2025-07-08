@@ -21,10 +21,13 @@ const isAuthenticated = computed(() => {
   return !!authStore.user
 })
 
-const menuItems = [
+const _menuItems = [
   { name: 'About', href: '/about', role: '' },
   { name: 'Admin', href: '/admin', role: 'admin' }
 ]
+const menuItems = computed(() => {
+  return _menuItems.filter((item) => !item.role || item.role === authStore.role)
+})
 const isMobileMenuOpen = ref(false) // State for mobile menu
 
 const toggleMobileMenu = () => {
@@ -32,6 +35,8 @@ const toggleMobileMenu = () => {
 }
 
 const isProfileMenuOpen = ref(false)
+const profileMenuRef = ref<HTMLElement | null>(null)
+
 const toggleProfileMenu = () => {
   isProfileMenuOpen.value = !isProfileMenuOpen.value
 }
@@ -39,6 +44,12 @@ const toggleProfileMenu = () => {
 const handleLogout = async () => {
   await authStore.signOut()
   router.push('/')
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (profileMenuRef.value && !profileMenuRef.value.contains(event.target as Node)) {
+    isProfileMenuOpen.value = false
+  }
 }
 
 // Register SignalR notifications
@@ -51,9 +62,11 @@ onMounted(async () => {
   } catch (err) {
     console.error('NotificationHub connection failed:', err)
   }
+  document.addEventListener('click', handleClickOutside)
 })
 onBeforeUnmount(() => {
   unregisterNotificationHubEvents()
+  document.removeEventListener('click', handleClickOutside)
   if (service.isConnected) {
     service.stopConnection()
   }
@@ -91,9 +104,13 @@ onBeforeUnmount(() => {
             ]"
           >
             <ul
-              class="flex flex-col space-y-6 py-4 text-base lg:flex-row lg:items-center lg:gap-8 lg:space-y-0 lg:py-0 lg:text-sm"
+              class="flex flex-col space-y-2 py-4 text-base lg:flex-row lg:items-center lg:gap-2 lg:space-y-0 lg:py-0 lg:text-sm"
             >
-              <li v-for="(item, index) in menuItems" :key="index">
+              <li
+                v-for="(item, index) in menuItems"
+                :key="index"
+                class="rounded-md p-2 hover:bg-black/5 dark:hover:bg-white/5"
+              >
                 <router-link
                   v-if="!item.role || item.role === authStore.role"
                   :to="item.href"
@@ -105,14 +122,15 @@ onBeforeUnmount(() => {
               <li v-if="isAuthenticated">
                 <router-link
                   to="/profile"
-                  class="text-muted-foreground hover:text-accent-foreground block duration-150 lg:hidden"
+                  class="text-muted-foreground hover:text-accent-foreground block rounded-md p-2 duration-150 hover:bg-black/5 lg:hidden dark:hover:bg-white/5"
                 >
                   <span>Edit Profile</span>
                 </router-link>
               </li>
               <li v-if="isAuthenticated">
                 <div
-                  class="text-muted-foreground hover:text-accent-foreground relative hidden cursor-pointer duration-150 lg:block"
+                  ref="profileMenuRef"
+                  class="text-muted-foreground hover:text-accent-foreground relative hidden cursor-pointer rounded-md p-2 duration-150 hover:bg-black/5 lg:block dark:hover:bg-white/5"
                 >
                   <img
                     :src="player.avatar || blankAvatar"
@@ -126,13 +144,13 @@ onBeforeUnmount(() => {
                   >
                     <router-link
                       to="/profile"
-                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                      class="text-default bg-surface-default w-full rounded-t-md px-4 py-2 text-right text-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       Edit Profile
                     </router-link>
                     <button
                       @click="handleLogout"
-                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                      class="text-default bg-surface-default w-full rounded-b-md px-4 py-2 text-right text-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       Log out
                     </button>
@@ -140,7 +158,7 @@ onBeforeUnmount(() => {
                 </div>
                 <div
                   @click="handleLogout"
-                  class="text-muted-foreground hover:text-accent-foreground block cursor-pointer duration-150 lg:hidden"
+                  class="text-muted-foreground hover:text-accent-foreground block cursor-pointer rounded-md p-2 duration-150 hover:bg-black/5 lg:hidden dark:hover:bg-white/5"
                 >
                   <span>Log out</span>
                 </div>
@@ -148,7 +166,7 @@ onBeforeUnmount(() => {
               <li v-else>
                 <router-link
                   to="/login"
-                  class="text-muted-foreground hover:text-accent-foreground block duration-150"
+                  class="text-muted-foreground hover:text-accent-foreground block rounded-md p-2 duration-150 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <span>Login</span>
                 </router-link>
