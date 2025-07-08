@@ -27,7 +27,7 @@
       <div
         v-for="(player, index) in activeTabPlayers"
         :key="index"
-        class="hover:bg-muted/50 flex animate-[slide-in-left_0.1s_ease-in_forwards] items-center p-4 transition-colors"
+        class="hover:bg-muted/50 flex animate-[slide-in-left_0.2s_ease-in_forwards] items-center p-4 transition-colors"
       >
         <div class="text-muted-foreground mr-4 w-10 flex-shrink-0 text-center font-semibold">
           {{ index + 1 }}

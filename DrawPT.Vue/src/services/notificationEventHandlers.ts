@@ -13,8 +13,7 @@ export function registerNotificationHubEvents() {
     // Determine if answer qualifies for top 20
     const lowestScore = list.length < 20 ? -Infinity : list[list.length - 1].score
     if (list.length < 20 || answer.score > lowestScore) {
-      list.unshift(answer)
-      if (list.length > 20) list.splice(20)
+      leaderboard.addDailyAnswer(answer)
     }
   })
 }
