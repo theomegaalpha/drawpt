@@ -28,7 +28,7 @@ import AboutMeSection from '@/components/about/AboutMeSection.vue'
           This completely changes the game. I hope this gets your creative juices flowing.
         </p>
         <p class="text-md mb-2 text-center">
-          What game couldn't exist before? What game can now with AI?
+          What game couldn't exist before? What game can exist now with AI?
         </p>
       </div>
     </div>
