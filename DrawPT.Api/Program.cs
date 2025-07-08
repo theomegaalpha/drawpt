@@ -135,6 +135,7 @@ app.MapControllers();
 
 // Map SignalR Hubs
 app.MapHub<GameHub>("/gamehub");
+app.MapHub<NotificationHub>("/notificationhub");
 
 // Use health checks
 app.UseHealthChecks("/health");
