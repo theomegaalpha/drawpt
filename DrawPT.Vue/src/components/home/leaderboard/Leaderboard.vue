@@ -4,9 +4,16 @@
       <button
         v-for="tab in tabs"
         :key="tab.id"
-        @click="activeTab = tab.id"
+        @click="tab.enabled && (activeTab = tab.id)"
+        :disabled="!tab.enabled"
         class="flex-1 px-6 py-4 text-center text-sm font-medium transition-colors"
-        :class="activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'"
+        :class="[
+          activeTab === tab.id
+            ? 'bg-black/5 dark:bg-white/5'
+            : tab.enabled
+              ? 'hover:bg-muted'
+              : 'text-muted-foreground cursor-not-allowed opacity-50'
+        ]"
       >
         {{ tab.label }}
       </button>
@@ -26,8 +33,8 @@
     <div v-else class="divide-border divide-y">
       <div
         v-for="(player, index) in activeTabPlayers"
-        :key="player.id"
-        class="hover:bg-muted/50 flex items-center p-4 transition-colors"
+        :key="index"
+        class="hover:bg-muted/50 flex animate-[slide-in-left_0.2s_ease-in_forwards] items-center p-4 transition-colors"
       >
         <div class="text-muted-foreground mr-4 w-10 flex-shrink-0 text-center font-semibold">
           {{ index + 1 }}
@@ -61,8 +68,8 @@ const playerStore = usePlayerStore()
 const isLoading = computed(() => leaderboardStore.isLoading)
 
 const tabs = [
-  { id: 'daily', label: 'Daily Prompt' },
-  { id: 'rooms', label: 'Game Rooms' }
+  { id: 'daily', label: 'Daily Prompt', enabled: true },
+  { id: 'rooms', label: 'Game Rooms', enabled: false }
 ]
 
 const activeTab = ref('daily')
@@ -89,13 +96,13 @@ const fetchTabData = async () => {
 }
 
 // Watch for tab changes to load data if needed
-watch(activeTab, async (newTab) => {
+watch(activeTab, async () => {
   await fetchTabData()
 })
 
 const handleImageError = (event: Event) => {
   // Replace broken image with a fallback
   const target = event.target as HTMLImageElement
-  target.src = 'https://picsum.photos/id/237/200/200' // Fallback image
+  target.src = playerStore.blankAvatar
 }
 </script>

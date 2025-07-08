@@ -29,8 +29,6 @@ namespace DrawPT.Api.Hubs
             _cache = cacheService;
             _serviceBusClient = serviceBusClient;
             _ttsService = ttsService;
-
-            _logger.LogInformation("Started consuming from client_broadcast queue");
         }
 
         public async Task RequestToJoinGame(string roomCode)

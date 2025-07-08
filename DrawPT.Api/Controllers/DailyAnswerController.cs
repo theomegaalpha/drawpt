@@ -7,6 +7,8 @@ using DrawPT.Data.Repositories.Game;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using DrawPT.Api.Hubs;
 
 namespace DrawPT.Api.Controllers
 {
@@ -17,12 +19,18 @@ namespace DrawPT.Api.Controllers
         private readonly DailiesRepository _dailiesRepository;
         private readonly DailyAIService _dailyAIService;
         private readonly PlayerService _profileService; // Added ProfileService
+        private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
 
-        public DailyAnswerController(DailiesRepository dailiesRepository, DailyAIService dailyAIService, PlayerService profileService) // Added profileService parameter
+        public DailyAnswerController(
+            DailiesRepository dailiesRepository,
+            DailyAIService dailyAIService,
+            PlayerService profileService,
+            IHubContext<NotificationHub, INotificationClient> hubContext) // Added hubContext parameter
         {
             _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "DailyAIService cannot be null.");
             _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "ProfileService cannot be null."); // Initialize ProfileService
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext), "HubContext cannot be null.");
         }
 
 
@@ -141,6 +149,10 @@ namespace DrawPT.Api.Controllers
             try
             {
                 var todaysQuestion = _dailiesRepository.GetDailyQuestion(TimezoneHelper.Now());
+                if (todaysQuestion == null)
+                {
+                    return NotFound("No daily question found for today.");
+                }
 
                 var saveToDb = false;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
@@ -148,10 +160,12 @@ namespace DrawPT.Api.Controllers
                 if (userId != null && Guid.TryParse(userId, out parsedUserId))
                     saveToDb = true;
 
+                var profile = await _profileService.GetPlayerAsync(parsedUserId);
                 var playerAnswer = new DailyAnswerPublic
                 {
                     PlayerId = Guid.NewGuid(),
-                    Username = User.Identity?.Name ?? "Unknown", // Added Username
+                    Username = profile?.Username ?? "Unknown",
+                    Avatar = profile?.Avatar,
                     Guess = answer,
                     Date = todaysQuestion.Date,
                     Reason = ""
@@ -182,13 +196,15 @@ namespace DrawPT.Api.Controllers
                 var answerPublic = new DailyAnswerPublic()
                 {
                     Date = todaysQuestion.Date,
-                    Username = User.Identity?.Name ?? "Unknown",
-                    PlayerId = playerAnswer.PlayerId,
+                    Username = profile?.Username ?? "Unknown",
+                    Avatar = profile?.Avatar,
                     Guess = playerAnswer.Guess,
                     Score = assessment.Score,
                     Reason = assessment.Reason,
                     ClosenessArray = assessment.ClosenessArray,
                 };
+                // Broadcast to all connected clients via SignalR
+                await _hubContext.Clients.All.NewDailyAnswer(answerPublic);
                 return Ok(answerPublic);
             }
             catch (Exception ex)

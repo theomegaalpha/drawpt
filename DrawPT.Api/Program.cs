@@ -33,7 +33,7 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
             // If the request is for our hub...
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/gamehub")))
+                (path.StartsWithSegments("/gamehub") || path.StartsWithSegments("/notificationhub")))
             {
                 context.Token = accessToken;
             }
@@ -135,6 +135,7 @@ app.MapControllers();
 
 // Map SignalR Hubs
 app.MapHub<GameHub>("/gamehub");
+app.MapHub<NotificationHub>("/notificationhub");
 
 // Use health checks
 app.UseHealthChecks("/health");

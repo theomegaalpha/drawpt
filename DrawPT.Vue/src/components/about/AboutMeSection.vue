@@ -1,9 +1,15 @@
 <template>
-  <section class="mx-auto max-w-4xl px-4 py-12">
+  <section class="mx-auto mb-12 max-w-4xl px-4 py-12">
     <div class="flex flex-col items-center gap-8 lg:flex-row">
       <div class="lg:w-1/2">
         <div class="mb-2 w-fit rounded-md bg-black/10 px-4 py-1 dark:bg-white/10">👥 The Team</div>
         <h2 class="mb-4 text-2xl font-bold">Just Me Here 😁</h2>
+        <p class="text-md mb-2">
+          Hi! I’m
+          <a href="https://www.linkedin.com/in/d4chong/" class="text-blue-500 hover:underline"
+            >david chong</a
+          >, coder by day, binge Netflixer by night.
+        </p>
         <p class="text-md mb-2">
           This project has been (and continues to be) my escape from the routine of a 9-to-5
           programming job. It’s become a creative outlet where I can tinker with everything from the
