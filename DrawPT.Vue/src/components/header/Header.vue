@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { MenuIcon, XIcon } from 'lucide-vue-next' // Added MenuIcon and XIcon
 import { storeToRefs } from 'pinia'
 
 import { usePlayerStore } from '@/stores/player'
+import {
+  registerNotificationHubEvents,
+  unregisterNotificationHubEvents
+} from '@/services/notificationEventHandlers'
+import service from '@/services/signalRService'
 
 const playerStore = usePlayerStore()
 const { player, blankAvatar } = storeToRefs(playerStore)
@@ -35,6 +40,24 @@ const handleLogout = async () => {
   await authStore.signOut()
   router.push('/')
 }
+
+// Register SignalR notifications
+onMounted(async () => {
+  try {
+    if (!service.isConnected) {
+      await service.startConnection('/notificationhub')
+    }
+    registerNotificationHubEvents()
+  } catch (err) {
+    console.error('NotificationHub connection failed:', err)
+  }
+})
+onBeforeUnmount(() => {
+  unregisterNotificationHubEvents()
+  if (service.isConnected) {
+    service.stopConnection()
+  }
+})
 </script>
 
 <template>

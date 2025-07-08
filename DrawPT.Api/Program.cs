@@ -33,7 +33,7 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
             // If the request is for our hub...
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/gamehub")))
+                (path.StartsWithSegments("/gamehub") || path.StartsWithSegments("/notificationhub")))
             {
                 context.Token = accessToken;
             }

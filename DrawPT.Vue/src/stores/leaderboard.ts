@@ -1,11 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { PlayerResult } from '@/models/player'
+import type { DailyAnswer } from '@/models/dailyModels'
 
 export const useLeaderboardStore = defineStore('leaderboard', () => {
   const roundNumber = ref(0)
   const isLoading = ref(false)
-  const dailies = ref([] as PlayerResult[])
+  const dailies = ref([] as DailyAnswer[])
   const playerResults = ref([] as PlayerResult[])
 
   function clearLeaderboard() {

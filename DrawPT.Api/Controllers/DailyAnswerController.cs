@@ -160,10 +160,12 @@ namespace DrawPT.Api.Controllers
                 if (userId != null && Guid.TryParse(userId, out parsedUserId))
                     saveToDb = true;
 
+                var profile = await _profileService.GetPlayerAsync(parsedUserId);
                 var playerAnswer = new DailyAnswerPublic
                 {
                     PlayerId = Guid.NewGuid(),
-                    Username = User.Identity?.Name ?? "Unknown", // Added Username
+                    Username = profile?.Username ?? "Unknown",
+                    Avatar = profile?.Avatar,
                     Guess = answer,
                     Date = todaysQuestion.Date,
                     Reason = ""
@@ -194,8 +196,8 @@ namespace DrawPT.Api.Controllers
                 var answerPublic = new DailyAnswerPublic()
                 {
                     Date = todaysQuestion.Date,
-                    Username = User.Identity?.Name ?? "Unknown",
-                    PlayerId = playerAnswer.PlayerId,
+                    Username = profile?.Username ?? "Unknown",
+                    Avatar = profile?.Avatar,
                     Guess = playerAnswer.Guess,
                     Score = assessment.Score,
                     Reason = assessment.Reason,
