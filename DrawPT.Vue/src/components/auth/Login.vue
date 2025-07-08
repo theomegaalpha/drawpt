@@ -83,12 +83,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import type { GoogleCredentialResponse } from '@/types/google'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
+import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
 
 const router = useRouter()
 const email = ref('')
@@ -186,66 +187,6 @@ const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
   }
 }
 
-const loadGoogleScript = (): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    if (document.getElementById('google-signin-script')) {
-      resolve(true)
-      return
-    }
-
-    const script = document.createElement('script')
-    script.id = 'google-signin-script'
-    script.src = 'https://accounts.google.com/gsi/client'
-    script.async = true
-    script.onload = () => resolve(true)
-    script.onerror = () => reject(new Error('Failed to load Google Sign-In script'))
-    document.head.appendChild(script)
-  })
-}
-
-const initializeGoogleSignIn = () => {
-  if (window.google?.accounts) {
-    // Make the callback function globally available
-    window.handleSignInWithGoogle = handleSignInWithGoogle
-
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: handleSignInWithGoogle,
-      auto_select: true,
-      cancel_on_tap_outside: false
-    })
-
-    const buttonContainer = document.querySelector('.g_id_signin')
-    if (buttonContainer) {
-      window.google.accounts.id.renderButton(buttonContainer, {
-        type: 'standard',
-        shape: 'pill',
-        theme: 'outline',
-        text: 'signin_with',
-        size: 'large',
-        logo_alignment: 'left'
-      })
-    }
-
-    // Optional: Display the One Tap prompt
-    window.google.accounts.id.prompt()
-  }
-}
-
-onMounted(async () => {
-  try {
-    await loadGoogleScript()
-    // Wait a bit for the script to fully initialize
-    setTimeout(initializeGoogleSignIn, 100)
-  } catch (error) {
-    console.error('Failed to load Google Sign-In:', error)
-  }
-})
-
-onUnmounted(() => {
-  // Clean up the global callback
-  if (window.handleSignInWithGoogle) {
-    delete window.handleSignInWithGoogle
-  }
-})
+// Initialize Google Sign-In when component mounts
+useGoogleSignIn(handleSignInWithGoogle)
 </script>
