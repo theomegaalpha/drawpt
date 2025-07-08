@@ -137,13 +137,13 @@ onBeforeUnmount(() => {
                   >
                     <router-link
                       to="/profile"
-                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                      class="text-default bg-surface-default w-full rounded-t-md px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
                     >
                       Edit Profile
                     </router-link>
                     <button
                       @click="handleLogout"
-                      class="text-default bg-surface-default w-full px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+                      class="text-default bg-surface-default w-full rounded-b-md px-4 py-2 text-right text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
                     >
                       Log out
                     </button>
