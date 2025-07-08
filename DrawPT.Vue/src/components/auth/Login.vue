@@ -68,20 +68,8 @@
         </div>
 
         <!-- Google Sign-In Button Container -->
-        <div class="text-center mb-4">
+        <div class="mb-4 text-center">
           <div class="g_id_signin"></div>
-        </div>
-        <!-- Facebook Login Button -->
-        <div class="text-center mb-4">
-          <button
-            type="button"
-            @click="handleFacebookLogin"
-            :disabled="loading"
-            class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            <span v-if="loading">Loading...</span>
-            <span v-else>Continue with Facebook</span>
-          </button>
         </div>
 
         <div class="text-center text-sm">
@@ -102,7 +90,6 @@ import type { GoogleCredentialResponse } from '@/types/google'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
 import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
-import { useFacebookLogin } from '@/composables/useFacebookLogin'
 
 const router = useRouter()
 const email = ref('')
@@ -202,20 +189,4 @@ const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
 
 // Initialize Google Sign-In when component mounts
 useGoogleSignIn(handleSignInWithGoogle)
-// Initialize Facebook login
-const { loginWithFacebook } = useFacebookLogin()
-/**
- * Handler to start Facebook OAuth flow
- */
-const handleFacebookLogin = async () => {
-  try {
-    loading.value = true
-    error.value = ''
-    await loginWithFacebook()
-  } catch (e: any) {
-    error.value = e.message || 'An error occurred during Facebook sign in'
-  } finally {
-    loading.value = false
-  }
-}
 </script>
