@@ -1,14 +1,10 @@
-using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Common.Interfaces;
-using DrawPT.Common.Models.Game;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using DrawPT.Api.Services;
 
 namespace DrawPT.Api.Hubs
 {
-    [Authorize]
     public partial class NotificationHub : Hub<INotificationClient>
     {
         protected readonly ILogger<NotificationHub> _logger;
