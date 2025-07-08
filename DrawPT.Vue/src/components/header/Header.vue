@@ -32,6 +32,8 @@ const toggleMobileMenu = () => {
 }
 
 const isProfileMenuOpen = ref(false)
+const profileMenuRef = ref<HTMLElement | null>(null)
+
 const toggleProfileMenu = () => {
   isProfileMenuOpen.value = !isProfileMenuOpen.value
 }
@@ -39,6 +41,12 @@ const toggleProfileMenu = () => {
 const handleLogout = async () => {
   await authStore.signOut()
   router.push('/')
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (profileMenuRef.value && !profileMenuRef.value.contains(event.target as Node)) {
+    isProfileMenuOpen.value = false
+  }
 }
 
 // Register SignalR notifications
@@ -51,9 +59,11 @@ onMounted(async () => {
   } catch (err) {
     console.error('NotificationHub connection failed:', err)
   }
+  document.addEventListener('click', handleClickOutside)
 })
 onBeforeUnmount(() => {
   unregisterNotificationHubEvents()
+  document.removeEventListener('click', handleClickOutside)
   if (service.isConnected) {
     service.stopConnection()
   }
@@ -112,6 +122,7 @@ onBeforeUnmount(() => {
               </li>
               <li v-if="isAuthenticated">
                 <div
+                  ref="profileMenuRef"
                   class="text-muted-foreground hover:text-accent-foreground relative hidden cursor-pointer duration-150 lg:block"
                 >
                   <img
