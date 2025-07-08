@@ -26,8 +26,8 @@
     <div v-else class="divide-border divide-y">
       <div
         v-for="(player, index) in activeTabPlayers"
-        :key="player.id"
-        class="hover:bg-muted/50 flex items-center p-4 transition-colors"
+        :key="index"
+        class="hover:bg-muted/50 flex animate-[slide-in-left_0.1s_ease-in_forwards] items-center p-4 transition-colors"
       >
         <div class="text-muted-foreground mr-4 w-10 flex-shrink-0 text-center font-semibold">
           {{ index + 1 }}
@@ -96,6 +96,6 @@ watch(activeTab, async (newTab) => {
 const handleImageError = (event: Event) => {
   // Replace broken image with a fallback
   const target = event.target as HTMLImageElement
-  target.src = 'https://picsum.photos/id/237/200/200' // Fallback image
+  target.src = playerStore.blankAvatar
 }
 </script>

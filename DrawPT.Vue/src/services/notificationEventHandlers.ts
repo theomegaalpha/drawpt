@@ -9,12 +9,12 @@ export function registerNotificationHubEvents() {
 
   // Handle new daily answers broadcast from the server
   service.on('newDailyAnswer', (answer: DailyAnswer) => {
-    console.log('New daily answer received:', answer)
-
-    leaderboard.dailies.unshift(answer)
-    // Optionally trim to top 20
-    if (leaderboard.dailies.length > 20) {
-      leaderboard.dailies.splice(20)
+    const list = leaderboard.dailies
+    // Determine if answer qualifies for top 20
+    const lowestScore = list.length < 20 ? -Infinity : list[list.length - 1].score
+    if (list.length < 20 || answer.score > lowestScore) {
+      list.unshift(answer)
+      if (list.length > 20) list.splice(20)
     }
   })
 }
