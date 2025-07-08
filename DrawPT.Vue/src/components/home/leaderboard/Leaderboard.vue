@@ -26,14 +26,14 @@
       <p class="text-muted-foreground mt-4">Loading leaderboard data...</p>
     </div>
 
-    <div v-else-if="activeTabPlayers.length === 0" class="p-8 text-center">
+    <div v-else-if="activeTabResults.length === 0" class="p-8 text-center">
       <p class="text-muted-foreground">No players found for this leaderboard.</p>
     </div>
 
     <div v-else class="divide-border divide-y">
       <div
-        v-for="(player, index) in activeTabPlayers"
-        :key="index"
+        v-for="(daily, index) in activeTabResults"
+        :key="daily.playerId"
         class="hover:bg-muted/50 flex animate-[slide-in-left_0.2s_ease-in_forwards] items-center p-4 transition-colors"
       >
         <div class="text-muted-foreground mr-4 w-10 flex-shrink-0 text-center font-semibold">
@@ -41,17 +41,17 @@
         </div>
         <div class="bg-muted h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
           <img
-            :src="player.avatar || playerStore.blankAvatar"
-            :alt="`${player.username}'s avatar`"
+            :src="daily.avatar || playerStore.blankAvatar"
+            :alt="`${daily.username}'s avatar`"
             class="h-full w-full object-cover"
             @error="handleImageError"
           />
         </div>
         <div class="ml-4 flex-1">
-          <h3 class="font-medium">{{ player.username }}</h3>
+          <h3 class="font-medium">{{ daily.username }}</h3>
         </div>
         <div class="text-lg font-bold">
-          {{ player.score }}
+          {{ daily.score }}
         </div>
       </div>
     </div>
@@ -74,8 +74,8 @@ const tabs = [
 
 const activeTab = ref('daily')
 
-const activeTabPlayers = computed(() => {
-  return activeTab.value === 'daily' ? leaderboardStore.dailies : leaderboardStore.playerResults
+const activeTabResults = computed(() => {
+  return activeTab.value === 'daily' ? leaderboardStore.dailies : leaderboardStore.dailies
 })
 
 onMounted(async () => {
