@@ -17,17 +17,11 @@ import Header from '@/components/header/Header.vue'
             </p>
           </div>
           <div class="flex gap-4">
-            <a href="#" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
+            <a href="/about" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
               >About</a
             >
-            <a href="#" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
+            <a href="/about" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
               >Contact</a
-            >
-            <a href="#" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
-              >Privacy</a
-            >
-            <a href="#" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400"
-              >Terms</a
             >
           </div>
         </div>
