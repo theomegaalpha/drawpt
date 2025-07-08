@@ -56,7 +56,7 @@
             <span v-else>Sign up with email</span>
           </button>
           <div class="my-4 text-center">
-            <div class="g_id_signin"></div>
+            <div class="g_id_signin w-full"></div>
           </div>
         </div>
 

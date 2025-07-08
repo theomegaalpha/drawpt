@@ -69,7 +69,7 @@
 
         <!-- Google Sign-In Button Container -->
         <div class="mb-4 text-center">
-          <div class="g_id_signin"></div>
+          <div class="g_id_signin w-full"></div>
         </div>
 
         <div class="text-center text-sm">
