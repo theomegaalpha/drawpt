@@ -4,6 +4,7 @@ import Header from '@/components/header/Header.vue'
 import PurposeSection from '@/components/about/PurposeSection.vue'
 import GameplaySection from '@/components/about/GameplaySection.vue'
 import AboutMeSection from '@/components/about/AboutMeSection.vue'
+import AppFooter from '@/components/footer/Footer.vue'
 </script>
 
 <template>
@@ -38,7 +39,7 @@ import AboutMeSection from '@/components/about/AboutMeSection.vue'
   <PurposeSection />
   <GameplaySection />
   <AboutMeSection />
-  <Footer />
+  <AppFooter />
 </template>
 
 <style scoped></style>
