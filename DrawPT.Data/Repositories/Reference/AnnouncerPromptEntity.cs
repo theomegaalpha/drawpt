@@ -5,7 +5,7 @@ namespace DrawPT.Data.Repositories.Reference
 {
     [Keyless]
     [Table("AnnouncerPrompts", Schema = "ref")]
-    internal class AnnouncerPromptEntity
+    public class AnnouncerPromptEntity
     {
         public required string Name { get; set; }
         public required string Prompt { get; set; }
