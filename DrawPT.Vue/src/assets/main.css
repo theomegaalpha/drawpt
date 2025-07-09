@@ -47,6 +47,9 @@
       )
       rgba(var(--solid-color-background), 1);
   }
+  .radial-gradient:hover {
+    background: color-mix(in srgb, black 2%, rgb(var(--solid-color-background)));
+  }
 
   .linear-mask {
     mask-image: linear-gradient(
@@ -106,6 +109,10 @@ body {
 @media (prefers-color-scheme: dark) {
   body {
     background: rgb(27, 26, 25);
+  }
+
+  .radial-gradient:hover {
+    background: color-mix(in srgb, white 5%, rgb(var(--solid-color-background)));
   }
 }
 
