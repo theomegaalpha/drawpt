@@ -11,7 +11,7 @@
           allowfullscreen
         ></iframe>
       </div>
-      <div class="lg:w-1/2">
+      <div class="rounded-md bg-white/20 px-4 py-12 lg:w-1/2 dark:bg-black/20">
         <div class="mb-2 w-fit rounded-md bg-black/10 px-4 py-1 dark:bg-white/10">
           🎮 Gameplay Highlights
         </div>
