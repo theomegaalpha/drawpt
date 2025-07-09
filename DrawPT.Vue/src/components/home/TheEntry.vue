@@ -6,6 +6,8 @@ import Leaderboard from './leaderboard/Leaderboard.vue'
 import DailyQuestion from './DailyQuestion.vue'
 import { useDailiesStore } from '@/stores/dailies'
 import DailiesCarousel from '../common/DailiesCarousel.vue'
+import ShinyButton from '../common/ShinyButton.vue'
+import UnshinyButton from '../common/UnshinyButton.vue'
 
 const { dailyQuestions, dailyAnswerHistory } = storeToRefs(useDailiesStore())
 
@@ -28,15 +30,12 @@ const scrollToPrompt = () => {
       <p class="text-color-default mx-auto mb-8 max-w-2xl text-lg font-semibold">
         Can you beat the algorithm?
       </p>
-      <div>
-        <button class="btn-default text-lg font-semibold shadow-md" @click="scrollToPrompt">
+      <div class="inline-flex items-center justify-center space-x-2">
+        <UnshinyButton class="w-fit cursor-pointer" @click="scrollToPrompt">
           Daily Challenge
-        </button>
-        <RouterLink
-          class="btn-default ml-2 text-lg font-semibold shadow-md"
-          :to="{ name: 'game-selection' }"
-        >
-          Play Game
+        </UnshinyButton>
+        <RouterLink :to="{ name: 'game-selection' }">
+          <ShinyButton class="ml-2">Play Game</ShinyButton>
         </RouterLink>
       </div>
     </div>
