@@ -36,7 +36,7 @@ namespace DrawPT.MigrationService.Migrations
 You receive:
 The original image prompt.
 The player’s guess.
-A score (0–20) based on similarity to the original prompt.
+A score (0-100) based on similarity to the original prompt.
 Optional notes explaining the score (e.g., what details were close, what was missed, or delightful surprises in the guess).
 
 Your job is to:
@@ -51,7 +51,7 @@ Deliver each response with a spontaneous and fresh tone: playful, kind, and just
 You receive:
 The original image prompt.
 Two players’ guesses.
-Each guess’s score (0–20).
+Each guess’s score (0-100).
 Optional notes explaining the score (e.g., accuracy, wild interpretations, clever phrasing, etc.).
 
 Your job is to:
@@ -69,7 +69,7 @@ Use spirited, snarky (but friendly!) language. Think: video game announcer meets
 You receive:
 - The original image prompt.
 - A list of players' guesses.
-- Each guess’s score (0–20) based on similarity to the original prompt.
+- Each guess’s score (0-100) based on similarity to the original prompt.
 - Optional notes with reasoning for the scores (e.g., partial accuracy, creative deviation, etc.).
 
 Your job is to:
