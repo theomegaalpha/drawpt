@@ -6,8 +6,8 @@ import { useRoomStore } from '@/stores/room'
 import StandardInput from '../common/StandardInput.vue'
 
 import matchmakingBackground from './matchmaking.jpg'
-
-const showTooltip = ref(false)
+import createBackground from './create.jpg'
+import joinBackground from './join.jpg'
 
 const { updateRoomCode, clearRoom } = useRoomStore()
 const roomCodeInput = ref<string>('')
@@ -68,12 +68,10 @@ onMounted(() => {
         @click="createRoom()"
         role="button"
       >
-        <!-- Background image: black & white by default, colored on hover -->
         <div
           class="absolute inset-0 bg-cover bg-center grayscale filter transition duration-300 ease-in-out group-hover:grayscale-0"
-          :style="{ backgroundImage: `url(${matchmakingBackground})` }"
+          :style="{ backgroundImage: `url(${createBackground})` }"
         ></div>
-        <!-- Content layer -->
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
           <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
             Create Lobby
@@ -84,12 +82,10 @@ onMounted(() => {
       <div
         class="group relative col-span-1 transform cursor-default overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
       >
-        <!-- Background image: black & white by default, colored on hover -->
         <div
           class="absolute inset-0 bg-cover bg-center grayscale filter transition duration-300 ease-in-out group-hover:grayscale-0"
-          :style="{ backgroundImage: `url(${matchmakingBackground})` }"
+          :style="{ backgroundImage: `url(${joinBackground})` }"
         ></div>
-        <!-- Content layer -->
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
           <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
             Join Lobby
