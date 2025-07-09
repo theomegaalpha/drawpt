@@ -1,5 +1,6 @@
 using DrawPT.GameEngine.Interfaces;
 using DrawPT.Common.Models.Game;
+using DrawPT.Common.Models;
 using OpenAI;
 using OpenAI.Chat;
 using Newtonsoft.Json;
@@ -64,10 +65,78 @@ Your job is to:
 Use friendly, humorous language with lots of personality. Be energetic but concise. Think: “Whose Line is it Anyway?” meets “Mario Party” announcer.
 ";
 
+        private string _greetingPromptSolo = @"Create a cheerful and wholesome announcer message to welcome a single player to a solo round of a game.
+The announcer should read out the username in a warm and playful way, as if genuinely excited to see them.
+Frame the session as a fun practice or training moment, emphasizing creativity, exploration, and growth.
+Keep the tone supportive and uplifting—like a friendly coach or buddy cheering them on.
+The message should feel spontaneous, as if the announcer recognizes the player and is glad they showed up for another round of playful prompting.";
+
+        private string _greetingPromptTwoPlayers = @"Create a playful, high-energy announcer message to welcome two players to a head-to-head match.
+The tone should be lighthearted and fun, mimicking the style of a sportscaster introducing a quirky showdown.
+Include both player names in a dramatic reveal—especially if they’re amusing, surprising, or oddly matched.
+The announcer should build hype and anticipation while keeping the mood cheerful, with subtle nods to each player’s personality or username if relevant.
+Avoid sounding too scripted; the message should feel spontaneous, like it’s reacting live to the moment.";
+
+        private string _greetingPromptGroup = @"Write a cheerful, energetic announcer greeting for the start of a game.
+Mention the total number of players and pick one or two player names to highlight—especially if they stand out in a fun or unusual way
+(e.g., silly usernames, longtime players, or thematic names). Keep the tone light and happy, with a playful twist that sets the mood for creative gameplay.
+Make it sound spontaneous, as if the announcer is reacting in real time.";
+
+
         public GameAnnouncerService(OpenAIClient client, IConfiguration configuration, ILogger<GameAnnouncerService> logger)
         {
             _chatClient = client.GetChatClient(configuration.GetValue<string>("Azure:OpenAI:ChatModel"));
             _logger = logger;
+        }
+
+        public async Task<string?> GenerateGreetingAnnouncement(List<Player> players)
+        {
+            var systemPrompt = players.Count == 1
+                ? _greetingPromptSolo
+                : players.Count == 2
+                    ? _greetingPromptTwoPlayers
+                    : _greetingPromptGroup;
+
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage($"players: {JsonConvert.SerializeObject(players.Select(a => new { a.Username }))}")
+            };
+
+            try
+            {
+                var options = new ChatCompletionOptions
+                {
+                    Temperature = 1,
+                    MaxOutputTokenCount = 800,
+
+                    TopP = 1,
+                    FrequencyPenalty = 0,
+                    PresencePenalty = 0
+                };
+
+                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
+
+                // Print the response
+                if (completion != null)
+                {
+                    if (completion.Content.Count == 0)
+                    {
+                        _logger.LogWarning($"No announcer message was produced for {players}.");
+                        return null;
+                    }
+                    return completion?.Content[0].Text.ToString() ?? "";
+                }
+                else
+                {
+                    _logger.LogWarning($"No response received from the announcer for {players}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred: {ex.Message}");
+            }
+            return null;
         }
 
         public async Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults)
@@ -118,8 +187,6 @@ Use friendly, humorous language with lots of personality. Be energetic but conci
                 _logger.LogError($"An error occurred: {ex.Message}");
             }
             return null;
-
-
         }
 
         public string GenerateGameResultAnnouncement()
