@@ -56,8 +56,10 @@ onMounted(() => {
           :style="{ backgroundImage: `url(${matchmakingBackground})` }"
         ></div>
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 text-xl font-bold text-white">Join Matchmaking</h2>
-          <p class="text-white">Coming Soon</p>
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Join Matchmaking
+          </h2>
+          <p class="mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-white">Coming Soon</p>
         </div>
       </div>
       <!-- create lobby -->
@@ -72,12 +74,14 @@ onMounted(() => {
         ></div>
         <!-- Content layer -->
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 text-xl font-bold text-white">Create Lobby</h2>
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Create Lobby
+          </h2>
         </div>
       </div>
       <!-- join lobby -->
       <div
-        class="group relative col-span-1 overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:shadow-lg"
+        class="group relative col-span-1 cursor-default overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:shadow-lg"
         role="button"
       >
         <!-- Background image: black & white by default, colored on hover -->
@@ -87,7 +91,9 @@ onMounted(() => {
         ></div>
         <!-- Content layer -->
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 text-xl font-bold text-white">Join Lobby</h2>
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Join Lobby
+          </h2>
           <StandardInput
             placeholder="Room Code"
             maxlength="4"
@@ -96,7 +102,7 @@ onMounted(() => {
             @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
           />
           <button
-            class="btn-default rounded-full"
+            class="btn-default mt-1 rounded-full"
             :disabled="roomCodeInput.length < 4"
             @click="joinRoom(roomCodeInput)"
           >
