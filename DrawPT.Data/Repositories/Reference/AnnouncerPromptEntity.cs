@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrawPT.Data.Repositories.Reference
 {
-    [Keyless]
     [Table("AnnouncerPrompts", Schema = "ref")]
     public class AnnouncerPromptEntity
     {
+        [Key]
         public required string Name { get; set; }
         public required string Prompt { get; set; }
     }
