@@ -1,22 +1,22 @@
 <script setup lang="ts">
 // No script needed for static content
-import Header from '@/components/header/Header.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 import PurposeSection from '@/components/about/PurposeSection.vue'
 import GameplaySection from '@/components/about/GameplaySection.vue'
 import AboutMeSection from '@/components/about/AboutMeSection.vue'
-import AppFooter from '@/components/footer/Footer.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <template>
-  <Header />
+  <AppHeader />
   <section class="mx-auto max-w-4xl px-4 py-12">
     <h1 class="mb-4 text-center text-4xl font-bold">About DrawPT</h1>
   </section>
-  <section class="mx-auto max-w-4xl px-4 py-12">
+  <section class="mx-auto max-w-4xl rounded-md bg-white/20 px-4 py-12 dark:bg-black/20">
     <div class="flex flex-col items-center gap-8 lg:flex-row">
       <div class="">
         <div class="mx-auto mb-2 w-fit rounded-md bg-black/10 px-4 py-1 dark:bg-white/10">
-          🤖 A New Kind of Referee
+          🤖 Gaming Reimagined
         </div>
         <p class="text-md mb-2 text-center">
           Before AI, scoring in games like this was rigid. You were either right or wrong; no

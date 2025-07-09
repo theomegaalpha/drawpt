@@ -1,7 +1,7 @@
 <template>
   <section class="mx-auto max-w-4xl px-4 py-12">
     <div class="flex flex-col items-center gap-8 lg:flex-row">
-      <div class="lg:w-1/2">
+      <div class="rounded-md bg-white/20 px-4 py-12 lg:w-1/2 dark:bg-black/20">
         <div class="mb-2 w-fit rounded-md bg-black/10 px-4 py-1 dark:bg-white/10">
           🧠 Purpose & Vision
         </div>

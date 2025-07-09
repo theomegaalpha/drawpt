@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import TheEntry from '@/components/home/TheEntry.vue'
-import Header from '@/components/header/Header.vue'
-import AppFooter from '@/components/footer/Footer.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <template>
   <div class="min-h-screen">
-    <Header />
+    <AppHeader />
     <TheEntry />
     <AppFooter />
   </div>
