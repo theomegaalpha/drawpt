@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import StandardInput from '../common/StandardInput.vue'
-
+import SelectionCard from './SelectionCard.vue'
 import matchmakingBackground from './matchmaking.jpg'
 import createBackground from './create.jpg'
 import joinBackground from './join.jpg'
@@ -45,67 +45,36 @@ onMounted(() => {
 <template>
   <div class="flex min-h-screen items-center justify-center p-10">
     <div
-      class="grid h-96 w-full grid-cols-1 gap-4 md:grid-cols-3 md:items-stretch lg:mx-auto lg:max-w-4xl"
+      class="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:items-stretch lg:mx-auto lg:max-w-4xl"
     >
-      <!-- matchmaking -->
-      <div
-        class="relative col-span-1 cursor-not-allowed overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:shadow-lg"
+      <SelectionCard
+        header="Join Matchmaking"
+        :backgroundImage="matchmakingBackground"
+        :disabled="true"
       >
-        <div
-          class="absolute inset-0 bg-black/50 bg-cover bg-center bg-blend-darken blur-sm grayscale filter"
-          :style="{ backgroundImage: `url(${matchmakingBackground})` }"
-        ></div>
-        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
-            Join Matchmaking
-          </h2>
-          <p class="mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-white">Coming Soon</p>
-        </div>
-      </div>
-      <!-- create lobby -->
-      <div
-        class="group relative col-span-1 transform overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+        <p class="mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-white">Coming Soon</p>
+      </SelectionCard>
+      <SelectionCard
+        header="Create Lobby"
+        :backgroundImage="createBackground"
         @click="createRoom()"
-        role="button"
-      >
-        <div
-          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
-          :style="{ backgroundImage: `url(${createBackground})` }"
-        ></div>
-        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
-            Create Lobby
-          </h2>
-        </div>
-      </div>
-      <!-- join lobby -->
-      <div
-        class="group relative col-span-1 transform cursor-default overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-      >
-        <div
-          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
-          :style="{ backgroundImage: `url(${joinBackground})` }"
-        ></div>
-        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
-          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
-            Join Lobby
-          </h2>
-          <StandardInput
-            placeholder="Room Code"
-            maxlength="4"
-            :autocapitalize="true"
-            v-model="roomCodeInput"
-            @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
-          />
-          <button
-            class="btn-default mt-1 rounded-full"
-            :disabled="roomCodeInput.length < 4"
-            @click="joinRoom(roomCodeInput)"
-          >
-            Join
-          </button>
-        </div>
-      </div>
+      />
+      <SelectionCard header="Join Lobby" :backgroundImage="joinBackground">
+        <StandardInput
+          placeholder="Room Code"
+          maxlength="4"
+          :autocapitalize="true"
+          v-model="roomCodeInput"
+          @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
+        />
+        <button
+          class="btn-default mt-1 rounded-full"
+          :disabled="roomCodeInput.length < 4"
+          @click="joinRoom(roomCodeInput)"
+        >
+          Join
+        </button>
+      </SelectionCard>
     </div>
   </div>
 </template>
