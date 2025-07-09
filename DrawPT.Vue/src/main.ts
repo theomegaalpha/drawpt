@@ -4,6 +4,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import Clarity from '@microsoft/clarity'
+Clarity.init(import.meta.env.VITE_CLARITY_PROJECT_ID)
 
 const app = createApp(App)
 

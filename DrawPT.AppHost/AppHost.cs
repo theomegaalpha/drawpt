@@ -107,6 +107,7 @@ var api = builder.AddProject<Projects.DrawPT_Api>("drawptapi")
 var customDomain = builder.AddParameter("customDomain");
 var certificateName = builder.AddParameter("certificateName");
 var googleClientId = builder.AddParameter("google-client-id");
+var clarityProjectId = builder.AddParameter("clarity-project-id");
 
 builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithReference(api)
@@ -115,11 +116,13 @@ builder.AddNpmApp("drawptui", "../DrawPT.Vue")
     .WithEnvironment("VITE_SUPABASE_URL", supabaseUrl)
     .WithEnvironment("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
     .WithEnvironment("VITE_GOOGLE_CLIENT_ID", googleClientId)
+    .WithEnvironment("VITE_CLARITY_PROJECT_ID", clarityProjectId)
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile(c =>
         c.WithBuildArg("VITE_SUPABASE_URL", supabaseUrl)
          .WithBuildArg("VITE_SUPABASE_ANON_KEY", supabaseAnonKey)
-         .WithBuildArg("VITE_GOOGLE_CLIENT_ID", googleClientId))
+         .WithBuildArg("VITE_GOOGLE_CLIENT_ID", googleClientId)
+         .WithBuildArg("VITE_CLARITY_PROJECT_ID", clarityProjectId))
     .PublishAsAzureContainerApp((infra, app) =>
     {
         app.ConfigureCustomDomain(customDomain, certificateName);
