@@ -69,7 +69,7 @@ onMounted(() => {
         role="button"
       >
         <div
-          class="absolute inset-0 bg-cover bg-center grayscale filter transition duration-300 ease-in-out group-hover:grayscale-0"
+          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
           :style="{ backgroundImage: `url(${createBackground})` }"
         ></div>
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
@@ -83,7 +83,7 @@ onMounted(() => {
         class="group relative col-span-1 transform cursor-default overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
       >
         <div
-          class="absolute inset-0 bg-cover bg-center grayscale filter transition duration-300 ease-in-out group-hover:grayscale-0"
+          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
           :style="{ backgroundImage: `url(${joinBackground})` }"
         ></div>
         <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
