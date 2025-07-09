@@ -5,7 +5,9 @@ import { useRouter } from 'vue-router' // Added useRoute
 import { useRoomStore } from '@/stores/room'
 import StandardInput from '../common/StandardInput.vue'
 
-const showTooltip = ref(false)
+import matchmakingBackground from './matchmaking.jpg'
+import createBackground from './create.jpg'
+import joinBackground from './join.jpg'
 
 const { updateRoomCode, clearRoom } = useRoomStore()
 const roomCodeInput = ref<string>('')
@@ -42,41 +44,52 @@ onMounted(() => {
 
 <template>
   <div class="flex min-h-screen items-center justify-center p-10">
-    <!-- Outer centering container -->
     <div
-      class="grid w-full grid-cols-1 gap-3 md:grid-cols-2 md:items-stretch lg:mx-auto lg:max-w-4xl"
+      class="grid h-96 w-full grid-cols-1 gap-4 md:grid-cols-3 md:items-stretch lg:mx-auto lg:max-w-4xl"
     >
-      <!-- Inner grid for columns -->
-      <div class="col-span-1 flex flex-col rounded-xl p-8 text-center shadow-md dark:bg-gray-500/5">
-        <h2 class="mb-4 text-xl font-bold">Public Matchmaking</h2>
-        <div class="flex justify-center p-8 text-center">
-          <div class="relative w-full">
-            <button
-              class="btn-default w-full"
-              disabled
-              @mouseenter="showTooltip = true"
-              @mouseleave="showTooltip = false"
-              @focus="showTooltip = true"
-              @blur="showTooltip = false"
-            >
-              Join Matchmaking Queue
-            </button>
-            <div
-              v-if="showTooltip"
-              class="absolute bottom-full left-1/2 -translate-x-1/2 transform whitespace-nowrap rounded-md border border-black/10 bg-gray-50 px-3 py-2 text-sm text-black shadow-lg dark:border-white/10 dark:bg-black dark:text-gray-200"
-            >
-              Coming soon!
-            </div>
-          </div>
+      <!-- matchmaking -->
+      <div
+        class="relative col-span-1 cursor-not-allowed overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:shadow-lg"
+      >
+        <div
+          class="absolute inset-0 bg-black/50 bg-cover bg-center bg-blend-darken blur-sm grayscale filter"
+          :style="{ backgroundImage: `url(${matchmakingBackground})` }"
+        ></div>
+        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Join Matchmaking
+          </h2>
+          <p class="mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-white">Coming Soon</p>
         </div>
       </div>
-      <div class="col-span-1 rounded-xl p-8 text-center shadow-md dark:bg-gray-500/5">
-        <h2 class="mb-4 text-xl font-bold">Private Lobby</h2>
-        <div class="relative">
-          <button class="btn-default w-full" @click="createRoom()">Create Room</button>
+      <!-- create lobby -->
+      <div
+        class="group relative col-span-1 transform overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+        @click="createRoom()"
+        role="button"
+      >
+        <div
+          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
+          :style="{ backgroundImage: `url(${createBackground})` }"
+        ></div>
+        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Create Lobby
+          </h2>
         </div>
-
-        <div class="relative my-4 flex w-full">
+      </div>
+      <!-- join lobby -->
+      <div
+        class="group relative col-span-1 transform cursor-default overflow-hidden rounded-xl shadow-md transition duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+      >
+        <div
+          class="absolute inset-0 bg-cover bg-center blur-sm grayscale filter transition duration-300 ease-in-out group-hover:blur-none group-hover:grayscale-0"
+          :style="{ backgroundImage: `url(${joinBackground})` }"
+        ></div>
+        <div class="relative z-10 flex h-full flex-col justify-center p-8 text-center">
+          <h2 class="mb-4 rounded-full bg-black/50 py-1 text-xl font-bold text-white">
+            Join Lobby
+          </h2>
           <StandardInput
             placeholder="Room Code"
             maxlength="4"
@@ -85,7 +98,7 @@ onMounted(() => {
             @keyup.enter="roomCodeInput.length === 4 ? joinRoom(roomCodeInput) : null"
           />
           <button
-            class="btn-default ml-2 flex rounded-full px-6"
+            class="btn-default mt-1 rounded-full"
             :disabled="roomCodeInput.length < 4"
             @click="joinRoom(roomCodeInput)"
           >
