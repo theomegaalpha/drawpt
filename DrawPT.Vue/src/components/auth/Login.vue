@@ -17,6 +17,7 @@
               v-model="email"
               name="email"
               type="email"
+              autocomplete="email"
               required
               class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               placeholder="Email address"
@@ -29,6 +30,7 @@
               v-model="password"
               name="password"
               type="password"
+              autocomplete="current-password"
               required
               class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               placeholder="Password"
@@ -67,9 +69,9 @@
           </div>
         </div>
 
-        <!-- Google Sign-In Button Container -->
+        <!-- Google Sign-In Button Component -->
         <div class="mb-4 text-center">
-          <div class="g_id_signin w-full"></div>
+          <GoogleLoginButton />
         </div>
 
         <div class="text-center text-sm">
@@ -86,10 +88,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
-import type { GoogleCredentialResponse } from '@/types/google'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
-import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
+import GoogleLoginButton from '@/components/common/GoogleLoginButton.vue'
 
 const router = useRouter()
 const email = ref('')
@@ -160,33 +161,5 @@ const handleResendConfirmation = async () => {
   }
 }
 
-const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
-  try {
-    loading.value = true
-    error.value = ''
-
-    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: response.credential
-    })
-
-    if (signInError) throw signInError
-
-    if (data.user) {
-      await playerStore.init()
-      if (!player.value.avatar) {
-        router.push('/profile')
-      } else {
-        router.push('/')
-      }
-    }
-  } catch (e: any) {
-    error.value = e.message || 'An error occurred during Google sign in'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Initialize Google Sign-In when component mounts
-useGoogleSignIn(handleSignInWithGoogle)
+// Google login handled by GoogleLoginButton component
 </script>

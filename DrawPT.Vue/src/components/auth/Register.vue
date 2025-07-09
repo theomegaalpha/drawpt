@@ -15,6 +15,7 @@
               v-model="email"
               name="email"
               type="email"
+              autocomplete="email"
               required
               class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               placeholder="Email address"
@@ -27,6 +28,7 @@
               v-model="password"
               name="password"
               type="password"
+              autocomplete="new-password"
               required
               class="relative block w-full appearance-none rounded-none border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               placeholder="Password"
@@ -39,6 +41,7 @@
               v-model="confirmPassword"
               name="confirmPassword"
               type="password"
+              autocomplete="new-password"
               required
               class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               placeholder="Confirm Password"
@@ -56,7 +59,7 @@
             <span v-else>Sign up with email</span>
           </button>
           <div class="my-4 text-center">
-            <div class="g_id_signin w-full"></div>
+            <GoogleLoginButton />
           </div>
         </div>
 
@@ -76,15 +79,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
-import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
-import type { GoogleCredentialResponse } from '@/types/google'
-import { usePlayerStore } from '@/stores/player'
+import GoogleLoginButton from '@/components/common/GoogleLoginButton.vue'
 
-const playerStore = usePlayerStore()
-const { player } = storeToRefs(playerStore)
+// Define a multi-word component name
+defineOptions({ name: 'AuthRegister' })
 
 const router = useRouter()
 const email = ref('')
@@ -119,34 +119,4 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
-
-const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
-  try {
-    loading.value = true
-    error.value = ''
-
-    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: response.credential
-    })
-
-    if (signInError) throw signInError
-
-    if (data.user) {
-      await playerStore.init()
-      if (!player.value.avatar) {
-        router.push('/profile')
-      } else {
-        router.push('/')
-      }
-    }
-  } catch (e: any) {
-    error.value = e.message || 'An error occurred during Google sign in'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Initialize Google Sign-In when component mounts
-useGoogleSignIn(handleSignInWithGoogle)
 </script>
