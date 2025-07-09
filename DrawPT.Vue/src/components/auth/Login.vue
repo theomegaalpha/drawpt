@@ -67,9 +67,18 @@
           </div>
         </div>
 
-        <!-- Google Sign-In Button Container -->
+        <!-- Google Sign-In Button -->
         <div class="mb-4 text-center">
-          <div class="g_id_signin w-full"></div>
+          <button
+            type="button"
+            @click="handleGoogleLogin"
+            :disabled="loading"
+            class="group relative flex w-full justify-center rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <img :src="googleSvg" alt="Google logo" class="mr-2 h-5 w-5" />
+            <span v-if="loading">Loading...</span>
+            <span v-else>Continue with Google</span>
+          </button>
         </div>
 
         <div class="text-center text-sm">
@@ -86,10 +95,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
-import type { GoogleCredentialResponse } from '@/types/google'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
-import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
+import googleSvg from '@/assets/icons/google.svg'
 
 const router = useRouter()
 const email = ref('')
@@ -160,33 +168,24 @@ const handleResendConfirmation = async () => {
   }
 }
 
-const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
+const handleGoogleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
-
-    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
+    // Use Supabase OAuth redirect, configurable via env var or fallback to current origin
+    const redirectTo = import.meta.env.VITE_SUPABASE_REDIRECT_URL || window.location.origin
+    console.log('Redirecting to:', redirectTo)
+    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      token: response.credential
+      options: { redirectTo }
     })
-
-    if (signInError) throw signInError
-
-    if (data.user) {
-      await playerStore.init()
-      if (!player.value.avatar) {
-        router.push('/profile')
-      } else {
-        router.push('/')
-      }
-    }
+    if (oauthError) throw oauthError
+    // Redirect to Supabase's OAuth URL
+    if (data?.url) window.location.href = data.url
   } catch (e: any) {
     error.value = e.message || 'An error occurred during Google sign in'
   } finally {
     loading.value = false
   }
 }
-
-// Initialize Google Sign-In when component mounts
-useGoogleSignIn(handleSignInWithGoogle)
 </script>
