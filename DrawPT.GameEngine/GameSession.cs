@@ -38,11 +38,17 @@ public class GameSession : IGameSession
     {
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
+
+        List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
+        var greetingAnnouncement = await _announcerService.GenerateGreetingAnnouncement(originalPlayers);
+        if (greetingAnnouncement != null)
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.AnnouncerAction, greetingAnnouncement);
+        await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameStartedAction, gameState);
         await Task.Delay(100);
 
         List<RoundResults> allRoundResults = new();
-        List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
 
         for (int i = 0; i < gameState.TotalRounds; i++)
         {
