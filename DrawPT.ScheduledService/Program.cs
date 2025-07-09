@@ -18,10 +18,11 @@ builder.AddAzureBlobClient(connectionName: "blobs");
 builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<FreepikMysticService>();
 builder.Services.AddTransient<DailyAIService>();
-builder.Services.AddScoped<DailiesRepository>(); // Changed from AddTransient to AddScoped
+builder.Services.AddScoped<DailiesRepository>();
 
 builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
 builder.Services.AddHostedService<DailyMidnightTaskService>();
+builder.Services.AddHostedService<WakeUpSleepyHeadService>();
 
 var app = builder.Build();
 
