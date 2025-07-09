@@ -56,7 +56,7 @@
             <span v-else>Sign up with email</span>
           </button>
           <div class="my-4 text-center">
-            <div class="g_id_signin w-full"></div>
+            <GoogleLoginButton />
           </div>
         </div>
 
@@ -76,15 +76,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
-import { useGoogleSignIn } from '@/composables/useGoogleSignIn'
-import type { GoogleCredentialResponse } from '@/types/google'
-import { usePlayerStore } from '@/stores/player'
+import GoogleLoginButton from '@/components/common/GoogleLoginButton.vue'
 
-const playerStore = usePlayerStore()
-const { player } = storeToRefs(playerStore)
+// Define a multi-word component name
+defineOptions({ name: 'AuthRegister' })
 
 const router = useRouter()
 const email = ref('')
@@ -119,34 +116,4 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
-
-const handleSignInWithGoogle = async (response: GoogleCredentialResponse) => {
-  try {
-    loading.value = true
-    error.value = ''
-
-    const { data, error: signInError } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: response.credential
-    })
-
-    if (signInError) throw signInError
-
-    if (data.user) {
-      await playerStore.init()
-      if (!player.value.avatar) {
-        router.push('/profile')
-      } else {
-        router.push('/')
-      }
-    }
-  } catch (e: any) {
-    error.value = e.message || 'An error occurred during Google sign in'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Initialize Google Sign-In when component mounts
-useGoogleSignIn(handleSignInWithGoogle)
 </script>

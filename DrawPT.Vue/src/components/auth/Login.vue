@@ -67,18 +67,9 @@
           </div>
         </div>
 
-        <!-- Google Sign-In Button -->
+        <!-- Google Sign-In Button Component -->
         <div class="mb-4 text-center">
-          <button
-            type="button"
-            @click="handleGoogleLogin"
-            :disabled="loading"
-            class="group relative flex w-full justify-center rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <img :src="googleSvg" alt="Google logo" class="mr-2 h-5 w-5" />
-            <span v-if="loading">Loading...</span>
-            <span v-else>Continue with Google</span>
-          </button>
+          <GoogleLoginButton />
         </div>
 
         <div class="text-center text-sm">
@@ -97,7 +88,7 @@ import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
-import googleSvg from '@/assets/icons/google.svg'
+import GoogleLoginButton from '@/components/common/GoogleLoginButton.vue'
 
 const router = useRouter()
 const email = ref('')
@@ -168,24 +159,5 @@ const handleResendConfirmation = async () => {
   }
 }
 
-const handleGoogleLogin = async () => {
-  try {
-    loading.value = true
-    error.value = ''
-    // Use Supabase OAuth redirect, configurable via env var or fallback to current origin
-    const redirectTo = import.meta.env.VITE_SUPABASE_REDIRECT_URL || window.location.origin
-    console.log('Redirecting to:', redirectTo)
-    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo }
-    })
-    if (oauthError) throw oauthError
-    // Redirect to Supabase's OAuth URL
-    if (data?.url) window.location.href = data.url
-  } catch (e: any) {
-    error.value = e.message || 'An error occurred during Google sign in'
-  } finally {
-    loading.value = false
-  }
-}
+// Google login handled by GoogleLoginButton component
 </script>
