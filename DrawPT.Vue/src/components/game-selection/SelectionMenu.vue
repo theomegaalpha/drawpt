@@ -55,6 +55,7 @@ onMounted(() => {
         <p class="mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-white">Coming Soon</p>
       </SelectionCard>
       <SelectionCard
+        class="cursor-pointer"
         header="Create Lobby"
         :backgroundImage="createBackground"
         @click="createRoom()"
