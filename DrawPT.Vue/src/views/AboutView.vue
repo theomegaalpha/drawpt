@@ -4,7 +4,7 @@ import Header from '@/components/header/Header.vue'
 import PurposeSection from '@/components/about/PurposeSection.vue'
 import GameplaySection from '@/components/about/GameplaySection.vue'
 import AboutMeSection from '@/components/about/AboutMeSection.vue'
-import { AppFooter } from '@/components/footer'
+import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <template>
