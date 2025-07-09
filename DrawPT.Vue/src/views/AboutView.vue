@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // No script needed for static content
-import Header from '@/components/header/Header.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 import PurposeSection from '@/components/about/PurposeSection.vue'
 import GameplaySection from '@/components/about/GameplaySection.vue'
 import AboutMeSection from '@/components/about/AboutMeSection.vue'
@@ -8,7 +8,7 @@ import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <template>
-  <Header />
+  <AppHeader />
   <section class="mx-auto max-w-4xl px-4 py-12">
     <h1 class="mb-4 text-center text-4xl font-bold">About DrawPT</h1>
   </section>
