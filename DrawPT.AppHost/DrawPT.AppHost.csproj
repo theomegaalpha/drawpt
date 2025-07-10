@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DrawPT.Api\DrawPT.Api.csproj" />
+    <ProjectReference Include="..\DrawPT.Common\DrawPT.Common.csproj" />
     <ProjectReference Include="..\DrawPT.Data\DrawPT.Data.csproj" />
     <ProjectReference Include="..\DrawPT.GameEngine\DrawPT.GameEngine.csproj" />
     <ProjectReference Include="..\DrawPT.Matchmaking\DrawPT.Matchmaking.csproj" />

@@ -1,7 +1,8 @@
-using Azure.Messaging.ServiceBus;
-using DrawPT.GameEngine.Interfaces;
-using DrawPT.Common.Models.Game;
 using System.Text.Json;
+using Azure.Messaging.ServiceBus;
+using DrawPT.Common.Configuration;
+using DrawPT.Common.Models.Game;
+using DrawPT.GameEngine.Interfaces;
 
 namespace DrawPT.GameEngine.BackgroundWorkers;
 
@@ -23,8 +24,7 @@ public class GameEventListener : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Configure Azure Service Bus processor for 'apiGlobal' queue
-        var processor = _serviceBusClient.CreateProcessor("apiGlobal");
+        var processor = _serviceBusClient.CreateProcessor(ApiGlobalQueue.Name);
 
         // Handle incoming Service Bus messages
         processor.ProcessMessageAsync += async args =>

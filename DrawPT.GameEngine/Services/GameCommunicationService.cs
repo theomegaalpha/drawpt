@@ -39,7 +39,7 @@ public class GameCommunicationService : IGameCommunicationService
         string json = JsonSerializer.Serialize(payload);
 
         // Send to the 'gameEngine' queue
-        ServiceBusSender sender = _sbClient.CreateSender("gameEngine");
+        ServiceBusSender sender = _sbClient.CreateSender(GameEngineQueue.Name);
         var sbMessage = new ServiceBusMessage(json)
         {
             SessionId = roomCode
@@ -54,7 +54,7 @@ public class GameCommunicationService : IGameCommunicationService
     {
         // Prepare request message for Service Bus
         var themes = _themeService.GetRandomThemes();
-        var requestObj = new { Action = GameEngineRequestMQ.Theme, Payload = themes };
+        var requestObj = new { Action = GameEngineRequests.Theme, Payload = themes };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         // Send via Service Bus and await response
@@ -101,7 +101,7 @@ public class GameCommunicationService : IGameCommunicationService
         stopwatch.Start();
 
         // Build SB request message
-        var requestObj = new { Action = GameEngineRequestMQ.Question, Payload = question };
+        var requestObj = new { Action = GameEngineRequests.Question, Payload = question };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         var correlationId = Guid.NewGuid().ToString();
@@ -158,7 +158,7 @@ public class GameCommunicationService : IGameCommunicationService
         answer.Username = player.Username;
         answer.Avatar = player.Avatar;
 
-        BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
+        BroadcastGameEvent(player.RoomCode, GameEngineQueue.PlayerAnsweredAction, answer);
         return answer;
     }
 

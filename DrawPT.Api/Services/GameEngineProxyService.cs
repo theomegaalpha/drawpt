@@ -75,14 +75,14 @@ namespace DrawPT.Api.Services
                 {
                     switch (action)
                     {
-                        case GameEngineRequestMQ.Theme:
+                        case GameEngineRequests.Theme:
                             {
                                 List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
                                 using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(35));
                                 response = await client.AskTheme(themes, ctsTheme.Token);
                                 break;
                             }
-                        case GameEngineRequestMQ.Question:
+                        case GameEngineRequests.Question:
                             {
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
                                 using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(35));
@@ -131,7 +131,7 @@ namespace DrawPT.Api.Services
 
                 switch (action)
                 {
-                    case GameEngineBroadcastMQ.AnnouncerAction:
+                    case GameEngineQueue.AnnouncerAction:
                         var accounerMsg = payload.Deserialize<string>();
                         if (accounerMsg == null)
                         {
@@ -142,38 +142,38 @@ namespace DrawPT.Api.Services
                         break;
 
 
-                    case GameEngineBroadcastMQ.GameStartedAction:
+                    case GameEngineQueue.GameStartedAction:
                         var gameState = payload.Deserialize<GameState>();
                         await _hubContext.Clients.Group(roomCode).GameStarted(gameState!);
                         break;
-                    case GameEngineBroadcastMQ.RoundStartedAction:
+                    case GameEngineQueue.RoundStartedAction:
                         var round = payload.GetInt32();
                         await _hubContext.Clients.Group(roomCode).RoundStarted(round);
                         break;
-                    case GameEngineBroadcastMQ.PlayerThemeSelectedAction:
+                    case GameEngineQueue.PlayerThemeSelectedAction:
                         var theme = payload.GetString();
                         await _hubContext.Clients.Group(roomCode).ThemeSelected(theme!);
                         break;
-                    case GameEngineBroadcastMQ.PlayerScoreUpdateAction:
+                    case GameEngineQueue.PlayerScoreUpdateAction:
                         var results = payload.Deserialize<PlayerResults>();
                         await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(results!.PlayerId, results.Score);
                         break;
-                    case GameEngineBroadcastMQ.PlayerLeftAction:
+                    case GameEngineQueue.PlayerLeftAction:
                         var left = payload.Deserialize<Common.Models.Player>();
                         await _hubContext.Clients.Group(roomCode).PlayerLeft(left!);
                         break;
-                    case GameEngineBroadcastMQ.GameResultsAction:
+                    case GameEngineQueue.GameResultsAction:
                         var resultsAll = payload.Deserialize<GameResults>();
                         await _hubContext.Clients.Group(roomCode).BroadcastFinalResults(resultsAll!);
                         break;
-                    case GameEngineBroadcastMQ.RoundResultsAction:
+                    case GameEngineQueue.RoundResultsAction:
                         var roundResults = payload.Deserialize<RoundResults>();
                         await _hubContext.Clients.Group(roomCode).RoundResults(roundResults!);
                         break;
-                    case GameEngineBroadcastMQ.AssessingAnswersAction:
+                    case GameEngineQueue.AssessingAnswersAction:
                         await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing answers.");
                         break;
-                    case GameEngineBroadcastMQ.PlayerAnsweredAction:
+                    case GameEngineQueue.PlayerAnsweredAction:
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
                         if (playerAnswer != null)
                         {
