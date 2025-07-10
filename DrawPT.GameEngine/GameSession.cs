@@ -45,7 +45,7 @@ public class GameSession : IGameSession
         var greetingAnnouncement = await _announcerService.GenerateGreetingAnnouncement(originalPlayers);
         if (greetingAnnouncement != null)
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
-        await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+        await Task.Delay(35 * 1000); // 35 seconds
 
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.GameStartedAction, gameState);
         await Task.Delay(100);
