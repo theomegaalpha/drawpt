@@ -163,12 +163,20 @@ onBeforeUnmount(() => {
                   <span>Log out</span>
                 </div>
               </li>
-              <li v-else>
+              <li v-if="!isAuthenticated">
                 <router-link
                   to="/login"
                   class="text-muted-foreground hover:text-accent-foreground block rounded-md p-2 duration-150 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <span>Login</span>
+                </router-link>
+              </li>
+              <li v-if="!isAuthenticated">
+                <router-link
+                  to="/register"
+                  class="text-muted-foreground hover:text-accent-foreground block rounded-md p-2 duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <span>Sign up for free!</span>
                 </router-link>
               </li>
             </ul>
