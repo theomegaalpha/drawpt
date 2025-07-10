@@ -1,4 +1,4 @@
-using DrawPT.Common.Configuration;
+using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
@@ -16,6 +16,7 @@ public class GameCommunicationService : IGameCommunicationService
     private readonly ServiceBusClient _sbClient;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingRequests;
     private readonly ILogger<GameCommunicationService> _logger;
+    private readonly ServiceBusProcessor _replyProcessor;
 
     public GameCommunicationService(
         IThemeService themeService,
@@ -26,6 +27,25 @@ public class GameCommunicationService : IGameCommunicationService
         _sbClient = sbClient;
         _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
         _logger = logger;
+
+        // Initialize centralized reply processor
+        _replyProcessor = _sbClient.CreateProcessor("gameEngineResponse", new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+        _replyProcessor.ProcessMessageAsync += ReplyHandlerAsync;
+        _replyProcessor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
+        _replyProcessor.StartProcessingAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task ReplyHandlerAsync(ProcessMessageEventArgs args)
+    {
+        if (_pendingRequests.TryRemove(args.Message.CorrelationId, out var tcs))
+        {
+            tcs.TrySetResult(args.Message.Body.ToString());
+            await args.CompleteMessageAsync(args.Message);
+        }
+        else
+        {
+            await args.AbandonMessageAsync(args.Message);
+        }
     }
 
     public void BroadcastGameEvent(string roomCode, string gameAction, object? message = null)
@@ -39,7 +59,7 @@ public class GameCommunicationService : IGameCommunicationService
         string json = JsonSerializer.Serialize(payload);
 
         // Send to the 'gameEngine' queue
-        ServiceBusSender sender = _sbClient.CreateSender("gameEngine");
+        ServiceBusSender sender = _sbClient.CreateSender(GameEngineQueue.Name);
         var sbMessage = new ServiceBusMessage(json)
         {
             SessionId = roomCode
@@ -54,38 +74,27 @@ public class GameCommunicationService : IGameCommunicationService
     {
         // Prepare request message for Service Bus
         var themes = _themeService.GetRandomThemes();
-        var requestObj = new { Action = GameEngineRequestMQ.Theme, Payload = themes };
+        var requestObj = new { Action = GameEngineRequests.Theme, Payload = themes };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         // Send via Service Bus and await response
         var correlationId = Guid.NewGuid().ToString();
-        var replyQueue = "gameEngineResponse";
-        var processor = _sbClient.CreateProcessor(replyQueue, new ServiceBusProcessorOptions { AutoCompleteMessages = false });
         var tcs = new TaskCompletionSource<string>();
-        processor.ProcessMessageAsync += async args =>
-        {
-            if (args.Message.CorrelationId == correlationId)
-            {
-                tcs.TrySetResult(args.Message.Body.ToString());
-                await args.CompleteMessageAsync(args.Message);
-            }
-        };
-        processor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
-        await processor.StartProcessingAsync();
+        _pendingRequests[correlationId] = tcs;
 
         var sender = _sbClient.CreateSender("gameEngineRequest");
         var requestMsg = new ServiceBusMessage(requestPayload)
         {
             SessionId = player.ConnectionId,
             CorrelationId = correlationId,
-            ReplyTo = replyQueue
+            ReplyTo = "gameEngineResponse"
         };
         await sender.SendMessageAsync(requestMsg);
 
         // Wait for response or timeout
         var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
         var completed = await Task.WhenAny(tcs.Task, delay);
-        await processor.StopProcessingAsync();
+        _pendingRequests.TryRemove(correlationId, out _);
 
         string selectedTheme = completed == tcs.Task
             ? tcs.Task.Result
@@ -101,37 +110,26 @@ public class GameCommunicationService : IGameCommunicationService
         stopwatch.Start();
 
         // Build SB request message
-        var requestObj = new { Action = GameEngineRequestMQ.Question, Payload = question };
+        var requestObj = new { Action = GameEngineRequests.Question, Payload = question };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         var correlationId = Guid.NewGuid().ToString();
-        var replyQueue = "gameEngineResponse";
-        var processor = _sbClient.CreateProcessor(replyQueue, new ServiceBusProcessorOptions { AutoCompleteMessages = false });
         var tcs = new TaskCompletionSource<string>();
-        processor.ProcessMessageAsync += async args =>
-        {
-            if (args.Message.CorrelationId == correlationId)
-            {
-                tcs.TrySetResult(args.Message.Body.ToString());
-                await args.CompleteMessageAsync(args.Message);
-            }
-        };
-        processor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
-        await processor.StartProcessingAsync();
+        _pendingRequests[correlationId] = tcs;
 
         var sender = _sbClient.CreateSender("gameEngineRequest");
         var requestMsg = new ServiceBusMessage(requestPayload)
         {
             SessionId = player.ConnectionId,
             CorrelationId = correlationId,
-            ReplyTo = replyQueue
+            ReplyTo = "gameEngineResponse"
         };
         await sender.SendMessageAsync(requestMsg);
 
         // Wait for response or timeout
         var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
         var completed = await Task.WhenAny(tcs.Task, delay);
-        await processor.StopProcessingAsync();
+        _pendingRequests.TryRemove(correlationId, out _);
 
         string answerString = completed == tcs.Task ? tcs.Task.Result : string.Empty;
 
@@ -158,7 +156,7 @@ public class GameCommunicationService : IGameCommunicationService
         answer.Username = player.Username;
         answer.Avatar = player.Avatar;
 
-        BroadcastGameEvent(player.RoomCode, GameEngineBroadcastMQ.PlayerAnsweredAction, answer);
+        BroadcastGameEvent(player.RoomCode, GameEngineQueue.PlayerAnsweredAction, answer);
         return answer;
     }
 

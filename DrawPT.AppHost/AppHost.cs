@@ -1,5 +1,3 @@
-using Aspire.Hosting.Azure;
-
 using Azure.Provisioning.ServiceBus;
 using Azure.Provisioning.Sql;
 using Azure.Provisioning.Storage;
@@ -36,7 +34,6 @@ var serviceBus = builder.AddAzureServiceBus("service-bus")
     })
     .RunAsEmulator();
 serviceBus.AddServiceBusQueue("apiGlobal");
-serviceBus.AddServiceBusQueue("apiGame");
 serviceBus.AddServiceBusQueue("gameEngine");
 serviceBus.AddServiceBusQueue("gameEngineRequest");
 serviceBus.AddServiceBusQueue("gameEngineResponse");
