@@ -1,4 +1,4 @@
-using DrawPT.Common.Configuration;
+using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;

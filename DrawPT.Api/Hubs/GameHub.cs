@@ -5,6 +5,7 @@ using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using DrawPT.Api.Services;
+using DrawPT.Common.ServiceBus;
 
 namespace DrawPT.Api.Hubs
 {
@@ -156,7 +157,7 @@ namespace DrawPT.Api.Hubs
             var message = JsonSerializer.Serialize(gameState);
 
             // Send start game message to Azure Service Bus queue 'apiGlobal'
-            var serviceBusSender = _serviceBusClient.CreateSender("apiGlobal");
+            var serviceBusSender = _serviceBusClient.CreateSender(ApiGlobalQueue.Name);
             var serviceBusMessage = new ServiceBusMessage(message);
             await serviceBusSender.SendMessageAsync(serviceBusMessage);
 

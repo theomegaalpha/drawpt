@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
-using DrawPT.Common.Configuration;
+using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
 

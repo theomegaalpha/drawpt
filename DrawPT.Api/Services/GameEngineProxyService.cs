@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Api.Hubs;
-using DrawPT.Common.Configuration;
+using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Models.Game;
 using Microsoft.AspNetCore.SignalR;
 

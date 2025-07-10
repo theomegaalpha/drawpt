@@ -1,4 +1,4 @@
-namespace DrawPT.Common.Configuration
+namespace DrawPT.Common.ServiceBus
 {
     public class ApiGlobalQueue
     {
