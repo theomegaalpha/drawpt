@@ -11,5 +11,8 @@ namespace DrawPT.Data.Repositories.Reference
         public const string GreetingSolo = "Greeting Solo";
         public const string GreetingTwoPlayers = "Greeting Two Players";
         public const string GreetingGroup = "Greeting Group";
+        public const string GameResultsSolo = "Game Results Solo";
+        public const string GameResultsTwoPlayers = "Game Results Two Players";
+        public const string GameResultsGroup = "Game Results Group";
     }
 }
