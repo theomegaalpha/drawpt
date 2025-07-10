@@ -24,18 +24,21 @@ Maintain engagement and variety in each response while aligning to the provided 
 Response Format:
 (Use this format without curly braces) [{Theme}] {Creative image prompt}";
         private const string _imageEnhancePrompt = @"  Use a painterly style image with visible brushstrokes and a slightly textured surface, utilizing a muted pastel color palette of soft blues, light grays, and pale yellow with soft, diffused lighting.";
-        private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 20 based on linguistic, semantic, and contextual resemblance.
-Evaluation Criteria:
-Exact Match (20 Points): The guessed phrase matches the original exactly—rare but possible.
-Very Strong Conceptual & Sentiment Match (15-19 Points): The guess conveys the same emotional tone and core meaning, matching on some words.
-Strong Conceptual & Sentiment Match (11-14 Points): The guess conveys the same emotional tone and core meaning, even if the wording is different.
-Moderate Conceptual Overlap (8-10 Points): The guess captures important aspects of the phrase—such as key themes, related emotions, or partial word matches—but deviates in structure.
-Weak Connection (4-7 Points): The guess contains elements that vaguely relate to the original phrase but alters meaning significantly.
-Very Weak Connection (1-3 Points): The guess contains trace elements that can arguably relate to the original phrase.
-Unrelated (0 Points): The guess has no meaningful connection in words, sentiment, or concept.
+        private const string _assessmentPrompt = @"You are an AI game moderator responsible for evaluating contestant guesses against a given original phrase in a gameshow setting. Your primary task is to provide consistent similarity assessments, awarding scores between 0 and 100 based on linguistic, semantic, and contextual resemblance.
 
-Strict Response Format:
-Return results as a JSON array where each contestant's data follows this structure:
+🎯 Evaluation Criteria:
+
+(100 points) Exact Match:  The guessed phrase is identical to the original—includes all elements, words, and structure precisely. Rare but possible.
+(90–99 points) Very Strong Match:  The guess mirrors the original in tone and core meaning, with nearly all key elements retained and high lexical overlap. Minor omissions only.
+(75–89 points) Strong Match:  The guess expresses the same emotional tone and central ideas, but may rephrase or omit one minor component. Essential concepts still present.
+(60–74 points) Moderate Match:  The guess preserves general themes and partial sentiment, but lacks multiple key elements or introduces mild distortion.
+(40–59 points) Partial Overlap:  The guess reflects some relevant ideas but includes significant omissions or semantic drift. Emotional tone may diverge.
+(25–39 points) Weak Connection:  The guess includes loosely related concepts with noticeable element loss and inconsistent tone or meaning.
+(1–24 points) Very Weak Connection:  The guess contains minimal resemblance—perhaps one surviving concept or emotion—but lacks completeness or cohesion.
+(0 points) Unrelated:  No discernible connection in wording, sentiment, or concept. Completely off-target.
+
+🧾 Strict Response Format
+Return results as a JSON array where each contestant’s data follows this structure:
 
 json
 [
@@ -43,20 +46,17 @@ json
         'Id': '<unique identifier>',
         'PlayerId': '<unique identifier of original Player ID>',
         'ConnectionId': '<unique identifier of original Connection ID>',
-        'Username': '<contestant's username>',
-        'Avatar': '<contestant's avatar URL>',
-        'Guess': '<contestant's guessed phrase>',
-        'Score': '<integer from 0 to 20>',
+        'Username': '<contestant\'s username>',
+        'Avatar': '<contestant\'s avatar URL>',
+        'Guess': '<contestant\'s guessed phrase>',
+        'Score': <integer from 0 to 100>,
         'Reason': '<explanation for the given score>',
         'IsGambling': <boolean>,
-        'BonusPoints': <integer from 0 to 5 of original scoring>,
-        'SubmittedAt': <string>
+        'BonusPoints': <integer from 0 to 25 of original scoring>,
+        'SubmittedAt': '<string>'
     }
 ]
-The response must always be a JSON array, even when evaluating a single contestant.
-Ensure explanations ('Reason') are concise yet sufficiently justify the assigned score.
-Original Phrase:
-Now, the original phrase is:";
+The response must always be a JSON array, even when evaluating a single contestant.Ensure explanations(Reason) are concise but clearly justify the score using linguistic and semantic reasoning.";
 
         public AIService(OpenAIClient aiClient, FreepikFastService freepikImageService, IConfiguration configuration)
         {
@@ -95,18 +95,20 @@ Now, the original phrase is:";
                 {
                     if (completion.Content.Count == 0)
                     {
-                        answers.ForEach(a => {
+                        answers.ForEach(a =>
+                        {
                             a.Reason = "Problem assing scores.";
-                            a.Score = 20;
+                            a.Score = 100;
                         });
                     }
                     var jsonResponse = completion.Content[0].Text.ToString() ?? "{}";
                     var playerAnswers = JsonSerializer.Deserialize<List<PlayerAnswer>>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (playerAnswers == null)
                     {
-                        answers.ForEach(a => {
+                        answers.ForEach(a =>
+                        {
                             a.Reason = "Problem assing scores.";
-                            a.Score = 20;
+                            a.Score = 100;
                         });
                         return answers;
                     }
@@ -117,7 +119,8 @@ Now, the original phrase is:";
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            answers.ForEach(a => {
+            answers.ForEach(a =>
+            {
                 a.Reason = "Problem assing scores.";
                 a.Score = 20;
             });
