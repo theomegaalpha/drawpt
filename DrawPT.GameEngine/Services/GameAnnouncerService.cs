@@ -124,9 +124,54 @@ namespace DrawPT.GameEngine.Services
             return null;
         }
 
-        public string GenerateGameResultAnnouncement()
+        public async Task<string?> GenerateGameResultsAnnouncement(List<PlayerResults> playerResults)
         {
-            return "blegh";
+            var systemPrompt = playerResults.Count == 1
+                ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GameResultSolo)
+                : playerResults.Count == 2
+                    ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GameResultTwoPlayers)
+                    : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GameResultGroup);
+
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage($"results: {JsonConvert.SerializeObject(playerResults.Select(a => new { a.Username, a.Score }))}")
+            };
+
+            try
+            {
+                var options = new ChatCompletionOptions
+                {
+                    Temperature = 1,
+                    MaxOutputTokenCount = 800,
+
+                    TopP = 1,
+                    FrequencyPenalty = 0,
+                    PresencePenalty = 0
+                };
+
+                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
+
+                // Print the response
+                if (completion != null)
+                {
+                    if (completion.Content.Count == 0)
+                    {
+                        _logger.LogWarning($"No announcer message was produced for {playerResults}.");
+                        return null;
+                    }
+                    return completion?.Content[0].Text.ToString() ?? "";
+                }
+                else
+                {
+                    _logger.LogWarning($"No response received from the announcer for {playerResults}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred: {ex.Message}");
+            }
+            return null;
         }
     }
 }

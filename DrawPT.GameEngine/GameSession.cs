@@ -133,5 +133,10 @@ public class GameSession : IGameSession
             TotalRounds = gameState.TotalRounds
         };
         _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.GameResultsAction, finalScores);
+
+        var finalAnnouncement = await _announcerService.GenerateGameResultsAnnouncement(finalScores.PlayerResults);
+        if (finalAnnouncement != null)
+            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineBroadcastMQ.AnnouncerAction, finalAnnouncement);
+        await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
     }
 }
