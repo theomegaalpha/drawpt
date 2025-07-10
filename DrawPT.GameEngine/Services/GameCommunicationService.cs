@@ -164,11 +164,11 @@ public class GameCommunicationService : IGameCommunicationService
 
     int CalculateBonusPoints(double elapsedTime)
     {
-        if (elapsedTime <= 3)
-            return 5;
-        if (elapsedTime >= 15)
+        if (elapsedTime <= 5)
+            return 25;
+        if (elapsedTime >= 25)
             return 0;
-        // Linear decrease from 5 to 0 between 3 and 15 seconds
-        return (int) Math.Ceiling(5 * (1 - (elapsedTime - 3) / 12));
+        // Linear decrease from 25 to 0 between 5 and 25 seconds
+        return (int) Math.Ceiling(25 * (1 - (elapsedTime - 5) / 20));
     }
 }

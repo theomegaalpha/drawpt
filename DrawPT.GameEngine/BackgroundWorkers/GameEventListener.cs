@@ -8,17 +8,17 @@ namespace DrawPT.GameEngine.BackgroundWorkers;
 public class GameEventListener : BackgroundService
 {
     private readonly ILogger<GameEventListener> _logger;
-    private readonly IGameSession _gameEngine;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ServiceBusClient _serviceBusClient;
 
     public GameEventListener(
         ILogger<GameEventListener> logger,
         ServiceBusClient serviceBusClient,
-        IGameSession gameEngine)
+        IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _serviceBusClient = serviceBusClient;
-        _gameEngine = gameEngine;
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,7 +33,13 @@ public class GameEventListener : BackgroundService
             _logger.LogInformation($"Received Service Bus message: {body}");
             var gameState = JsonSerializer.Deserialize<GameState>(body);
             _logger.LogInformation($"Game start event for room: {gameState.RoomCode}");
-            _ = Task.Run(async () => await _gameEngine.PlayGameAsync(gameState.RoomCode));
+            // Resolve scoped IGameSession per message
+            _ = Task.Run(async () =>
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var gameEngine = scope.ServiceProvider.GetRequiredService<IGameSession>();
+                await gameEngine.PlayGameAsync(gameState.RoomCode);
+            });
             await args.CompleteMessageAsync(args.Message);
         };
         processor.ProcessErrorAsync += args =>
