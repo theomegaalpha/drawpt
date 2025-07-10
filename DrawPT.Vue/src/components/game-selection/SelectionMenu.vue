@@ -11,9 +11,12 @@ import joinBackground from './join.jpg'
 
 const { updateRoomCode, clearRoom } = useRoomStore()
 const roomCodeInput = ref<string>('')
+const isCreating = ref<boolean>(false)
+const isJoining = ref<boolean>(false)
 const router = useRouter()
 
 const joinRoom = (codeToJoin: string) => {
+  isJoining.value = true
   if (!codeToJoin || codeToJoin.trim().length === 0) {
     console.warn('Attempted to join with an empty room code.')
     // Optionally, add a user notification here
@@ -27,14 +30,20 @@ const joinRoom = (codeToJoin: string) => {
 }
 
 const createRoom = () => {
-  api.createRoom().then((newlyCreatedCode) => {
-    if (newlyCreatedCode) {
-      joinRoom(newlyCreatedCode)
-    } else {
-      console.error('Failed to create room: No room code received from API.')
-      // Optionally, add a user notification here
-    }
-  })
+  isCreating.value = true
+  api
+    .createRoom()
+    .then((newlyCreatedCode) => {
+      if (newlyCreatedCode) {
+        joinRoom(newlyCreatedCode)
+      } else {
+        console.error('Failed to create room: No room code received from API.')
+        // Optionally, add a user notification here
+      }
+    })
+    .finally(() => {
+      isCreating.value = false
+    })
 }
 
 onMounted(() => {
@@ -58,9 +67,10 @@ onMounted(() => {
         class="cursor-pointer"
         header="Create Lobby"
         :backgroundImage="createBackground"
+        :isLoading="isCreating"
         @click="createRoom()"
       />
-      <SelectionCard header="Join Lobby" :backgroundImage="joinBackground">
+      <SelectionCard header="Join Lobby" :backgroundImage="joinBackground" :isLoading="isJoining">
         <StandardInput
           placeholder="Room Code"
           maxlength="4"
