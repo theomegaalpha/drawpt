@@ -1,6 +1,6 @@
 namespace DrawPT.Common.ServiceBus
 {
-    public class ApiGlobalQueue
+    public static class ApiGlobalQueue
     {
         public const string Name = "apiGlobal";
 

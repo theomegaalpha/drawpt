@@ -1,6 +1,6 @@
 namespace DrawPT.Common.ServiceBus
 {
-    public class GameEngineQueue
+    public static class GameEngineQueue
     {
         public const string Name = "gameEngine";
 

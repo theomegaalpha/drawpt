@@ -2,7 +2,6 @@ using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
-using DrawPT.Data.Repositories;
 using DrawPT.GameEngine.Interfaces;
 
 namespace DrawPT.GameEngine;
@@ -37,6 +36,8 @@ public class GameSession : IGameSession
 
     public async Task PlayGameAsync(string roomCode)
     {
+        _logger.LogInformation($"Starting game session for room {roomCode}");
+
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
 
@@ -138,5 +139,7 @@ public class GameSession : IGameSession
         if (finalAnnouncement != null)
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, finalAnnouncement);
         await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+
+        _logger.LogInformation($"Final scores for room {roomCode}: {string.Join(", ", finalScores.PlayerResults.Select(pr => $"{pr.Username}: {pr.Score}"))}");
     }
 }
