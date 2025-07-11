@@ -4,6 +4,7 @@ namespace DrawPT.Common.Constants
     {
         WaitingForPlayers,
         JustStarted,
+        StartingRound,
         AskingTheme,
         AskingQuestion,
         ShowingRoundResults,

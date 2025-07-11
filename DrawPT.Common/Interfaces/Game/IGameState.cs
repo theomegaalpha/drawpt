@@ -1,4 +1,5 @@
 using DrawPT.Common.Constants;
+using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 
 namespace DrawPT.Common.Interfaces.Game
@@ -12,6 +13,8 @@ namespace DrawPT.Common.Interfaces.Game
         Guid HostPlayerId { get; set; }
         GameStatus CurrentStatus { get; set; }
         List<string> Themes { get; set; }
+        string CurrentTheme { get; set; }
+        List<Player> Players { get; set; }
         List<PlayerResults> PlayerResults { get; set; }
     }
 }

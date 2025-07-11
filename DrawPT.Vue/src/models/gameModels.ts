@@ -9,13 +9,28 @@ export interface IGameConfiguration {
   GamblingEnabled: boolean
 }
 
+export enum GameStatus {
+  WaitingForPlayers = 0,
+  JustStarted = 1,
+  StartingRound = 2,
+  AskingTheme = 3,
+  AskingQuestion = 4,
+  ShowingRoundResults = 5,
+  Completed = 6,
+  Abandoned = 7
+}
+
 export interface GameState {
   RoomCode: string
   CurrentRound: number
-  GameConfiguration: IGameConfiguration
   TotalRounds: number
+  GameConfiguration: IGameConfiguration
   HostPlayerId: string
   Players: string[]
+  Themes: string[]
+  CurrentTheme: string
+  CurrentImageUrl: string
+  CurrentStatus: GameStatus
 }
 
 export interface GameResults {
