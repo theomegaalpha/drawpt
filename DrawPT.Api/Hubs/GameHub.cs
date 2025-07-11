@@ -130,9 +130,9 @@ namespace DrawPT.Api.Hubs
             }
             await _cache.SetGameState(gameState);
 
-            var otherPlayers = players.Where(p => p.ConnectionId != Context.ConnectionId).ToList();
             await Clients.Caller.InitRoomPlayers(players);
             await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
+            await Clients.GroupExcept(player.RoomCode, Context.ConnectionId).PlayerJoined(player);
         }
 
         public async Task<bool> StartGame()
