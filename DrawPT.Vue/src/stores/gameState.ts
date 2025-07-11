@@ -1,51 +1,68 @@
 // src/stores/gameState.ts
 import { defineStore } from 'pinia'
-import type { GameState, PlayerQuestion, RoundResults } from '@/models/gameModels'
+import type { GameState, PlayerQuestion, IGameConfiguration } from '@/models/gameModels'
+import { GameStatus } from '@/models/gameModels'
 import { useScoreboardStore } from './scoreboard'
 
 export const useGameStateStore = defineStore('gameState', {
   state: () => ({
-    themeOptions: [] as string[],
+    // GameState properties
+    roomCode: '' as string,
+    currentRound: 0,
+    totalRounds: 0,
+    gameConfiguration: {} as IGameConfiguration,
+    hostPlayerId: '' as string,
+    players: [] as string[],
+    themes: [] as string[],
     selectableThemeOptions: [] as string[],
+    currentTheme: '' as string,
     currentImageUrl: '' as string,
+    currentStatus: GameStatus.WaitingForPlayers,
+    // UI-specific
+    hasPlayerAction: false,
     showImageLoader: false,
     shouldShowResults: false,
     currentBonusPoints: 0,
-    isGuessLocked: true,
-    currentRoundNumber: 0
-    // Timeout ID for bonus points display, if managed by store
-    // bonusPointsTimeoutId: null as NodeJS.Timeout | null,
+    isGuessLocked: true
   }),
   getters: {
-    areThemesSelectable: (state) => state.selectableThemeOptions.length > 0,
-    areThemesVisible: (state) => state.themeOptions.length > 0,
+    areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
+    areThemesVisible: (state) => state.themes.length > 0,
     showGameCanvas: (state) => state.currentImageUrl !== ''
   },
   actions: {
     initializeGameState(gameState: GameState) {
-      this.themeOptions = gameState.themeOptions || []
-      this.selectableThemeOptions = gameState.selectableThemeOptions || []
+      // Map backend state
+      this.roomCode = gameState.roomCode || ''
+      this.currentRound = gameState.currentRound || 0
+      this.totalRounds = gameState.totalRounds || 0
+      this.gameConfiguration = gameState.gameConfiguration
+      this.hostPlayerId = gameState.hostPlayerId
+      this.players = gameState.players || []
+      this.themes = gameState.themes || []
+      this.currentTheme = gameState.currentTheme || ''
       this.currentImageUrl = gameState.currentImageUrl || ''
-      this.showImageLoader = gameState.showImageLoader || false
-      this.shouldShowResults = gameState.shouldShowResults || false
-      this.currentBonusPoints = gameState.currentBonusPoints || 0
-      this.isGuessLocked = gameState.isGuessLocked || true
-      this.currentRoundNumber = gameState.currentRoundNumber || 0
+      this.currentStatus = gameState.currentStatus
+      // UI defaults
+      this.showImageLoader = false
+      this.shouldShowResults = false
+      this.currentBonusPoints = 0
+      this.isGuessLocked = true
     },
     handleThemeSelectionEvent(themes: string[]) {
       this.currentImageUrl = ''
       this.showImageLoader = false
       this.shouldShowResults = false
-      this.themeOptions = themes
+      this.themes = themes
       this.selectableThemeOptions = []
     },
-    handleThemeSelectedEvent(theme: string) {
-      this.themeOptions = []
+    handleThemeSelectedEvent() {
+      this.themes = []
       this.selectableThemeOptions = []
       this.showImageLoader = true
       console.log('handle theme selected event is now', this.showImageLoader)
     },
-    handleBroadcastRoundResultsEvent(roundResults: RoundResults) {
+    handleBroadcastRoundResultsEvent() {
       this.shouldShowResults = true
       this.showImageLoader = false
       this.currentImageUrl = ''
@@ -61,7 +78,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentImageUrl = ''
       this.shouldShowResults = false
       this.showImageLoader = false
-      this.themeOptions = []
+      this.themes = []
       this.selectableThemeOptions = themes
       this.isGuessLocked = true
     },
@@ -70,7 +87,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.showImageLoader = false
       this.isGuessLocked = false // Unlock guess input
       this.currentImageUrl = question.imageUrl || ''
-      this.currentRoundNumber = question.roundNumber // Keep track of current round
+      this.currentRound = question.roundNumber // Keep track of current round
       const scoreboardStore = useScoreboardStore()
       scoreboardStore.setRound(question.roundNumber)
     },
@@ -87,18 +104,18 @@ export const useGameStateStore = defineStore('gameState', {
     },
     // Action to be called when a theme is chosen by the current player via UI
     // This is distinct from handleThemeSelectedEvent which is a broadcast
-    playerSelectedTheme(theme: string) {
+    playerSelectedTheme() {
       this.selectableThemeOptions = []
-      this.themeOptions = []
+      this.themes = []
     },
     handleEndGameEvent() {
       this.shouldShowResults = true
       this.currentImageUrl = ''
-      this.themeOptions = []
+      this.themes = []
       this.selectableThemeOptions = []
       this.currentBonusPoints = 0
       this.isGuessLocked = true
-      this.currentRoundNumber = 0
+      this.currentRound = 0
       this.showImageLoader = false
     }
   }

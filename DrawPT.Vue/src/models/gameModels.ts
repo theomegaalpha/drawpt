@@ -21,16 +21,16 @@ export enum GameStatus {
 }
 
 export interface GameState {
-  RoomCode: string
-  CurrentRound: number
-  TotalRounds: number
-  GameConfiguration: IGameConfiguration
-  HostPlayerId: string
-  Players: string[]
-  Themes: string[]
-  CurrentTheme: string
-  CurrentImageUrl: string
-  CurrentStatus: GameStatus
+  roomCode: string
+  currentRound: number
+  totalRounds: number
+  gameConfiguration: IGameConfiguration
+  hostPlayerId: string
+  players: string[]
+  themes: string[]
+  currentTheme: string
+  currentImageUrl: string
+  currentStatus: GameStatus
 }
 
 export interface GameResults {
