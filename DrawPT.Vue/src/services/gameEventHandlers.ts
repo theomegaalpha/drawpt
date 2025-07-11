@@ -45,8 +45,7 @@ export function registerBaseGameHubEvents() {
   service.on('gameStarted', (gameState: GameState) => {
     stores.roomStore.startGame()
     stores.notificationStore.addGameNotification('Game has started!')
-    // Potentially update gameStateStore with initial game state if provided
-    // stores.gameStateStore.initializeGameState(gameState);
+    stores.gameStateStore.initializeGameState(gameState)
   })
 
   service.on('roundResults', (roundResult: RoundResults) => {

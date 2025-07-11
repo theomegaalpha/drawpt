@@ -1,6 +1,6 @@
 // src/stores/gameState.ts
 import { defineStore } from 'pinia'
-import type { PlayerQuestion, RoundResults } from '@/models/gameModels'
+import type { GameState, PlayerQuestion, RoundResults } from '@/models/gameModels'
 import { useScoreboardStore } from './scoreboard'
 
 export const useGameStateStore = defineStore('gameState', {
@@ -22,6 +22,16 @@ export const useGameStateStore = defineStore('gameState', {
     showGameCanvas: (state) => state.currentImageUrl !== ''
   },
   actions: {
+    initializeGameState(gameState: GameState) {
+      this.themeOptions = gameState.themeOptions || []
+      this.selectableThemeOptions = gameState.selectableThemeOptions || []
+      this.currentImageUrl = gameState.currentImageUrl || ''
+      this.showImageLoader = gameState.showImageLoader || false
+      this.shouldShowResults = gameState.shouldShowResults || false
+      this.currentBonusPoints = gameState.currentBonusPoints || 0
+      this.isGuessLocked = gameState.isGuessLocked || true
+      this.currentRoundNumber = gameState.currentRoundNumber || 0
+    },
     handleThemeSelectionEvent(themes: string[]) {
       this.currentImageUrl = ''
       this.showImageLoader = false
