@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { motion } from 'motion-v'
+const { isPrimary } = defineProps({ isPrimary: { type: Boolean, default: false } })
 </script>
 
 <template>
@@ -22,7 +23,11 @@ import { motion } from 'motion-v'
         mass: 0.1
       }
     }"
-    class="radial-gradient relative rounded-full px-6 py-2"
+    :class="[
+      'radial-gradient',
+      { 'shiny-btn-primary': isPrimary },
+      'relative rounded-full px-6 py-2'
+    ]"
   >
     <span
       class="linear-mask relative inline-flex h-full w-full items-center justify-center font-light tracking-wide"
