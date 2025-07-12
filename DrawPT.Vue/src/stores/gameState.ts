@@ -60,7 +60,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.themes = []
       this.selectableThemeOptions = []
       this.showImageLoader = true
-      console.log('handle theme selected event is now', this.showImageLoader)
     },
     handleBroadcastRoundResultsEvent() {
       this.shouldShowResults = true
@@ -74,7 +73,8 @@ export const useGameStateStore = defineStore('gameState', {
       }, 5000)
     },
 
-    prepareForThemeSelection(themes: string[]) {
+    prepareForThemeSelection(themes: string[], hasAction: boolean = false) {
+      this.hasPlayerAction = hasAction
       this.currentImageUrl = ''
       this.shouldShowResults = false
       this.showImageLoader = false
