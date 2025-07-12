@@ -41,7 +41,6 @@ export const useGameStateStore = defineStore('gameState', {
   },
   actions: {
     initializeGameState(gameState: GameState) {
-      console.log('Initializing game state:', gameState)
       // Map backend state
       this.roomCode = gameState.roomCode || ''
       this.currentRound = gameState.currentRound || 0
@@ -67,6 +66,12 @@ export const useGameStateStore = defineStore('gameState', {
     clearRoom() {
       this.roomCode = ''
       this.currentRound = 0
+    },
+    addPlayer(player: Player) {
+      const existingPlayer = this.players.find((p) => p.id === player.id)
+      if (!existingPlayer) {
+        this.players.push(player)
+      }
     },
 
     handleThemeSelectionEvent(themes: string[]) {

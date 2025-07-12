@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { usePlayerStore } from '@/stores/player'
-import { useRoomStore } from '@/stores/room'
+import { useGameStateStore } from '@/stores/gameState'
 import service from '@/services/signalRService'
 import { ref } from 'vue'
 import ShinyButton from '@/components/common/ShinyButton.vue'
 
 const { player } = usePlayerStore()
-const { room } = useRoomStore()
+const { players, roomCode } = useGameStateStore()
 const isCopied = ref(false)
 const isLoading = ref(false)
 
@@ -22,9 +22,9 @@ const startGame = async () => {
 }
 
 const copyRoomCodeToClipboard = () => {
-  if (room && room.code) {
+  if (roomCode) {
     navigator.clipboard
-      .writeText(room.code)
+      .writeText(roomCode)
       .then(() => {
         isCopied.value = true
         setTimeout(() => {
@@ -44,7 +44,7 @@ const copyRoomCodeToClipboard = () => {
     <h2 class="mb-2 text-2xl">Welcome, {{ player.username }}</h2>
     <p class="mb-2 text-lg">Waiting for other players to join...</p>
     <ShinyButton
-      v-if="room.players.length > 0 && room.players[0].id === player.id"
+      v-if="players.length > 0 && players[0].id === player.id"
       class="my-5 px-10"
       :class="{ 'cursor-progress': isLoading }"
       :isPrimary="true"
@@ -58,7 +58,7 @@ const copyRoomCodeToClipboard = () => {
       class="mx-auto w-fit cursor-pointer rounded-xl bg-zinc-800/10 px-4 py-2 text-2xl font-bold text-blue-400 transition-all hover:bg-zinc-800/20 dark:bg-white/10 dark:text-blue-300 dark:hover:bg-white/20"
       :class="{ 'font-semibold text-green-500 dark:text-green-400': isCopied }"
     >
-      {{ isCopied ? 'Copied!' : room.code }}
+      {{ isCopied ? 'Copied!' : roomCode }}
     </h2>
   </div>
 </template>
