@@ -13,6 +13,7 @@ import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useVolumeStore } from '@/stores/volume'
+import { useGameStateStore } from '@/stores/gameState'
 import api from '@/api/api'
 import service from '@/services/signalRService'
 import {
@@ -30,11 +31,12 @@ const scoreboardStore = useScoreboardStore()
 const notificationStore = useNotificationStore()
 const roomJoinStore = useRoomJoinStore()
 const { isModalOpen, toggleModal } = useVolumeStore()
+const gameState = useGameStateStore()
 
 onMounted(async () => {
   roomJoinStore.reset()
   scoreboardStore.clearScoreboard()
-  roomStore.setSuccessfullyJoined(false)
+  gameState.successfullyJoined = false
 
   api.getPlayer().then((res) => {
     playerStore.updatePlayer(res)
@@ -66,8 +68,8 @@ onUnmounted(() => {
 
 <template>
   <GameNotifications />
-  <SetUsername v-if="!roomStore.successfullyJoined" />
-  <div v-if="roomStore.successfullyJoined && playerStore.player?.id" class="h-full">
+  <SetUsername v-if="!gameState.successfullyJoined" />
+  <div v-if="gameState.successfullyJoined && playerStore.player?.id" class="h-full">
     <GameResults v-if="scoreboardStore.gameResults.playerResults.length > 0" />
     <div v-else>
       <Lobby v-if="!roomStore.room.isGameStarted" />

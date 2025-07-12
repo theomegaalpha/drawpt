@@ -35,10 +35,11 @@ export function registerBaseGameHubEvents() {
     stores.roomStore.removePlayer(player)
   })
 
-  service.on('successfullyJoined', (connectionId: string) => {
+  service.on('successfullyJoined', (connectionId: string, gameState: GameState) => {
     console.log('Successfully joined the game with connection ID:', connectionId)
     stores.notificationStore.addGameNotification('Welcome to the party!')
     stores.playerStore.updateConnectionId(connectionId)
+    stores.gameStateStore.initializeGameState(gameState)
     stores.roomStore.setSuccessfullyJoined(true)
   })
 

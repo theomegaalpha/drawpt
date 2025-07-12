@@ -131,7 +131,7 @@ namespace DrawPT.Api.Hubs
             await _cache.SetGameState(gameState);
 
             await Clients.Caller.InitRoomPlayers(players);
-            await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
+            await Clients.Caller.SuccessfullyJoined(Context.ConnectionId, gameState);
             await Clients.GroupExcept(player.RoomCode, Context.ConnectionId).PlayerJoined(player);
         }
 

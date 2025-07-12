@@ -1,8 +1,14 @@
 // src/stores/gameState.ts
 import { defineStore } from 'pinia'
-import type { GameState, PlayerQuestion, IGameConfiguration } from '@/models/gameModels'
+import type {
+  GameState,
+  PlayerQuestion,
+  IGameConfiguration,
+  RoundResults
+} from '@/models/gameModels'
 import { GameStatus } from '@/models/gameModels'
 import { useScoreboardStore } from './scoreboard'
+import type { Player, PlayerResult } from '@/models/player'
 
 export const useGameStateStore = defineStore('gameState', {
   state: () => ({
@@ -12,13 +18,16 @@ export const useGameStateStore = defineStore('gameState', {
     totalRounds: 0,
     gameConfiguration: {} as IGameConfiguration,
     hostPlayerId: '' as string,
-    players: [] as string[],
+    players: [] as Player[],
     themes: [] as string[],
     selectableThemeOptions: [] as string[],
     currentTheme: '' as string,
     currentImageUrl: '' as string,
     currentStatus: GameStatus.WaitingForPlayers,
     // UI-specific
+    successfullyJoined: false,
+    roundResults: [] as RoundResults[],
+    gameResults: [] as PlayerResult[],
     hasPlayerAction: false,
     showImageLoader: false,
     shouldShowResults: false,
@@ -32,6 +41,7 @@ export const useGameStateStore = defineStore('gameState', {
   },
   actions: {
     initializeGameState(gameState: GameState) {
+      console.log('Initializing game state:', gameState)
       // Map backend state
       this.roomCode = gameState.roomCode || ''
       this.currentRound = gameState.currentRound || 0
@@ -48,7 +58,17 @@ export const useGameStateStore = defineStore('gameState', {
       this.shouldShowResults = false
       this.currentBonusPoints = 0
       this.isGuessLocked = true
+      this.successfullyJoined = true
     },
+
+    updateRoomCode(code: string) {
+      this.roomCode = code
+    },
+    clearRoom() {
+      this.roomCode = ''
+      this.currentRound = 0
+    },
+
     handleThemeSelectionEvent(themes: string[]) {
       this.currentImageUrl = ''
       this.showImageLoader = false
@@ -61,10 +81,11 @@ export const useGameStateStore = defineStore('gameState', {
       this.selectableThemeOptions = []
       this.showImageLoader = true
     },
-    handleBroadcastRoundResultsEvent() {
+    handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
       this.shouldShowResults = true
       this.showImageLoader = false
       this.currentImageUrl = ''
+      this.roundResults.push(roundResult)
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points

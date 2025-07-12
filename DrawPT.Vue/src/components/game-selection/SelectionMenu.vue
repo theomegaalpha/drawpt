@@ -2,7 +2,7 @@
 import api from '@/api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
-import { useRoomStore } from '@/stores/room'
+import { useGameStateStore } from '@/stores/gameState'
 import UnshinyButton from '../common/UnshinyButton.vue'
 import StandardInput from '../common/StandardInput.vue'
 import SelectionCard from './SelectionCard.vue'
@@ -11,7 +11,7 @@ import createBackground from './create.jpg'
 import joinBackground from './join.jpg'
 import { ChevronLeft } from 'lucide-vue-next'
 
-const { updateRoomCode, clearRoom } = useRoomStore()
+const { updateRoomCode, clearRoom } = useGameStateStore()
 const roomCodeInput = ref<string>('')
 const isCreating = ref<boolean>(false)
 const isJoining = ref<boolean>(false)

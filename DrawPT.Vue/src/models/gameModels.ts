@@ -1,4 +1,4 @@
-import type { PlayerResult } from './player'
+import type { Player, PlayerResult } from './player'
 
 export interface IGameConfiguration {
   MaxPlayers: number
@@ -26,7 +26,7 @@ export interface GameState {
   totalRounds: number
   gameConfiguration: IGameConfiguration
   hostPlayerId: string
-  players: string[]
+  players: Player[]
   themes: string[]
   currentTheme: string
   currentImageUrl: string
