@@ -1,9 +1,11 @@
 <template>
   <div
-    class="radial-gradient relative rounded-full border border-black/20 px-6 py-2 dark:border-white/20"
+    class="radial-gradient relative cursor-pointer rounded-full border border-black/15 px-6 py-2 dark:border-white/15"
   >
-    <span class="linear-mask relative block h-full w-full font-light tracking-wide">
-      <slot>Start now</slot>
+    <span
+      class="linear-mask relative inline-flex h-full w-full items-center justify-center font-light tracking-wide"
+    >
+      <slot />
     </span>
     <span class="linear-overlay absolute inset-0 block rounded-full p-px" />
   </div>

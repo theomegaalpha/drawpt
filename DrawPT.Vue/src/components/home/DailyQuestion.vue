@@ -3,10 +3,18 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDailiesStore } from '@/stores/dailies'
 import GuessInput from '@/components/common/GuessInput.vue'
-import { EyeIcon, Loader2Icon, LogInIcon, OctagonAlertIcon, Share2Icon, UserIcon } from 'lucide-vue-next'
+import {
+  EyeIcon,
+  Loader2Icon,
+  LogInIcon,
+  OctagonAlertIcon,
+  Share2Icon,
+  UserIcon
+} from 'lucide-vue-next'
 import api from '@/api/api'
 import ClosenessDisplay from '../common/ClosenessDisplay.vue'
 import { useAuthStore } from '@/stores/auth'
+import UnshinyButton from '../common/UnshinyButton.vue'
 
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
@@ -106,14 +114,11 @@ const copyClosenessArrayToClipboard = async () => {
 }
 
 onMounted(async () => {
-  if (!isAuthenticated.value)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  if (!isAuthenticated.value) await new Promise((resolve) => setTimeout(resolve, 1000))
 
   await dailiesStore.initStore()
-  if (isAuthenticated.value)
-    showLoginCta.value = false
-  if (dailiesStore.hasDailyAnswer)
-    showLoginCta.value = false
+  if (isAuthenticated.value) showLoginCta.value = false
+  if (dailiesStore.hasDailyAnswer) showLoginCta.value = false
 })
 </script>
 
@@ -133,13 +138,13 @@ onMounted(async () => {
       <img
         :src="imageLoaded ? dailyQuestion.imageUrl : defaultImageUrl"
         :alt="dailyQuestion.theme"
-        class="animate-fade-blur-in-slow -my-1 aspect-[3/4] h-auto w-full object-contain transition delay-1000"
+        class="-my-1 aspect-[3/4] h-auto w-full animate-fade-blur-in-slow object-contain transition delay-1000"
         @error="handleImageError"
       />
       <!-- loading scree -->
       <div
         v-if="isLoading"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
+        class="absolute inset-0 flex animate-fade-blur-in-fast flex-col items-center justify-center bg-black bg-opacity-80 text-white"
       >
         <div class="flex flex-col items-center justify-center">
           <Loader2Icon class="h-12 w-12 animate-spin" />
@@ -148,7 +153,7 @@ onMounted(async () => {
       <!-- error screen -->
       <div
         v-else-if="dailyError"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 text-white animate-fade-blur-in-fast"
+        class="absolute inset-0 flex animate-fade-blur-in-fast flex-col items-center justify-center bg-black bg-opacity-80 text-white"
       >
         <div class="flex flex-col items-center justify-center">
           <OctagonAlertIcon class="mb-4 h-12 w-12 text-red-500" />
@@ -159,11 +164,16 @@ onMounted(async () => {
       <!-- assessment stats -->
       <div
         v-else-if="showAssessment"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 text-white animate-fade-blur-in-fast"
+        class="absolute inset-0 flex animate-fade-blur-in-fast flex-col items-center justify-center bg-black bg-opacity-90 text-white"
       >
         <div class="flex flex-col items-center justify-center p-8">
           <p class="text-lg">
-            Score: <div class="ml-2 float-right  font-bold" :class="{'animate-bounce text-green-600': dailyAnswer.score >= 70}">{{ dailyAnswer.score }}</div>
+            Score:
+            <span
+              class="float-right ml-2 font-bold"
+              :class="{ 'animate-bounce text-green-600': dailyAnswer.score >= 70 }"
+              >{{ dailyAnswer.score }}</span
+            >
           </p>
           <p class="text-lg font-semibold">Your guess:</p>
           <p class="text-md">{{ dailyAnswer.guess }}</p>
@@ -173,8 +183,8 @@ onMounted(async () => {
       </div>
     </div>
     <div class="relative flex w-full pt-4" v-if="showLoginCta">
-      <button
-        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+      <UnshinyButton
+        class="mr-2 flex h-12 w-full items-center justify-center rounded-full"
         :class="{
           'cursor-wait': isLoading
         }"
@@ -182,18 +192,18 @@ onMounted(async () => {
       >
         <UserIcon class="mr-4 h-4 w-4" />
         Continue as Guest
-      </button>
-      <router-link
-        to="/login"
-        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+      </UnshinyButton>
+      <UnshinyButton
+        class="mr-2 flex h-12 w-full cursor-pointer items-center justify-center rounded-full"
         :class="{
           'cursor-wait': isLoading
         }"
-        @click="toggleLoginCta"
       >
-        <LogInIcon class="mr-4 h-4 w-4" />
-        Login
-      </router-link>
+        <router-link to="/login" @click="toggleLoginCta" class="flex items-center">
+          <LogInIcon class="mr-4 h-4 w-4" />
+          Login
+        </router-link>
+      </UnshinyButton>
     </div>
     <GuessInput
       v-else-if="!dailiesStore.hasDailyAnswer"
@@ -204,8 +214,8 @@ onMounted(async () => {
       :submitAction="submitGuess"
     />
     <div class="relative flex w-full pt-4" v-else>
-      <button
-        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+      <UnshinyButton
+        class="mr-2 flex h-12 w-full items-center justify-center rounded-full"
         :class="{
           'cursor-wait': isLoading
         }"
@@ -214,9 +224,9 @@ onMounted(async () => {
         <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <EyeIcon v-else class="mr-4 h-4 w-4" />
         {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
-      </button>
-      <button
-        class="btn-default ml-2 flex h-12 w-full items-center justify-center rounded-full"
+      </UnshinyButton>
+      <UnshinyButton
+        class="ml-2 flex h-12 w-full items-center justify-center rounded-full"
         :class="{
           'cursor-wait': isLoading
         }"
@@ -225,7 +235,7 @@ onMounted(async () => {
         <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
         <Share2Icon v-else class="mr-4 h-4 w-4" />
         {{ shareText }}
-      </button>
+      </UnshinyButton>
     </div>
   </div>
 </template>

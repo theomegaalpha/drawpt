@@ -24,8 +24,10 @@ import { motion } from 'motion-v'
     }"
     class="radial-gradient relative rounded-full px-6 py-2"
   >
-    <span class="linear-mask relative block h-full w-full font-light tracking-wide">
-      <slot>Start now</slot>
+    <span
+      class="linear-mask relative inline-flex h-full w-full items-center justify-center font-light tracking-wide"
+    >
+      <slot />
     </span>
     <span class="linear-overlay absolute inset-0 block rounded-full p-px" />
   </motion.button>
