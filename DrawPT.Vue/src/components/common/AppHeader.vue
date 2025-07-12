@@ -23,6 +23,7 @@ const isAuthenticated = computed(() => {
 
 const _menuItems = [
   { name: 'About', href: '/about', role: '' },
+  { name: 'Play Game', href: '/game-selection', role: '' },
   { name: 'Admin', href: '/admin', role: 'admin' }
 ]
 const menuItems = computed(() => {
