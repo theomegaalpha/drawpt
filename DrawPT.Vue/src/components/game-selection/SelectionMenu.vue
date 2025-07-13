@@ -2,14 +2,16 @@
 import api from '@/api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Added useRoute
-import { useRoomStore } from '@/stores/room'
+import { useGameStateStore } from '@/stores/gameState'
+import UnshinyButton from '../common/UnshinyButton.vue'
 import StandardInput from '../common/StandardInput.vue'
 import SelectionCard from './SelectionCard.vue'
 import matchmakingBackground from './matchmaking.jpg'
 import createBackground from './create.jpg'
 import joinBackground from './join.jpg'
+import { ChevronLeft } from 'lucide-vue-next'
 
-const { updateRoomCode, clearRoom } = useRoomStore()
+const { updateRoomCode, clearRoom } = useGameStateStore()
 const roomCodeInput = ref<string>('')
 const isCreating = ref<boolean>(false)
 const isJoining = ref<boolean>(false)
@@ -52,7 +54,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center p-10">
+  <div class="flex min-h-screen flex-col items-center justify-center space-y-4 p-10">
+    <RouterLink class="flex" :to="{ name: 'home' }">
+      <UnshinyButton>
+        <ChevronLeft class="mr-2 mt-[1px]" />
+        Back Home
+      </UnshinyButton>
+    </RouterLink>
     <div
       class="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:items-stretch lg:mx-auto lg:max-w-4xl"
     >

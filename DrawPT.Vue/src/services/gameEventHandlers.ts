@@ -1,7 +1,6 @@
 // src/services/gameEventHandlers.ts
 import service from '@/services/signalRService'
 import { usePlayerStore } from '@/stores/player'
-import { useRoomStore } from '@/stores/room'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
@@ -13,7 +12,6 @@ import type { GameState, RoundResults, GameResults } from '@/models/gameModels'
 // Helper to easily access stores within handlers
 const getStores = () => ({
   playerStore: usePlayerStore(),
-  roomStore: useRoomStore(),
   roomJoinStore: useRoomJoinStore(),
   scoreboardStore: useScoreboardStore(),
   notificationStore: useNotificationStore(),
@@ -27,26 +25,30 @@ export function registerBaseGameHubEvents() {
     if (stores.playerStore.player && player.id !== stores.playerStore.player.id) {
       stores.notificationStore.addGameNotification(`${player.username} has joined the game!`)
     }
-    stores.roomStore.addPlayer(player)
+    stores.gameStateStore.addPlayer(player)
   })
 
   service.on('playerLeft', (player: Player) => {
     stores.notificationStore.addGameNotification(`${player.username} has left the game.`)
-    stores.roomStore.removePlayer(player)
+    stores.gameStateStore.removePlayer(player)
   })
 
-  service.on('successfullyJoined', (connectionId: string) => {
+  service.on('successfullyJoined', (connectionId: string, gameState: GameState) => {
     console.log('Successfully joined the game with connection ID:', connectionId)
     stores.notificationStore.addGameNotification('Welcome to the party!')
     stores.playerStore.updateConnectionId(connectionId)
-    stores.roomStore.setSuccessfullyJoined(true)
+    stores.gameStateStore.initializeGameState(gameState)
   })
 
   service.on('gameStarted', (gameState: GameState) => {
-    stores.roomStore.startGame()
     stores.notificationStore.addGameNotification('Game has started!')
-    // Potentially update gameStateStore with initial game state if provided
-    // stores.gameStateStore.initializeGameState(gameState);
+    stores.gameStateStore.initializeGameState(gameState)
+    stores.gameStateStore.startGame()
+  })
+
+  service.on('roundStarted', (roundNumber: number) => {
+    stores.notificationStore.addGameNotification(`Round ${roundNumber} has started!`)
+    stores.gameStateStore.startRound(roundNumber)
   })
 
   service.on('roundResults', (roundResult: RoundResults) => {

@@ -14,6 +14,7 @@ namespace DrawPT.Api.Hubs
         Task NavigateToRoom();
         Task ErrorJoiningRoom(string error);
         Task InitRoomPlayers(List<Player> players);
+        Task SuccessfullyJoined(string connectionId, IGameState gameState);
 
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);
@@ -29,7 +30,6 @@ namespace DrawPT.Api.Hubs
 
         Task RoundStarted(int roundNumber);
         Task RoundResults(RoundResults round);
-        Task SuccessfullyJoined(string connectionId);
         Task BroadcastFinalResults(GameResults results);
 
 

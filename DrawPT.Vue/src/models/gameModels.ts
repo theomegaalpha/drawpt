@@ -1,4 +1,4 @@
-import type { PlayerResult } from './player'
+import type { Player, PlayerResult } from './player'
 
 export interface IGameConfiguration {
   MaxPlayers: number
@@ -9,13 +9,25 @@ export interface IGameConfiguration {
   GamblingEnabled: boolean
 }
 
+export enum GameStatus {
+  WaitingForPlayers = 0,
+  JustStarted = 1,
+  StartingRound = 2,
+  AskingTheme = 3,
+  AskingQuestion = 4,
+  ShowingRoundResults = 5,
+  Completed = 6,
+  Abandoned = 7
+}
+
 export interface GameState {
-  RoomCode: string
-  CurrentRound: number
-  GameConfiguration: IGameConfiguration
-  TotalRounds: number
-  HostPlayerId: string
-  Players: string[]
+  roomCode: string
+  currentRound: number
+  totalRounds: number
+  gameConfiguration: IGameConfiguration
+  hostPlayerId: string
+  players: Player[]
+  currentStatus: GameStatus
 }
 
 export interface GameResults {

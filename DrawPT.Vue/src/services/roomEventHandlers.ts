@@ -1,7 +1,6 @@
 // src/services/roomEventHandlers.ts
 import { useRoomJoinStore } from '@/stores/roomJoin'
-import { useRoomStore } from '@/stores/room'
-import type { HubConnection } from '@microsoft/signalr'
+import { useGameStateStore } from '@/stores/gameState'
 import type { Player } from '@/models/player'
 import signalRService from '@/services/signalRService' // Import the service instance
 
@@ -25,10 +24,10 @@ const handleErrorJoiningRoom = (errorMessage?: string) => {
   roomJoinStore.handleErrorJoiningRoom(errorMessage)
 }
 
-const handleInitRoomPLayers = (players: Player[]) => {
-  const roomJoinStore = useRoomStore()
+const handleInitRoomPlayers = (players: Player[]) => {
+  const gameStateStore = useGameStateStore()
   for (let i = 0; i < players.length; i++) {
-    roomJoinStore.addPlayer(players[i])
+    gameStateStore.addPlayer(players[i])
   }
 }
 
@@ -37,7 +36,7 @@ export function registerRoomHubEvents() {
   signalRService.on('alreadyInRoom', handleAlreadyInRoom)
   signalRService.on('navigateToRoom', handleNavigateToRoom)
   signalRService.on('errorJoiningRoom', handleErrorJoiningRoom)
-  signalRService.on('initRoomPlayers', handleInitRoomPLayers)
+  signalRService.on('initRoomPlayers', handleInitRoomPlayers)
 }
 
 export function unregisterRoomHubEvents() {

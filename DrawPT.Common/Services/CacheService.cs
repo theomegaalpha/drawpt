@@ -3,6 +3,7 @@ using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace DrawPT.Common.Services
@@ -12,12 +13,14 @@ namespace DrawPT.Common.Services
         private readonly IDistributedCache _cache;
         private readonly DistributedCacheEntryOptions _options;
         private readonly PlayerService _profileService;
+        private readonly ILogger<CacheService> _logger;
 
-        public CacheService(IDistributedCache cache, PlayerService profileService)
+        public CacheService(IDistributedCache cache, PlayerService profileService, ILogger<CacheService> logger)
         {
             _cache = cache;
             _options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(2));
             _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "PlayerService cannot be null.");
+            _logger = logger;
         }
 
         public async Task<Room?> GetRoomAsync(string code)
@@ -162,7 +165,7 @@ namespace DrawPT.Common.Services
             var playerIds = await _cache.GetStringAsync($"room:{roomCode}:players");
             List<Guid> parsedIds = string.IsNullOrEmpty(playerIds) ? new() : JsonSerializer.Deserialize<List<Guid>>(playerIds) ?? new();
             if (!parsedIds.Any(pid => pid == player.Id))
-                return; // Player already doesn't exist in the room
+                return;
 
             parsedIds.RemoveAll(pid => pid == player.Id);
 
@@ -174,6 +177,19 @@ namespace DrawPT.Common.Services
                 return;
             }
             await _cache.SetStringAsync($"room:{roomCode}:players", JsonSerializer.Serialize(parsedIds), _options);
+
+            var gameState = await GetGameState(roomCode);
+            if (gameState == null)
+            {
+                _logger.LogError($"Game state for room {roomCode} not found while removing player {player.Id}.");
+                return;
+            }
+
+            if (gameState.HostPlayerId == player.Id)
+            {
+                gameState.HostPlayerId = parsedIds.First();
+                await SetGameState(gameState);
+            }
         }
     }
 }

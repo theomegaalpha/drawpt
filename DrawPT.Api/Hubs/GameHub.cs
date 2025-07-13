@@ -128,11 +128,12 @@ namespace DrawPT.Api.Hubs
                 await Clients.Caller.ErrorJoiningRoom("Failed to join room.  Please refresh and try again.");
                 return;
             }
+            gameState.Players = players;
             await _cache.SetGameState(gameState);
 
-            var otherPlayers = players.Where(p => p.ConnectionId != Context.ConnectionId).ToList();
             await Clients.Caller.InitRoomPlayers(players);
-            await Clients.Caller.SuccessfullyJoined(Context.ConnectionId);
+            await Clients.Caller.SuccessfullyJoined(Context.ConnectionId, gameState);
+            await Clients.GroupExcept(player.RoomCode, Context.ConnectionId).PlayerJoined(player);
         }
 
         public async Task<bool> StartGame()

@@ -1,4 +1,5 @@
 using DrawPT.Common.ServiceBus;
+using DrawPT.Common.Constants;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models;
 using DrawPT.Common.Models.Game;
@@ -42,12 +43,12 @@ public class GameSession : IGameSession
         var gameState = await _gameStateService.StartGameAsync(roomCode);
 
         List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
+        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.GameStartedAction, gameState);
         var greetingAnnouncement = await _announcerService.GenerateGreetingAnnouncement(originalPlayers);
         if (greetingAnnouncement != null)
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
-        await Task.Delay(35 * 1000); // 35 seconds
+        await Task.Delay(35 * 1000);
 
-        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.GameStartedAction, gameState);
         await Task.Delay(100);
 
         List<RoundResults> allRoundResults = new();
@@ -68,8 +69,10 @@ public class GameSession : IGameSession
             // add players that are missing from original list into originalPlayers
             foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
                 originalPlayers.Add(player);
+            gameState = await _gameStateService.AskThemeAsync(roomCode);
             var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
             _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.PlayerThemeSelectedAction, selectedTheme);
+            gameState = await _gameStateService.ChooseThemeAsync(roomCode);
 
             // ask all players for their answers
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
@@ -84,6 +87,7 @@ public class GameSession : IGameSession
             if (playerAnswers.Count == 0)
                 break;
 
+            gameState = await _gameStateService.AskQuestionAsync(roomCode);
             await Task.WhenAll(playerAnswers);
 
             var answers = new List<PlayerAnswer>();

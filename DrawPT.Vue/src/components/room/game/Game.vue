@@ -21,8 +21,7 @@ const notificationStore = useNotificationStore()
 const scoreboardStore = useScoreboardStore() // Already imported, ensure it's used if needed directly here
 
 // --- State from Pinia Store (via computed properties) ---
-const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
-const themeOptions = computed(() => gameStateStore.themeOptions) // For ViewThemes
+const themes = computed(() => gameStateStore.themes)
 const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
@@ -52,17 +51,16 @@ async function askForThemeInternal(): Promise<string> {
 
     themeTimeoutRef.value = setTimeout(() => {
       notificationStore.addGameNotification("Uh oh! Theme selection time's up!", true)
-      gameStateStore.clearSelectableThemes() // Clear options in store
+      gameStateStore.clearThemes() // Clear options in store
       if (stopEffect) stopEffect()
       reject(new Error('Theme selection timed out'))
     }, timeoutForTheme)
 
-    // themeSelectionInput is reset to '' by service.on('askTheme',...) before this is called
     stopEffect = watchEffect(() => {
       const currentTheme = themeSelectionInput.value
       if (currentTheme) {
-        // gameStateStore.playerSelectedTheme(currentTheme); // Action in store to clear selectable themes
-        gameStateStore.clearSelectableThemes() // Or directly clear here
+        gameStateStore.playerSelectedTheme(currentTheme) // Action in store to clear selectable themes
+        gameStateStore.clearThemes() // Or directly clear here
         clearTimeout(themeTimeoutRef.value)
         if (stopEffect) stopEffect() // Stop this effect itself
         resolve(currentTheme)
@@ -103,45 +101,39 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
 onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askTheme', async (themes: string[]) => {
-    console.log('askTheme received from server:', themes)
-    themeSelectionInput.value = '' // Reset local UI state for theme selection
-    gameStateStore.prepareForThemeSelection(themes) // Prepare store state for theme selection
+    themeSelectionInput.value = ''
+    gameStateStore.prepareForThemeSelection(themes)
     try {
       const theme = await askForThemeInternal()
-      return theme // Return selected theme to server
+      return theme
     } catch (error) {
       console.error('Error in askForTheme process:', error)
-      // Ensure a value is always returned to the server, even on error/timeout
-      return '' // Or a specific "timeout" string if the server expects it
+      return ''
     }
   })
 
   service.on('askQuestion', async (question: PlayerQuestion): Promise<PlayerAnswerBase> => {
     console.log('askQuestion received from server:', question)
-    gameStateStore.prepareForQuestion(question) // Prepare store state for the question
-    // scoreboardStore.setRound(question.roundNumber); // This is now done inside prepareForQuestion action
+    gameStateStore.prepareForQuestion(question)
     try {
       const answer = await askQuestionInternal()
-      return answer // Return player's answer to server
+      return answer
     } catch (error) {
       console.error('Error in askQuestion process:', error)
-      // Ensure a value is always returned
-      return { guess: '', isGambling: false } // Default/fallback answer
+      return { guess: '', isGambling: false }
     }
   })
 
-  // Watch for bonus points changes to apply a display timeout
   watchEffect(() => {
     if (bonusPoints.value > 0) {
       setTimeout(() => {
-        gameStateStore.clearBonusPointsDisplay() // Action to clear bonus points in store
-      }, 20000) // Display duration for bonus points
+        gameStateStore.clearBonusPointsDisplay()
+      }, 20000)
     }
   })
 })
 
 onUnmounted(() => {
-  // Unregister only the handlers defined in this component
   service.off('askTheme')
   service.off('askQuestion')
 
@@ -151,16 +143,16 @@ onUnmounted(() => {
 })
 
 // --- UI Action: Submitting a guess ---
-const guessInputFromComponent = ref<string>('') // v-model for the GuessInput component
+const guessInputFromComponent = ref<string>('')
 
 const submitGuess = async (valueFromInput: string) => {
   if (valueFromInput === '' || lockGuess.value) {
     // Check lockGuess from store
     return
   }
-  gameStateStore.setGuessLock(true) // Lock guess in store
-  currentGuessForPromise.value = valueFromInput // Set the value to resolve the askQuestionInternal promise
-  guessInputFromComponent.value = '' // Clear the input field in UI
+  gameStateStore.setGuessLock(true)
+  currentGuessForPromise.value = valueFromInput
+  guessInputFromComponent.value = ''
 }
 </script>
 
@@ -170,10 +162,10 @@ const submitGuess = async (valueFromInput: string) => {
     <RoundResults v-if="gameStateStore.shouldShowResults" />
     <SelectTheme
       v-if="gameStateStore.areThemesSelectable"
-      :themes="selectableThemeOptions"
+      :themes="themes"
       @themeSelected="handleThemeSelectedFromUI"
     />
-    <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themeOptions" />
+    <ViewThemes v-else-if="gameStateStore.areThemesVisible" :themes="themes" />
     <GameCanvas v-if="gameStateStore.showGameCanvas" @guessSubmitted="submitGuess" />
     <GameResults v-if="false" />
   </div>

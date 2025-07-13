@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Avatar from '@/components/common/Avatar.vue'
+import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
-import { useRoomStore } from '@/stores/room'
 import type { Player } from '@/models/player'
 
 const { player, blankAvatar } = usePlayerStore()
-const { room } = useRoomStore()
+const { players } = useGameStateStore()
 
 const isYou = (p: Player) => {
   return p.id === player.id
@@ -18,7 +18,7 @@ const isYou = (p: Player) => {
     <div
       class="mt-2 flex animate-slide-in-left flex-row items-center rounded-lg border border-zinc-200 bg-white p-2 shadow dark:border-zinc-900 dark:bg-black"
       :class="{ 'bg-indigo-200 dark:bg-indigo-950': isYou(p) }"
-      v-for="p in room.players"
+      v-for="p in players"
       :key="p.id"
     >
       <Avatar :username="p.username" :avatar="p.avatar || blankAvatar" />
@@ -26,7 +26,7 @@ const isYou = (p: Player) => {
     </div>
     <div
       class="mt-2 flex flex-row items-center rounded-lg border border-zinc-200 bg-zinc-100 p-2 shadow dark:border-zinc-900 dark:bg-zinc-900"
-      v-for="p in 8 - room.players.length"
+      v-for="p in 8 - players.length"
       :key="p"
     >
       <div

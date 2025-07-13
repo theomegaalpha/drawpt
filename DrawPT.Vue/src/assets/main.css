@@ -82,6 +82,17 @@
     mask-composite: exclude;
     -webkit-mask-composite: xor;
   }
+
+  /* Overlay color modifiers */
+  .shiny-btn-primary {
+    --overlay-color: 129, 120, 229;
+    --solid-color-background: 242, 245, 255;
+  }
+  @media (prefers-color-scheme: dark) {
+    .shiny-btn-primary {
+      --solid-color-background: 2, 1, 23;
+    }
+  }
 }
 
 :root {
