@@ -35,14 +35,24 @@ namespace DrawPT.Api.Services
         {
             _broadcastProcessor = _sbClient.CreateProcessor(
                 "gameEngine",
-                new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    MaxConcurrentCalls = 64,
+                    MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(5)
+                });
 
             _broadcastProcessor.ProcessMessageAsync += ProcessMessageAsync;
             _broadcastProcessor.ProcessErrorAsync += ProcessErrorAsync;
 
             _interactionProcessor = _sbClient.CreateProcessor(
                 "gameEngineRequest",
-                new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    MaxConcurrentCalls = 64,
+                    MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(5)
+                });
 
             _interactionProcessor.ProcessMessageAsync += ProcessInteractionMessageAsync;
             _interactionProcessor.ProcessErrorAsync += ProcessErrorAsync;
@@ -64,6 +74,7 @@ namespace DrawPT.Api.Services
                 using JsonDocument doc = JsonDocument.Parse(body);
                 JsonElement root = doc.RootElement;
                 string action = root.GetProperty("Action").GetString()!;
+                string roomCode = root.GetProperty("RoomCode").GetString()!;
                 JsonElement payload = root.GetProperty("Payload");
 
                 var client = _hubContext.Clients.Client(connectionId);
@@ -79,6 +90,7 @@ namespace DrawPT.Api.Services
                             {
                                 List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
                                 using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(35));
+                                await _hubContext.Clients.GroupExcept(roomCode, connectionId).ThemeSelection(themes);
                                 response = await client.AskTheme(themes, ctsTheme.Token);
                                 break;
                             }
@@ -158,6 +170,10 @@ namespace DrawPT.Api.Services
                         var results = payload.Deserialize<PlayerResults>();
                         await _hubContext.Clients.Group(roomCode).PlayerScoreUpdated(results!.PlayerId, results.Score);
                         break;
+                    case GameEngineQueue.PlayerJoinedAction:
+                        var joined = payload.Deserialize<Common.Models.Player>();
+                        await _hubContext.Clients.Group(roomCode).PlayerJoined(joined!);
+                        break;
                     case GameEngineQueue.PlayerLeftAction:
                         var left = payload.Deserialize<Common.Models.Player>();
                         await _hubContext.Clients.Group(roomCode).PlayerLeft(left!);
@@ -205,6 +221,12 @@ namespace DrawPT.Api.Services
             {
                 await _broadcastProcessor.StopProcessingAsync(cancellationToken);
             }
+
+            if (_interactionProcessor != null)
+            {
+                await _interactionProcessor.StopProcessingAsync(cancellationToken);
+            }
+
             await base.StopAsync(cancellationToken);
         }
     }

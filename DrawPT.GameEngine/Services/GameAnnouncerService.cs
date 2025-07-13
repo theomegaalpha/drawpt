@@ -85,7 +85,7 @@ namespace DrawPT.GameEngine.Services
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(systemPrompt),
-                new UserChatMessage($"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score + a.BonusPoints }))}")
+                new UserChatMessage($"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score, TimeBonusPoints = a.BonusPoints }))}")
             };
 
             try
