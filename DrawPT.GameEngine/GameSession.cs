@@ -42,10 +42,10 @@ public class GameSession : IGameSession
         var gameState = await _gameStateService.StartGameAsync(roomCode);
 
         List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
-        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.GameStartedAction, gameState);
+        await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GameStartedAction, gameState);
         var greetingAnnouncement = await _announcerService.GenerateGreetingAnnouncement(originalPlayers);
         if (greetingAnnouncement != null)
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
         await Task.Delay(35 * 1000);
 
         await Task.Delay(100);
@@ -55,7 +55,7 @@ public class GameSession : IGameSession
         for (int i = 0; i < gameState.TotalRounds; i++)
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
             await Task.Delay(500);
 
             // ask player for theme
@@ -70,7 +70,7 @@ public class GameSession : IGameSession
                 originalPlayers.Add(player);
             gameState = await _gameStateService.AskThemeAsync(roomCode);
             var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.PlayerThemeSelectedAction, selectedTheme);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.PlayerThemeSelectedAction, selectedTheme);
             gameState = await _gameStateService.ChooseThemeAsync(roomCode);
 
             // ask all players for their answers
@@ -78,9 +78,7 @@ public class GameSession : IGameSession
             question.RoundNumber = i + 1;
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
             foreach (var player in players)
-            {
                 playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
-            }
 
             // empty game check
             if (playerAnswers.Count == 0)
@@ -94,7 +92,7 @@ public class GameSession : IGameSession
                 answers.Add(answer);
 
 
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AssessingAnswersAction);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AssessingAnswersAction);
 
             var assessedAnswers = await _assessmentService.AssessAnswersAsync(question.OriginalPrompt, answers);
             var roundResults = new RoundResults
@@ -109,9 +107,9 @@ public class GameSession : IGameSession
 
             var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
             if (announcerMessage != null)
-                _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
+                await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
 
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
             await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
         }
 
@@ -136,11 +134,11 @@ public class GameSession : IGameSession
             WasCompleted = true,
             TotalRounds = gameState.TotalRounds
         };
-        _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.GameResultsAction, finalScores);
+        await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GameResultsAction, finalScores);
 
         var finalAnnouncement = await _announcerService.GenerateGameResultsAnnouncement(finalScores.PlayerResults);
         if (finalAnnouncement != null)
-            _gameCommunicationService.BroadcastGameEvent(roomCode, GameEngineQueue.AnnouncerAction, finalAnnouncement);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, finalAnnouncement);
         await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
 
         _logger.LogInformation($"Final scores for room {roomCode}: {string.Join(", ", finalScores.PlayerResults.Select(pr => $"{pr.Username}: {pr.Score}"))}");

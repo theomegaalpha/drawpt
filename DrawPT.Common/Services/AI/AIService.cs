@@ -129,6 +129,7 @@ The response must always be a JSON array, even when evaluating a single contesta
 
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
+            return await GenerateFakeGameQuestionAsync(theme);
             var prompt = await GenerateImagePromptAsync(theme);
             var imageUrl = await GenerateImageAsync($"{prompt} {_imageEnhancePrompt}");
             return new GameQuestion()

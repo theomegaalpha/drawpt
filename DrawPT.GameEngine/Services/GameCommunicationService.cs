@@ -29,10 +29,10 @@ public class GameCommunicationService : IGameCommunicationService
         _logger = logger;
 
         // Initialize centralized reply processor
-        _replyProcessor = _sbClient.CreateProcessor("gameEngineResponse", new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+        _replyProcessor = _sbClient.CreateProcessor("gameEngineResponse", new ServiceBusProcessorOptions { AutoCompleteMessages = false, MaxConcurrentCalls = 8 });
         _replyProcessor.ProcessMessageAsync += ReplyHandlerAsync;
         _replyProcessor.ProcessErrorAsync += args => { _logger.LogError(args.Exception, "Error processing SB response"); return Task.CompletedTask; };
-        _replyProcessor.StartProcessingAsync().GetAwaiter().GetResult();
+        _replyProcessor.StartProcessingAsync();
     }
 
     private async Task ReplyHandlerAsync(ProcessMessageEventArgs args)
@@ -48,9 +48,8 @@ public class GameCommunicationService : IGameCommunicationService
         }
     }
 
-    public void BroadcastGameEvent(string roomCode, string gameAction, object? message = null)
+    public async Task BroadcastGameEventAsync(string roomCode, string gameAction, object? message = null)
     {
-        // Build the Service Bus message payload
         var payload = new
         {
             Action = gameAction,
@@ -58,14 +57,12 @@ public class GameCommunicationService : IGameCommunicationService
         };
         string json = JsonSerializer.Serialize(payload);
 
-        // Send to the 'gameEngine' queue
         ServiceBusSender sender = _sbClient.CreateSender(GameEngineQueue.Name);
         var sbMessage = new ServiceBusMessage(json)
         {
             SessionId = roomCode
         };
-        // Synchronously send the message
-        sender.SendMessageAsync(sbMessage).GetAwaiter().GetResult();
+        await sender.SendMessageAsync(sbMessage);
 
         _logger.LogDebug($"[{roomCode}] Broadcasted game event via SB: {gameAction} with message: {message}");
     }
@@ -106,9 +103,6 @@ public class GameCommunicationService : IGameCommunicationService
 
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-
         // Build SB request message
         var requestObj = new { Action = GameEngineRequests.Question, Payload = question };
         var requestPayload = JsonSerializer.Serialize(requestObj);
@@ -125,6 +119,8 @@ public class GameCommunicationService : IGameCommunicationService
             ReplyTo = "gameEngineResponse"
         };
         await sender.SendMessageAsync(requestMsg);
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         // Wait for response or timeout
         var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
@@ -156,7 +152,7 @@ public class GameCommunicationService : IGameCommunicationService
         answer.Username = player.Username;
         answer.Avatar = player.Avatar;
 
-        BroadcastGameEvent(player.RoomCode, GameEngineQueue.PlayerAnsweredAction, answer);
+        await BroadcastGameEventAsync(player.RoomCode, GameEngineQueue.PlayerAnsweredAction, answer);
         return answer;
     }
 
