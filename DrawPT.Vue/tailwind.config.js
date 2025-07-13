@@ -75,6 +75,11 @@ export default {
             opacity: '1',
             filter: 'blur(0px)'
           }
+        },
+        bulging: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '25%, 75%': { transform: 'scale(1.1)' },
+          '50%': { transform: 'scale(1)' }
         }
       },
       animation: {
@@ -84,7 +89,8 @@ export default {
         'slide-in': 'slide-in 0.2s ease-in forwards',
         'blur-in': 'blur-in-effect 0.5s ease-out forwards',
         'fade-blur-in-slow': 'fade-blur-in-effect 2s ease-out forwards',
-        'fade-blur-in-fast': 'fade-blur-in-fast-effect 175ms ease-out forwards'
+        'fade-blur-in-fast': 'fade-blur-in-fast-effect 175ms ease-out forwards',
+        bulging: 'bulging 1.5s ease-in-out infinite'
       }
     }
   },

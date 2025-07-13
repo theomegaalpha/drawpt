@@ -4,6 +4,7 @@ import GameTimer from '../GameTimer.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
+import ShinyButton from '@/components/common/ShinyButton.vue'
 
 const timeoutPerQuestion = 30000
 const emit = defineEmits<{
@@ -36,6 +37,9 @@ const submitGuess = async (valueFromInput: string) => {
     />
     <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
     <div class="flex w-full max-w-5xl flex-col items-center px-4">
+      <ShinyButton class="mb-4 cursor-default" :disabled="true">
+        <h2 class="text-2xl">Theme: {{ gameStateStore.currentTheme }}</h2>
+      </ShinyButton>
       <div class="mb-2">
         <img
           v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"

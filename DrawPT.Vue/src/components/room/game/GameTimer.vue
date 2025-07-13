@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { time } from 'console'
 import { computed, onMounted, ref } from 'vue'
 const props = defineProps({
   maxTime: {
@@ -9,6 +10,13 @@ const props = defineProps({
 
 const maxTime = props.maxTime - 1000
 const timer = ref(maxTime)
+
+const timerText = computed(() => {
+  if (timer.value / maxTime <= 0.3) {
+    return 'HURRY!'
+  }
+  return `Guess the Prompt!`
+})
 
 var percentage = computed(() => {
   return (timer.value / maxTime) * 100
@@ -26,13 +34,19 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="relative h-6 overflow-hidden bg-gray-200 dark:bg-gray-600/80">
-      <div class="h-full w-full"></div>
+    <div class="relative h-12 overflow-hidden bg-gray-200 dark:bg-gray-600/80">
+      <div class="flex h-full w-full text-lg font-bold"></div>
       <div
         class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
-        :class="percentage <= 20 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
+        :class="percentage <= 30 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
         :style="{ width: `calc(${percentage}vw)` }"
       ></div>
+      <div
+        class="absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center text-lg font-bold opacity-50"
+        :class="percentage <= 30 ? 'animate-bulging text-red-400' : ''"
+      >
+        {{ timerText }}
+      </div>
     </div>
     <div id="glow" class="w-vw relative">
       <div

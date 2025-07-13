@@ -1,27 +1,19 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount, onMounted } from 'vue'
-import GuessInput from '@/components/common/GuessInput.vue'
+import Game from '@/components/room/game/Game.vue'
 import signalRService from '@/services/signalRService'
 import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 
-const announcerMessage = ref<string>('')
+import { useGameStateStore } from '@/stores/gameState'
 
-/** Send text to server for TTS streaming */
-async function submitAnnouncerMessage(value: string) {
-  announcerMessage.value = value
-  if (!value) return
-  signalRService.invoke('TestAudio', value)
-}
+const gameState = useGameStateStore()
 
 onMounted(async () => {
-  try {
-    if (!signalRService.isConnected) {
-      await signalRService.startConnection('/gamehub')
-    }
-    registerAudioEvents()
-  } catch (err) {
-    console.error('SignalR connection failed in RoomWrapper:', err)
-  }
+  gameState.startRound(1)
+  gameState.currentTheme = 'Dickless Vagrant'
+  gameState.currentImageUrl =
+    'https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp'
+  gameState.isGuessLocked = false
 })
 
 onBeforeUnmount(() => {
@@ -30,5 +22,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <GuessInput v-model="announcerMessage" :submitAction="submitAnnouncerMessage" />
+  <div class="h-full">
+    <Game />
+  </div>
 </template>
