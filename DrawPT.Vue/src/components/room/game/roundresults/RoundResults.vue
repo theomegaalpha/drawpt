@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import PlayerResultCard from './PlayerResultCard.vue'
-import { useRoomStore } from '@/stores/room'
 import { usePlayerStore } from '@/stores/player'
+import { useGameStateStore } from '@/stores/gameState'
 import { useScoreboardStore } from '@/stores/scoreboard'
 
-const { players } = useRoomStore()
+const { players } = useGameStateStore()
 const { player: you } = usePlayerStore()
 const { lastRoundResults } = useScoreboardStore()
 

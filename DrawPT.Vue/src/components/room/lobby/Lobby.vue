@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import PlayerList from './PlayerList.vue' // New import
-import RoomInfo from './RoomInfo.vue' // New import
+import PlayerList from './PlayerList.vue'
+import RoomInfo from './RoomInfo.vue'
 import { usePlayerStore } from '@/stores/player'
-import { useRoomStore } from '@/stores/room'
 import { useGameStateStore } from '@/stores/gameState'
 import { useVolumeStore } from '@/stores/volume'
 import service from '@/services/signalRService'
 import FlickeringGrid from '../../common/FlickeringGrid.vue'
 import { onMounted } from 'vue'
 
-const playerStore = usePlayerStore() // Renamed for clarity
-const roomStore = useRoomStore() // Renamed for clarity
+const playerStore = usePlayerStore()
 const gameStateStore = useGameStateStore()
 const volumeStore = useVolumeStore()
 const { setMusicUrl, togglePlayMusic } = volumeStore

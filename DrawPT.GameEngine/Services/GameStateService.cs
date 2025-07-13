@@ -1,4 +1,5 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Constants;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
@@ -17,7 +18,7 @@ namespace DrawPT.GameEngine.Services
         public async Task<IGameState> StartGameAsync(string roomCode)
         {
             var gameState = await _cacheService.GetGameState(roomCode);
-            gameState ??= new GameState() { RoomCode = roomCode };
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.JustStarted };
             await _cacheService.SetGameState(gameState);
             return gameState;
         }
@@ -25,7 +26,31 @@ namespace DrawPT.GameEngine.Services
         public async Task<IGameState> StartRoundAsync(string roomCode, int roundNumber)
         {
             var gameState = await _cacheService.GetGameState(roomCode);
-            gameState ??= new GameState() { RoomCode = roomCode, CurrentRound = roundNumber };
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentRound = roundNumber, CurrentStatus = GameStatus.StartingRound };
+            await _cacheService.SetGameState(gameState);
+            return gameState;
+        }
+
+        public async Task<IGameState> AskThemeAsync(string roomCode)
+        {
+            var gameState = await _cacheService.GetGameState(roomCode);
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.AskingTheme };
+            await _cacheService.SetGameState(gameState);
+            return gameState;
+        }
+
+        public async Task<IGameState> ChooseThemeAsync(string roomCode)
+        {
+            var gameState = await _cacheService.GetGameState(roomCode);
+            gameState ??= new GameState() { RoomCode = roomCode };
+            await _cacheService.SetGameState(gameState);
+            return gameState;
+        }
+
+        public async Task<IGameState> AskQuestionAsync(string roomCode)
+        {
+            var gameState = await _cacheService.GetGameState(roomCode);
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.AskingQuestion };
             await _cacheService.SetGameState(gameState);
             return gameState;
         }
@@ -33,7 +58,7 @@ namespace DrawPT.GameEngine.Services
         public async Task<IGameState> EndGameAsync(string roomCode)
         {
             var gameState = await _cacheService.GetGameState(roomCode);
-            gameState ??= new GameState() { RoomCode = roomCode };
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.Completed };
             await _cacheService.SetGameState(gameState);
             return gameState;
         }

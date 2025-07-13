@@ -20,7 +20,6 @@ export const useGameStateStore = defineStore('gameState', {
     hostPlayerId: '' as string,
     players: [] as Player[],
     themes: [] as string[],
-    selectableThemeOptions: [] as string[],
     currentTheme: '' as string,
     currentImageUrl: '' as string,
     currentStatus: GameStatus.WaitingForPlayers,
@@ -48,11 +47,11 @@ export const useGameStateStore = defineStore('gameState', {
       this.gameConfiguration = gameState.gameConfiguration
       this.hostPlayerId = gameState.hostPlayerId
       this.players = gameState.players || []
-      this.themes = gameState.themes || []
-      this.currentTheme = gameState.currentTheme || ''
-      this.currentImageUrl = gameState.currentImageUrl || ''
       this.currentStatus = gameState.currentStatus
       // UI defaults
+      this.themes = []
+      this.currentTheme = ''
+      this.currentImageUrl = ''
       this.showImageLoader = false
       this.shouldShowResults = false
       this.currentBonusPoints = 0
@@ -73,24 +72,28 @@ export const useGameStateStore = defineStore('gameState', {
         this.players.push(player)
       }
     },
-
-    handleThemeSelectionEvent(themes: string[]) {
-      this.currentImageUrl = ''
-      this.showImageLoader = false
-      this.shouldShowResults = false
-      this.themes = themes
-      this.selectableThemeOptions = []
+    removePlayer(player: Player) {
+      const index = this.players.findIndex((p) => p.id === player.id)
+      if (index !== -1) {
+        this.players.splice(index, 1)
+      }
     },
-    handleThemeSelectedEvent() {
+
+    startGame() {
+      this.currentStatus = GameStatus.JustStarted
+    },
+
+    handleThemeSelectedEvent(theme: string) {
       this.themes = []
-      this.selectableThemeOptions = []
       this.showImageLoader = true
+      this.currentTheme = theme
     },
     handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
       this.shouldShowResults = true
       this.showImageLoader = false
       this.currentImageUrl = ''
       this.roundResults.push(roundResult)
+      this.currentStatus = GameStatus.ShowingRoundResults
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points
@@ -105,8 +108,15 @@ export const useGameStateStore = defineStore('gameState', {
       this.shouldShowResults = false
       this.showImageLoader = false
       this.themes = []
-      this.selectableThemeOptions = themes
       this.isGuessLocked = true
+      this.currentStatus = GameStatus.AskingTheme
+    },
+    handleThemeSelectionEvent(themes: string[]) {
+      this.currentImageUrl = ''
+      this.showImageLoader = false
+      this.shouldShowResults = false
+      this.themes = themes
+      this.currentStatus = GameStatus.AskingTheme
     },
     prepareForQuestion(question: PlayerQuestion) {
       this.shouldShowResults = false
@@ -116,11 +126,12 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentRound = question.roundNumber // Keep track of current round
       const scoreboardStore = useScoreboardStore()
       scoreboardStore.setRound(question.roundNumber)
+      this.currentStatus = GameStatus.AskingQuestion
     },
 
     // Actions called from Game.vue UI interactions or internal logic
-    clearSelectableThemes() {
-      this.selectableThemeOptions = []
+    clearThemes() {
+      this.themes = []
     },
     setGuessLock(locked: boolean) {
       this.isGuessLocked = locked
@@ -128,21 +139,19 @@ export const useGameStateStore = defineStore('gameState', {
     clearBonusPointsDisplay() {
       this.currentBonusPoints = 0
     },
-    // Action to be called when a theme is chosen by the current player via UI
-    // This is distinct from handleThemeSelectedEvent which is a broadcast
-    playerSelectedTheme() {
-      this.selectableThemeOptions = []
+    playerSelectedTheme(theme: string) {
+      this.currentTheme = theme
       this.themes = []
     },
     handleEndGameEvent() {
       this.shouldShowResults = true
       this.currentImageUrl = ''
       this.themes = []
-      this.selectableThemeOptions = []
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.currentRound = 0
       this.showImageLoader = false
+      this.currentStatus = GameStatus.Completed
     }
   }
 })

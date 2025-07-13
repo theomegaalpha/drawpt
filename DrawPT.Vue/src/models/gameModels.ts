@@ -27,9 +27,6 @@ export interface GameState {
   gameConfiguration: IGameConfiguration
   hostPlayerId: string
   players: Player[]
-  themes: string[]
-  currentTheme: string
-  currentImageUrl: string
   currentStatus: GameStatus
 }
 

@@ -24,7 +24,7 @@ onMounted(() => {
   })
 })
 
-const selectableThemeOptions = computed(() => gameStateStore.selectableThemeOptions)
+const selectableThemeOptions = computed(() => gameStateStore.themes)
 function handleThemeSelected(newTheme: string) {
   emit('themeSelected', newTheme)
 }
