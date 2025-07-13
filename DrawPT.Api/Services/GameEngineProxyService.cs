@@ -35,14 +35,24 @@ namespace DrawPT.Api.Services
         {
             _broadcastProcessor = _sbClient.CreateProcessor(
                 "gameEngine",
-                new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    MaxConcurrentCalls = 64,
+                    MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(5)
+                });
 
             _broadcastProcessor.ProcessMessageAsync += ProcessMessageAsync;
             _broadcastProcessor.ProcessErrorAsync += ProcessErrorAsync;
 
             _interactionProcessor = _sbClient.CreateProcessor(
                 "gameEngineRequest",
-                new ServiceBusProcessorOptions { AutoCompleteMessages = false });
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    MaxConcurrentCalls = 64,
+                    MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(5)
+                });
 
             _interactionProcessor.ProcessMessageAsync += ProcessInteractionMessageAsync;
             _interactionProcessor.ProcessErrorAsync += ProcessErrorAsync;
@@ -205,6 +215,12 @@ namespace DrawPT.Api.Services
             {
                 await _broadcastProcessor.StopProcessingAsync(cancellationToken);
             }
+
+            if (_interactionProcessor != null)
+            {
+                await _interactionProcessor.StopProcessingAsync(cancellationToken);
+            }
+
             await base.StopAsync(cancellationToken);
         }
     }

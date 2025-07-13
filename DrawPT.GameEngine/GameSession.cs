@@ -77,6 +77,8 @@ public class GameSession : IGameSession
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
             question.RoundNumber = i + 1;
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
+
+            gameState = await _gameStateService.AskQuestionAsync(roomCode);
             foreach (var player in players)
                 playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
 
@@ -84,7 +86,6 @@ public class GameSession : IGameSession
             if (playerAnswers.Count == 0)
                 break;
 
-            gameState = await _gameStateService.AskQuestionAsync(roomCode);
             await Task.WhenAll(playerAnswers);
 
             var answers = new List<PlayerAnswer>();
