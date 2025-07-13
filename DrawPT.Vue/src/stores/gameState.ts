@@ -82,6 +82,10 @@ export const useGameStateStore = defineStore('gameState', {
     startGame() {
       this.currentStatus = GameStatus.JustStarted
     },
+    startRound(roundNumber: number) {
+      this.currentRound = roundNumber
+      this.currentStatus = GameStatus.StartingRound
+    },
 
     handleThemeSelectedEvent(theme: string) {
       this.themes = []

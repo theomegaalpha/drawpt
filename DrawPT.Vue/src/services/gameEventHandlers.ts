@@ -46,6 +46,11 @@ export function registerBaseGameHubEvents() {
     stores.gameStateStore.startGame()
   })
 
+  service.on('roundStarted', (roundNumber: number) => {
+    stores.notificationStore.addGameNotification(`Round ${roundNumber} has started!`)
+    stores.gameStateStore.startRound(roundNumber)
+  })
+
   service.on('roundResults', (roundResult: RoundResults) => {
     console.log('Round results received:', roundResult)
     stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)

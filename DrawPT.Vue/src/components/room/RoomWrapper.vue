@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SetUsername from '@/components/room/SetUsername.vue'
 import Lobby from '@/components/room/lobby/Lobby.vue'
+import PlayerRoster from './game/playerRoster/PlayerRoster.vue'
 import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/GameNotifications.vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
@@ -70,6 +71,7 @@ onUnmounted(() => {
   <SetUsername v-if="!gameState.successfullyJoined" />
   <div v-if="gameState.successfullyJoined && playerStore.player?.id" class="h-full">
     <Lobby v-if="gameState.currentStatus === GameStatus.WaitingForPlayers" />
+    <PlayerRoster v-else-if="gameState.currentStatus === GameStatus.JustStarted" />
     <Game v-else-if="gameState.currentStatus < GameStatus.Completed" />
     <GameResults v-else-if="gameState.currentStatus === GameStatus.Completed" />
 
