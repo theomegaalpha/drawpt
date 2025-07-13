@@ -71,7 +71,7 @@ public class GameCommunicationService : IGameCommunicationService
     {
         // Prepare request message for Service Bus
         var themes = _themeService.GetRandomThemes();
-        var requestObj = new { Action = GameEngineRequests.Theme, Payload = themes };
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Theme, Payload = themes };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         // Send via Service Bus and await response
@@ -104,7 +104,7 @@ public class GameCommunicationService : IGameCommunicationService
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
         // Build SB request message
-        var requestObj = new { Action = GameEngineRequests.Question, Payload = question };
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Question, Payload = question };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         var correlationId = Guid.NewGuid().ToString();
