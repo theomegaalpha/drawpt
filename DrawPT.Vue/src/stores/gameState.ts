@@ -102,16 +102,22 @@ export const useGameStateStore = defineStore('gameState', {
       }, 5000)
     },
 
-    prepareForThemeSelection(themes: string[], hasAction: boolean = false) {
-      this.hasPlayerAction = hasAction
+    prepareForThemeSelection(themes: string[]) {
+      this.hasPlayerAction = true
       this.currentImageUrl = ''
       this.shouldShowResults = false
       this.showImageLoader = false
-      this.themes = []
+      console.log('Preparing for theme selection with themes:', themes)
+      for (const theme of themes) {
+        if (this.themes.indexOf(theme) === -1) {
+          this.themes.push(theme)
+        }
+      }
       this.isGuessLocked = true
       this.currentStatus = GameStatus.AskingTheme
     },
     handleThemeSelectionEvent(themes: string[]) {
+      this.hasPlayerAction = false
       this.currentImageUrl = ''
       this.showImageLoader = false
       this.shouldShowResults = false

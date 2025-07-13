@@ -101,9 +101,8 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
 onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askTheme', async (themes: string[]) => {
-    console.log('askTheme received from server:', themes)
-    themeSelectionInput.value = '' // Reset local UI state for theme selection
-    gameStateStore.prepareForThemeSelection(themes) // Prepare store state for theme selection
+    themeSelectionInput.value = ''
+    gameStateStore.prepareForThemeSelection(themes)
     try {
       const theme = await askForThemeInternal()
       return theme

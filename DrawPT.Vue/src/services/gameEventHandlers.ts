@@ -41,9 +41,9 @@ export function registerBaseGameHubEvents() {
   })
 
   service.on('gameStarted', (gameState: GameState) => {
-    stores.gameStateStore.startGame()
     stores.notificationStore.addGameNotification('Game has started!')
     stores.gameStateStore.initializeGameState(gameState)
+    stores.gameStateStore.startGame()
   })
 
   service.on('roundResults', (roundResult: RoundResults) => {
