@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
 
 const { players } = defineProps<{
   players: Array<{ id: string; avatar?: string | null; username: string }>
 }>()
 
+const { playerAnswers } = useGameStateStore()
 const { blankAvatar } = usePlayerStore()
 </script>
 
@@ -20,7 +22,8 @@ const { blankAvatar } = usePlayerStore()
         <img
           :src="player.avatar || blankAvatar"
           :alt="player.username"
-          class="inline-block h-16 w-16 flex-shrink-0 rounded-full"
+          class="md:border-6 inline-block h-16 w-16 flex-shrink-0 rounded-full border-4 border-gray-400 filter md:h-20 md:w-20 dark:border-white"
+          :class="{ grayscale: !playerAnswers.some((pa) => pa.id === player.id) }"
         />
       </li>
     </ul>

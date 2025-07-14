@@ -7,7 +7,7 @@ import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useGameStateStore } from '@/stores/gameState'
 
 import type { Player } from '@/models/player'
-import type { GameState, RoundResults, GameResults } from '@/models/gameModels'
+import type { PlayerAnswer, GameState, RoundResults, GameResults } from '@/models/gameModels'
 
 // Helper to easily access stores within handlers
 const getStores = () => ({
@@ -77,6 +77,11 @@ export function registerBaseGameHubEvents() {
     // Server confirms a theme was selected by someone
     stores.gameStateStore.handleThemeSelectedEvent(theme)
     stores.notificationStore.addGameNotification('Selected theme: ' + theme)
+  })
+
+  service.on('playerAnswered', (playerAnswer: PlayerAnswer) => {
+    stores.gameStateStore.handlePlayerAnsweredEvent(playerAnswer)
+    stores.notificationStore.addGameNotification('Please select a theme for the next round.')
   })
 
   service.on('broadcastRoundResults', (gameRound: RoundResults) /* Specify type */ => {

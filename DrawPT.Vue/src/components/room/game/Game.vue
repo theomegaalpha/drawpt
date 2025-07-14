@@ -6,7 +6,6 @@ import ViewThemes from './themescreen/ViewThemes.vue'
 import ImageLoader from './loader/ImageLoader.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
-import { useScoreboardStore } from '@/stores/scoreboard'
 import { useGameStateStore } from '@/stores/gameState' // Import the new store
 import service from '@/services/signalRService'
 
