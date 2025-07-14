@@ -6,6 +6,10 @@ export default {
   theme: {
     extend: {
       keyframes: {
+        'float-up-fade': {
+          '0%': { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-1rem)' }
+        },
         aurora: {
           from: {
             backgroundPosition: '50% 50%, 50% 50%'
@@ -77,9 +81,9 @@ export default {
           }
         },
         bulging: {
-          '0%, 100%': { transform: 'scale(1)' },
-          '25%, 75%': { transform: 'scale(1.1)' },
-          '50%': { transform: 'scale(1)' }
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)' }
         }
       },
       animation: {
@@ -90,7 +94,8 @@ export default {
         'blur-in': 'blur-in-effect 0.5s ease-out forwards',
         'fade-blur-in-slow': 'fade-blur-in-effect 2s ease-out forwards',
         'fade-blur-in-fast': 'fade-blur-in-fast-effect 175ms ease-out forwards',
-        bulging: 'bulging 1.5s ease-in-out infinite'
+        bulging: 'bulging 1.5s ease-in-out infinite',
+        'float-up-fade': 'float-up-fade 3s ease-out forwards'
       }
     }
   },

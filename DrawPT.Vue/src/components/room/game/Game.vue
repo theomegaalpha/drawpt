@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import GameCanvas from './canvas/GameCanvas.vue'
 import RoundResults from './roundresults/RoundResults.vue'
-import GameBonusPoints from './canvas/GameBonusPoints.vue'
 import SelectTheme from './themescreen/SelectTheme.vue'
 import ViewThemes from './themescreen/ViewThemes.vue'
-import GameTimer from './GameTimer.vue'
 import ImageLoader from './loader/ImageLoader.vue'
-import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
-import { useScoreboardStore } from '@/stores/scoreboard'
 import { useGameStateStore } from '@/stores/gameState' // Import the new store
 import service from '@/services/signalRService'
 
@@ -18,11 +14,9 @@ import GameResults from './gameresults/GameResults.vue'
 
 const gameStateStore = useGameStateStore()
 const notificationStore = useNotificationStore()
-const scoreboardStore = useScoreboardStore() // Already imported, ensure it's used if needed directly here
 
 // --- State from Pinia Store (via computed properties) ---
 const themes = computed(() => gameStateStore.themes)
-const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
@@ -113,7 +107,6 @@ onBeforeMount(() => {
   })
 
   service.on('askQuestion', async (question: PlayerQuestion): Promise<PlayerAnswerBase> => {
-    console.log('askQuestion received from server:', question)
     gameStateStore.prepareForQuestion(question)
     try {
       const answer = await askQuestionInternal()

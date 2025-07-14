@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import type {
   GameState,
+  PlayerAnswer,
   PlayerQuestion,
   IGameConfiguration,
   RoundResults
@@ -25,6 +26,7 @@ export const useGameStateStore = defineStore('gameState', {
     currentStatus: GameStatus.WaitingForPlayers,
     // UI-specific
     successfullyJoined: false,
+    playerAnswers: [] as PlayerAnswer[],
     roundResults: [] as RoundResults[],
     gameResults: [] as PlayerResult[],
     hasPlayerAction: false,
@@ -50,6 +52,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = gameState.currentStatus
       // UI defaults
       this.themes = []
+      this.playerAnswers.length = 0
       this.currentTheme = ''
       this.currentImageUrl = ''
       this.showImageLoader = false
@@ -63,8 +66,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.roomCode = code
     },
     clearRoom() {
-      this.roomCode = ''
-      this.currentRound = 0
+      this.initializeGameState({} as GameState)
     },
     addPlayer(player: Player) {
       const existingPlayer = this.players.find((p) => p.id === player.id)
@@ -85,12 +87,18 @@ export const useGameStateStore = defineStore('gameState', {
     startRound(roundNumber: number) {
       this.currentRound = roundNumber
       this.currentStatus = GameStatus.StartingRound
+      this.playerAnswers.length = 0
     },
 
     handleThemeSelectedEvent(theme: string) {
       this.themes = []
       this.showImageLoader = true
       this.currentTheme = theme
+    },
+    handlePlayerAnsweredEvent(playerAnswer: PlayerAnswer) {
+      if (!this.playerAnswers.includes(playerAnswer)) {
+        this.playerAnswers.push(playerAnswer)
+      }
     },
     handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
       this.shouldShowResults = true

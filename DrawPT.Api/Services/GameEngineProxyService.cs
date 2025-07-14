@@ -191,10 +191,7 @@ namespace DrawPT.Api.Services
                         break;
                     case GameEngineQueue.PlayerAnsweredAction:
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
-                        if (playerAnswer != null)
-                        {
-                            await _hubContext.Clients.Group(roomCode).WriteMessage($"{playerAnswer.Username} answered!");
-                        }
+                        await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
                         break;
                     default:
                         _logger.LogWarning($"Unhandled GameEngine action: {action}");

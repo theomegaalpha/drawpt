@@ -24,6 +24,7 @@ namespace DrawPT.Api.Hubs
          */
         Task GameStarted(IGameState? state);
         Task PlayerScoreUpdated(Guid playerId, int newScore);
+        Task PlayerAnswered(PlayerAnswer playerAnswer);
 
         Task ThemeSelection(List<string> themes);
         Task ThemeSelected(string theme);

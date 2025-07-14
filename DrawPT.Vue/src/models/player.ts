@@ -1,7 +1,6 @@
 export interface Player {
   id: string
   connectionId: string
-  color: string
   username: string
   avatar: string | null
 }
