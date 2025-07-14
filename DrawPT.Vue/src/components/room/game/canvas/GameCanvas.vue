@@ -18,6 +18,12 @@ const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
+// Split players: first 4 for left, last 4 for right (only if more than 4)
+const leftPlayers = computed(() => gameStateStore.players.slice(0, 4))
+const rightPlayers = computed(() =>
+  gameStateStore.players.length > 4 ? gameStateStore.players.slice(-4) : []
+)
+
 const guessInputFromComponent = ref<string>('')
 
 const submitGuess = async (valueFromInput: string) => {
@@ -46,7 +52,7 @@ const submitGuess = async (valueFromInput: string) => {
           <!-- Left players inline -->
           <ActivePlayers
             class="absolute right-full top-1/2 h-full -translate-y-1/2 transform"
-            :players="gameStateStore.players"
+            :players="leftPlayers"
             :is-guess-locked="lockGuess"
           />
           <img
@@ -56,8 +62,9 @@ const submitGuess = async (valueFromInput: string) => {
           />
           <!-- Right players overlay -->
           <ActivePlayers
+            v-if="rightPlayers.length > 0"
             class="absolute left-full top-1/2 h-full -translate-y-1/2 transform"
-            :players="gameStateStore.players"
+            :players="rightPlayers"
             :is-guess-locked="lockGuess"
           />
         </div>
