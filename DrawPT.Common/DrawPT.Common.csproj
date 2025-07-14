@@ -10,11 +10,11 @@
     <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.3.0-preview.1.25265.20" />
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.1" />
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.3.1" />
-    <PackageReference Include="Google.Cloud.AIPlatform.V1" Version="3.35.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.44.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Google.Cloud.AIPlatform.V1" Version="3.38.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.45.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
     <PackageReference Include="Supabase" Version="1.1.1" />
-    <PackageReference Include="System.Text.Json" Version="9.0.6" />
+    <PackageReference Include="System.Text.Json" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,7 +6,7 @@ namespace DrawPT.Api.Hubs
 {
     public interface IGameClient
     {
-        /*         
+        /*
          *  Room lifecycle events
          */
         Task RoomIsFull();
@@ -19,7 +19,7 @@ namespace DrawPT.Api.Hubs
         Task PlayerJoined(Player player);
         Task PlayerLeft(Player player);
 
-        /*         
+        /*
          *  Game lifecycle events
          */
         Task GameStarted(IGameState? state);
@@ -38,16 +38,16 @@ namespace DrawPT.Api.Hubs
         Task WriteError(string message);
 
 
-        /*         
+        /*
          *  Game interaction events
          */
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
 
-        /*       
+        /*
          *  Streaming audio chunks
          */
-        Task ReceiveAudio(string audioChunk);
+        Task ReceiveAudio(byte[] audioChunk);
         Task AudioStreamCompleted();
     }
 }
