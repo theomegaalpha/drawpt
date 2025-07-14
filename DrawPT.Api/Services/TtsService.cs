@@ -44,13 +44,13 @@ namespace DrawPT.Api.Services
                 chunkBuffer.AddRange(page);
                 if (chunkBuffer.Count >= MaxChunkSize)
                 {
-                    await client.ReceiveAudio(Convert.ToBase64String(chunkBuffer.ToArray()));
+                    await client.ReceiveAudio(chunkBuffer.ToArray());
                     chunkBuffer.Clear();
                 }
                 pos = next;
             }
             if (chunkBuffer.Count > 0)
-                await client.ReceiveAudio(Convert.ToBase64String(chunkBuffer.ToArray()));
+                await client.ReceiveAudio(chunkBuffer.ToArray());
 
             await client.AudioStreamCompleted();
         }
