@@ -21,24 +21,27 @@ const { blankAvatar } = usePlayerStore()
         :key="player.id"
         class="relative -mx-4 flex h-full flex-none items-center md:mx-1"
       >
-        <!-- Bonus points float animation -->
-        <div
-          v-if="playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints"
-          class="animate-float-up-fade absolute left-1/2 top-4 -mx-4 -translate-x-1/2 transform text-lg font-bold text-green-500"
-        >
-          +{{ playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints }}
+        <div class="relative h-16 w-16 flex-shrink-0 md:h-20 md:w-20">
+          <div
+            v-if="playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints"
+            class="absolute bottom-full left-1/2 -mb-1 -translate-x-1/2"
+          >
+            <div class="animate-float-up-fade mb-1 text-lg font-bold text-green-500">
+              +{{ playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints }}
+            </div>
+          </div>
+          <img
+            :src="player.avatar || blankAvatar"
+            :alt="player.username"
+            class="md:border-6 h-full w-full rounded-full border-4 border-gray-400 filter dark:border-white"
+            :class="{
+              'opacity-50 grayscale': !playerAnswers.some((pa) => pa.playerId === player.id),
+              'animate-bulging opacity-100 [animation-iteration-count:1]': playerAnswers.some(
+                (pa) => pa.playerId === player.id
+              )
+            }"
+          />
         </div>
-        <img
-          :src="player.avatar || blankAvatar"
-          :alt="player.username"
-          class="md:border-6 inline-block h-16 w-16 flex-shrink-0 rounded-full border-4 border-gray-400 filter md:h-20 md:w-20 dark:border-white"
-          :class="{
-            grayscale: !playerAnswers.some((pa) => pa.playerId === player.id),
-            'animate-bulging [animation-iteration-count:1]': playerAnswers.some(
-              (pa) => pa.playerId === player.id
-            )
-          }"
-        />
       </li>
     </ul>
   </div>

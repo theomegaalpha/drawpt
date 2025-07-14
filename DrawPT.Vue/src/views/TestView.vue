@@ -45,7 +45,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-full">
-    <Game />
-  </div>
+  <main class="h-full">
+    <div class="h-full">
+      <Game />
+    </div>
+  </main>
 </template>
