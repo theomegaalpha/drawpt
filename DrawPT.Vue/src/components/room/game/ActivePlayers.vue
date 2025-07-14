@@ -1,17 +1,27 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
 
-const { players } = useGameStateStore()
+const { players } = defineProps<{
+  players: Array<{ id: string; avatar?: string | null; username: string }>
+}>()
+
+const { blankAvatar } = usePlayerStore()
 </script>
 
 <template>
   <div>
-    <h2 class="text-lg font-bold">Active Players</h2>
-    <ul>
-      <li v-for="player in players" :key="player.id">
-        {{ player.username }}
+    <!-- Use a fixed height (e.g., 70vh to match the main image) so each row has space -->
+    <ul class="-mx-4 grid h-full max-h-[70vh] w-fit grid-rows-4 justify-items-center md:mx-1">
+      <li
+        v-for="player in players"
+        :key="player.id"
+        class="-mx-4 flex h-full flex-none items-center md:mx-1"
+      >
+        <img
+          :src="player.avatar || blankAvatar"
+          :alt="player.username"
+          class="inline-block h-16 w-16 flex-shrink-0 rounded-full"
+        />
       </li>
     </ul>
   </div>

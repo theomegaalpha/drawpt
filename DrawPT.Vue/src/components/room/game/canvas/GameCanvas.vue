@@ -5,6 +5,7 @@ import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
 import ShinyButton from '@/components/common/ShinyButton.vue'
+import ActivePlayers from '../ActivePlayers.vue'
 
 const timeoutPerQuestion = 30000
 const emit = defineEmits<{
@@ -36,16 +37,30 @@ const submitGuess = async (valueFromInput: string) => {
       class="fixed bottom-0 left-0 right-0"
     />
     <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
-    <div class="flex w-full max-w-5xl flex-col items-center px-4">
+    <div class="flex w-fit max-w-5xl flex-col items-center px-4">
       <ShinyButton class="-mb-12 cursor-default sm:mb-4" :disabled="true">
         <h2 class="sm:text-2xl">Theme: {{ gameStateStore.currentTheme }}</h2>
       </ShinyButton>
-      <div class="mb-2">
-        <img
-          v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
-          class="aspect-auto max-h-[70vh] max-w-[1048px] rounded-lg object-contain"
-          :src="imageUrl"
-        />
+      <div class="mb-2 flex items-start justify-center">
+        <div class="relative inline-block">
+          <!-- Left players inline -->
+          <ActivePlayers
+            class="absolute right-full top-1/2 h-full -translate-y-1/2 transform"
+            :players="gameStateStore.players"
+            :is-guess-locked="lockGuess"
+          />
+          <img
+            v-if="imageUrl !== '' && !gameStateStore.shouldShowResults"
+            class="max-h-[70vh] rounded-lg object-contain"
+            :src="imageUrl"
+          />
+          <!-- Right players overlay -->
+          <ActivePlayers
+            class="absolute left-full top-1/2 h-full -translate-y-1/2 transform"
+            :players="gameStateStore.players"
+            :is-guess-locked="lockGuess"
+          />
+        </div>
       </div>
       <div v-if="!lockGuess" class="w-full max-w-2xl">
         <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
