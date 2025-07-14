@@ -33,12 +33,12 @@ const submitGuess = async (valueFromInput: string) => {
     <GameTimer
       :max-time="timeoutPerQuestion"
       v-if="!lockGuess"
-      class="fixed left-0 right-0 top-0"
+      class="fixed bottom-0 left-0 right-0"
     />
     <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
     <div class="flex w-full max-w-5xl flex-col items-center px-4">
-      <ShinyButton class="mb-4 cursor-default" :disabled="true">
-        <h2 class="text-2xl">Theme: {{ gameStateStore.currentTheme }}</h2>
+      <ShinyButton class="-mb-12 cursor-default sm:mb-4" :disabled="true">
+        <h2 class="sm:text-2xl">Theme: {{ gameStateStore.currentTheme }}</h2>
       </ShinyButton>
       <div class="mb-2">
         <img

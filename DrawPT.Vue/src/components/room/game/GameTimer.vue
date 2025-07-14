@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { time } from 'console'
 import { computed, onMounted, ref } from 'vue'
 const props = defineProps({
   maxTime: {
@@ -34,20 +33,6 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="relative h-12 overflow-hidden bg-gray-200 dark:bg-gray-600/80">
-      <div class="flex h-full w-full text-lg font-bold"></div>
-      <div
-        class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
-        :class="percentage <= 30 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
-        :style="{ width: `calc(${percentage}vw)` }"
-      ></div>
-      <div
-        class="absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center text-lg font-bold opacity-50"
-        :class="percentage <= 30 ? 'animate-bulging text-red-400' : ''"
-      >
-        {{ timerText }}
-      </div>
-    </div>
     <div id="glow" class="w-vw relative">
       <div
         class="absolute left-1/2 top-0 h-[2px] w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-green-500 to-transparent blur-sm transition-all duration-1000 ease-linear"
@@ -63,6 +48,20 @@ onMounted(() => {
       <div
         class="absolute left-1/2 top-0 h-px w-1/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-sky-300 to-transparent transition-all duration-1000 ease-linear"
       />
+    </div>
+    <div class="relative h-12 overflow-hidden bg-gray-200 dark:bg-gray-600/80">
+      <div class="flex h-full w-full text-lg font-bold"></div>
+      <div
+        class="transition-10 absolute left-0 top-0 h-full w-full transition-all duration-1000 ease-linear"
+        :class="percentage <= 30 ? 'bg-red-400' : 'bg-green-400 dark:bg-green-700'"
+        :style="{ width: `calc(${percentage}vw)` }"
+      ></div>
+      <div
+        class="absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center text-lg font-bold opacity-50"
+        :class="percentage <= 30 ? 'animate-bulging text-red-400' : ''"
+      >
+        {{ timerText }}
+      </div>
     </div>
   </div>
 </template>
