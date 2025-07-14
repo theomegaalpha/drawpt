@@ -23,7 +23,12 @@ const { blankAvatar } = usePlayerStore()
           :src="player.avatar || blankAvatar"
           :alt="player.username"
           class="md:border-6 inline-block h-16 w-16 flex-shrink-0 rounded-full border-4 border-gray-400 filter md:h-20 md:w-20 dark:border-white"
-          :class="{ grayscale: !playerAnswers.some((pa) => pa.id === player.id) }"
+          :class="{
+            grayscale: !playerAnswers.some((pa) => pa.id === player.id),
+            'animate-bulging [animation-iteration-count:1]': playerAnswers.some(
+              (pa) => pa.id === player.id
+            )
+          }"
         />
       </li>
     </ul>

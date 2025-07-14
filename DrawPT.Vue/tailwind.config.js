@@ -77,9 +77,9 @@ export default {
           }
         },
         bulging: {
-          '0%, 100%': { transform: 'scale(1)' },
-          '25%, 75%': { transform: 'scale(1.1)' },
-          '50%': { transform: 'scale(1)' }
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)' }
         }
       },
       animation: {

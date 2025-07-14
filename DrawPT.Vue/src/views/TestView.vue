@@ -24,6 +24,22 @@ onMounted(async () => {
     avatar: '/images/profile-photos/anime-5.png',
     connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
   })
+
+  // Simulate a player answering after 5 seconds
+  setTimeout(() => {
+    gameState.handlePlayerAnsweredEvent({
+      connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02',
+      id: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
+      username: 'micro david',
+      avatar: '/images/profile-photos/anime-5.png',
+      isGambling: false,
+      score: 10,
+      bonusPoints: 1,
+      reason: '',
+      guess: 'Some answer',
+      submittedAt: new Date().toISOString()
+    })
+  }, 5000)
 })
 </script>
 
