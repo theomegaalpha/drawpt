@@ -17,8 +17,15 @@ const { blankAvatar } = usePlayerStore()
       <li
         v-for="player in players"
         :key="player.id"
-        class="-mx-4 flex h-full flex-none items-center md:mx-1"
+        class="relative -mx-4 flex h-full flex-none items-center md:mx-1"
       >
+        <!-- Bonus points float animation -->
+        <div
+          v-if="playerAnswers.find((pa) => pa.id === player.id)?.bonusPoints"
+          class="animate-float-up-fade absolute left-1/2 top-4 -mx-4 -translate-x-1/2 transform text-lg font-bold text-green-500"
+        >
+          +{{ playerAnswers.find((pa) => pa.id === player.id)?.bonusPoints }}
+        </div>
         <img
           :src="player.avatar || blankAvatar"
           :alt="player.username"

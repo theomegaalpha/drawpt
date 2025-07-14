@@ -39,7 +39,7 @@ onMounted(async () => {
       guess: 'Some answer',
       submittedAt: new Date().toISOString()
     })
-  }, 5000)
+  }, 1000)
 })
 </script>
 
