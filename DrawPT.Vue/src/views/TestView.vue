@@ -29,7 +29,8 @@ onMounted(async () => {
   setTimeout(() => {
     gameState.handlePlayerAnsweredEvent({
       connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02',
-      id: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
+      id: 'f06514a7-0e9a-4664-bf2c-3164855d12aq',
+      playerId: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
       username: 'micro david',
       avatar: '/images/profile-photos/anime-5.png',
       isGambling: false,

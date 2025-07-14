@@ -52,7 +52,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = gameState.currentStatus
       // UI defaults
       this.themes = []
-      this.playerAnswers = []
+      this.playerAnswers.length = 0
       this.currentTheme = ''
       this.currentImageUrl = ''
       this.showImageLoader = false
@@ -87,7 +87,7 @@ export const useGameStateStore = defineStore('gameState', {
     startRound(roundNumber: number) {
       this.currentRound = roundNumber
       this.currentStatus = GameStatus.StartingRound
-      this.playerAnswers = []
+      this.playerAnswers.length = 0
     },
 
     handleThemeSelectedEvent(theme: string) {

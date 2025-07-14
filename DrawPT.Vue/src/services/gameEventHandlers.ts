@@ -80,8 +80,8 @@ export function registerBaseGameHubEvents() {
   })
 
   service.on('playerAnswered', (playerAnswer: PlayerAnswer) => {
+    console.log('Player answered:', playerAnswer)
     stores.gameStateStore.handlePlayerAnsweredEvent(playerAnswer)
-    stores.notificationStore.addGameNotification('Please select a theme for the next round.')
   })
 
   service.on('broadcastRoundResults', (gameRound: RoundResults) /* Specify type */ => {

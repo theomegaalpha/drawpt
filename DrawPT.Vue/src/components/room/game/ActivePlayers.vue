@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useGameStateStore } from '@/stores/gameState'
+import { storeToRefs } from 'pinia'
 import { usePlayerStore } from '@/stores/player'
 
 const { players } = defineProps<{
   players: Array<{ id: string; avatar?: string | null; username: string }>
 }>()
 
-const { playerAnswers } = useGameStateStore()
+const gameStateStore = useGameStateStore()
+const { playerAnswers } = storeToRefs(gameStateStore)
 const { blankAvatar } = usePlayerStore()
 </script>
 
@@ -21,19 +23,19 @@ const { blankAvatar } = usePlayerStore()
       >
         <!-- Bonus points float animation -->
         <div
-          v-if="playerAnswers.find((pa) => pa.id === player.id)?.bonusPoints"
+          v-if="playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints"
           class="animate-float-up-fade absolute left-1/2 top-4 -mx-4 -translate-x-1/2 transform text-lg font-bold text-green-500"
         >
-          +{{ playerAnswers.find((pa) => pa.id === player.id)?.bonusPoints }}
+          +{{ playerAnswers.find((pa) => pa.playerId === player.id)?.bonusPoints }}
         </div>
         <img
           :src="player.avatar || blankAvatar"
           :alt="player.username"
           class="md:border-6 inline-block h-16 w-16 flex-shrink-0 rounded-full border-4 border-gray-400 filter md:h-20 md:w-20 dark:border-white"
           :class="{
-            grayscale: !playerAnswers.some((pa) => pa.id === player.id),
+            grayscale: !playerAnswers.some((pa) => pa.playerId === player.id),
             'animate-bulging [animation-iteration-count:1]': playerAnswers.some(
-              (pa) => pa.id === player.id
+              (pa) => pa.playerId === player.id
             )
           }"
         />

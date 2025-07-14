@@ -61,6 +61,7 @@ export interface PlayerAnswerBase {
 
 export interface PlayerAnswer {
   id: string
+  playerId: string
   connectionId: string
   username: string
   avatar: string | null
