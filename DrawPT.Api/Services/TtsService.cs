@@ -29,7 +29,7 @@ namespace DrawPT.Api.Services
             BinaryData speech = await _audioClient.GenerateSpeechAsync(text, "ballad", options);
             byte[] buffer = speech.ToArray();
             const byte O1 = 0x4F, O2 = 0x67, O3 = 0x67, O4 = 0x53;
-            const int MaxChunkSize = 64 * 1024; // 64 KB threshold
+            const int MaxChunkSize = 128 * 1024; // 128 KB threshold
             var chunkBuffer = new List<byte>();
             for (int pos = 0; pos < buffer.Length;)
             {
