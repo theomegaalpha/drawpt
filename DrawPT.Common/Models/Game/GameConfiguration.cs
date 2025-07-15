@@ -20,7 +20,7 @@ namespace DrawPT.Common.Models.Game
         /// <summary>
         /// Gets or sets the time limit for each question in seconds
         /// </summary>
-        public int QuestionTimeout { get; set; } = 30;
+        public int QuestionTimeout { get; set; } = 40;
 
         /// <summary>
         /// Gets or sets the time limit for theme selection in seconds
