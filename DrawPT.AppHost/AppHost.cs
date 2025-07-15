@@ -1,4 +1,5 @@
 using Azure.Provisioning.ServiceBus;
+using Azure.Provisioning.SignalR;
 using Azure.Provisioning.Sql;
 using Azure.Provisioning.Storage;
 
@@ -21,6 +22,15 @@ var db = sql.AddDatabase("database");
 
 var signalr = builder.ExecutionContext.IsPublishMode ?
     builder.AddAzureSignalR("signalr")
+        .ConfigureInfrastructure(configure =>
+        {
+            var signalrService = configure.GetProvisionableResources()
+                                          .OfType<SignalRService>()
+                                          .Single();
+
+            signalrService.Sku.Name = "Standard_S1";
+            signalrService.Tags.Add("drawpt", "DrawPT Game Engine");
+        })
     : builder.AddConnectionString("signalr");
 
 var serviceBus = builder.AddAzureServiceBus("service-bus")
