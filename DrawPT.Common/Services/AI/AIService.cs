@@ -81,7 +81,7 @@ The response must always be a JSON array, even when evaluating a single contesta
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 800,
+                    MaxOutputTokenCount = 3000,
 
                     TopP = 1,
                     FrequencyPenalty = 0,
@@ -97,7 +97,7 @@ The response must always be a JSON array, even when evaluating a single contesta
                     {
                         answers.ForEach(a =>
                         {
-                            a.Reason = "Problem assing scores.";
+                            a.Reason = "Problem assessing scores.";
                             a.Score = 100;
                         });
                     }
@@ -107,7 +107,7 @@ The response must always be a JSON array, even when evaluating a single contesta
                     {
                         answers.ForEach(a =>
                         {
-                            a.Reason = "Problem assing scores.";
+                            a.Reason = "Problem assessing scores.";
                             a.Score = 100;
                         });
                         return answers;
@@ -121,8 +121,8 @@ The response must always be a JSON array, even when evaluating a single contesta
             }
             answers.ForEach(a =>
             {
-                a.Reason = "Problem assing scores.";
-                a.Score = 20;
+                a.Reason = "Problem assessing scores.";
+                a.Score = 100;
             });
             return answers;
         }
