@@ -68,7 +68,6 @@ var storage = builder.AddAzureStorage("storage")
                     azurite
                         .WithBlobPort(51566)
                         .WithContainerName("images")
-                        .WithContainerName("music")
                         .WithLifetime(ContainerLifetime.Persistent);
                 })
     .AddBlobs("blobs");

@@ -26,7 +26,8 @@ namespace DrawPT.Api.Controllers
 
             foreach (var blob in blobs)
             {
-                musicFiles.Add(blob.Name);
+                var blobClient = _containerClient.GetBlobClient(blob.Name);
+                musicFiles.Add(blobClient.Uri.ToString());
             }
 
             return Ok(musicFiles);

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import api from '@/api/api'
 
 const getInitialVolume = (key: string, defaultValue: number): number => {
   const storedValue = localStorage.getItem(key)
@@ -19,7 +20,9 @@ export const useVolumeStore = defineStore('volume', {
     musicUrl: null as string | null,
     sfxUrl: null as string | null,
     isPlayingMusic: false,
-    isPlayingSfx: false
+    isPlayingSfx: false,
+    backgroundMusicList: [] as string[],
+    currentTrackIndex: -1 as number
   }),
   getters: {
     musicVolumePercent: (state) => state.musicVolume / 100,
@@ -28,7 +31,9 @@ export const useVolumeStore = defineStore('volume', {
     getCurrentMusicUrl: (state) => state.musicUrl,
     getCurrentSfxUrl: (state) => state.sfxUrl,
     getIsPlayingMusic: (state) => state.isPlayingMusic,
-    getIsPlayingSfx: (state) => state.isPlayingSfx
+    getIsPlayingSfx: (state) => state.isPlayingSfx,
+    getBackgroundMusicList: (state) => state.backgroundMusicList,
+    getCurrentTrackIndex: (state) => state.currentTrackIndex
   },
   actions: {
     setMusicVolume(newVolume: number) {
@@ -59,6 +64,21 @@ export const useVolumeStore = defineStore('volume', {
     stopSfx() {
       this.isPlayingSfx = false
       this.sfxUrl = null
+    },
+    // Fetch and initialize background music list
+    async loadBackgroundMusic() {
+      try {
+        const urls = await api.getBackgroundMusic()
+        this.backgroundMusicList = urls
+        // If no URL set yet, pick random initially
+        if (urls.length > 0 && this.musicUrl == null) {
+          const idx = Math.floor(Math.random() * urls.length)
+          this.currentTrackIndex = idx
+          this.musicUrl = urls[idx]
+        }
+      } catch (error) {
+        console.error('Failed to load background music', error)
+      }
     }
   }
 })
