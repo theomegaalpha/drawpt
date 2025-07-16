@@ -6,9 +6,10 @@ import Game from '@/components/room/game/Game.vue'
 import GameNotifications from '@/components/room/GameNotifications.vue'
 import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 import VolumeControls from '@/components/room/volume/VolumeControls.vue'
+import EditProfile from '@/components/common/EditProfile.vue'
 import { GameStatus } from '@/models/gameModels'
 
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
@@ -33,6 +34,23 @@ const roomJoinStore = useRoomJoinStore()
 const { isModalOpen, toggleModal } = useVolumeStore()
 const gameState = useGameStateStore()
 
+const isUsernameSet = ref(false)
+
+const handleSaved = async () => {
+  try {
+    if (!service.isConnected) {
+      await service.startConnection('/gamehub')
+      notificationStore.addGameNotification('Connected to game server.', false)
+    }
+    registerBaseGameHubEvents()
+    registerAudioEvents()
+    isUsernameSet.value = true
+  } catch (err) {
+    console.error('SignalR connection failed in RoomWrapper:', err)
+    notificationStore.addGameNotification('Failed to connect to the game server.', true)
+  }
+}
+
 onMounted(async () => {
   roomJoinStore.reset()
   scoreboardStore.clearScoreboard()
@@ -41,18 +59,6 @@ onMounted(async () => {
   api.getPlayer().then((res) => {
     playerStore.updatePlayer(res)
   })
-
-  try {
-    if (!service.isConnected) {
-      await service.startConnection('/gamehub')
-      notificationStore.addGameNotification('Connected to game server.', false)
-    }
-    registerBaseGameHubEvents()
-    registerAudioEvents()
-  } catch (err) {
-    console.error('SignalR connection failed in RoomWrapper:', err)
-    notificationStore.addGameNotification('Failed to connect to the game server.', true)
-  }
 })
 
 onUnmounted(() => {
@@ -68,7 +74,8 @@ onUnmounted(() => {
 
 <template>
   <GameNotifications />
-  <JoiningRoom v-if="!gameState.successfullyJoined" />
+  <EditProfile v-if="!isUsernameSet" @saved="handleSaved" />
+  <JoiningRoom v-else-if="!gameState.successfullyJoined" />
   <div v-if="gameState.successfullyJoined && playerStore.player?.id" class="h-full">
     <Lobby v-if="gameState.currentStatus === GameStatus.WaitingForPlayers" />
     <PlayerRoster v-else-if="gameState.currentStatus === GameStatus.JustStarted" />
