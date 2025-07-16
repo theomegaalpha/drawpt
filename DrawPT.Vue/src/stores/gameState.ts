@@ -183,6 +183,9 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentRound = 0
       this.showImageLoader = false
       this.currentStatus = GameStatus.Completed
+    },
+    handleNavigateBackToLobbyEvent() {
+      this.currentStatus = GameStatus.WaitingForPlayers
     }
   }
 })

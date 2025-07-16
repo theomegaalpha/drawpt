@@ -81,13 +81,16 @@ export function registerBaseGameHubEvents() {
     stores.gameStateStore.handlePlayerAnsweredEvent(playerAnswer)
   })
 
-  service.on('broadcastRoundResults', (gameRound: RoundResults) /* Specify type */ => {
-    stores.scoreboardStore.addRoundResult(gameRound)
+  service.on('broadcastRoundResults', (gameRound: RoundResults) => {
     stores.gameStateStore.handleBroadcastRoundResultsEvent(gameRound)
   })
 
   service.on('awardBonusPoints', (points: number) => {
     stores.gameStateStore.handleAwardBonusPointsEvent(points)
+  })
+
+  service.on('navigateBackToLobby', () => {
+    stores.gameStateStore.handleNavigateBackToLobbyEvent()
   })
 }
 
