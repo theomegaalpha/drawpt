@@ -8,9 +8,11 @@ import api from '@/api/api'
 const { header } = withDefaults(
   defineProps<{
     header?: string
+    buttonText?: string
   }>(),
   {
-    header: 'Set Username'
+    header: 'Set Username',
+    buttonText: 'Save Changes'
   }
 )
 const emit = defineEmits(['saved'])
@@ -111,7 +113,7 @@ const toggleShowAvatarOptions = () => {
         class="btn-default w-full"
         :class="{ 'cursor-wait': isLoading }"
       >
-        Save Changes
+        {{ buttonText }}
       </button>
     </div>
   </div>

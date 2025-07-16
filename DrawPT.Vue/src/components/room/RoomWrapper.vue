@@ -78,7 +78,12 @@ onUnmounted(() => {
 
 <template>
   <GameNotifications />
-  <EditProfile v-if="!isUsernameSet" @saved="handleSaved" :header="'Joining Room ' + roomCode" />
+  <EditProfile
+    v-if="!isUsernameSet"
+    @saved="handleSaved"
+    :header="'Joining Room ' + roomCode"
+    buttonText="Join Game"
+  />
   <JoiningRoom v-else-if="!gameState.successfullyJoined" />
   <div v-if="gameState.successfullyJoined && playerStore.player?.id" class="h-full">
     <Lobby v-if="gameState.currentStatus === GameStatus.WaitingForPlayers" />
