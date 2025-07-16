@@ -1,39 +1,12 @@
-import { ref, onUnmounted, watch, onMounted } from 'vue'
+import { ref, onUnmounted, watch, computed } from 'vue'
 import { useVolumeStore } from '@/stores/volume'
-import api from '@/api/api'
 
 export function useBackgroundMusic() {
-  const playBgMusic = ref(false)
   const audio = ref<HTMLAudioElement | null>(null)
-  const sfxAudio = ref<HTMLAudioElement | null>(null)
   const volumeStore = useVolumeStore()
 
-  // Reactive list of background music URLs
-  const backgroundMusicList = ref<string[]>([])
-  // Track current track index for shuffle
-  const currentTrackIndex = ref<number>(-1)
-  const getRandomIndex = () => {
-    const list = backgroundMusicList.value
-    const len = list.length
-    if (len === 0) return -1
-    let idx = Math.floor(Math.random() * len)
-    if (len > 1) {
-      while (idx === currentTrackIndex.value) {
-        idx = Math.floor(Math.random() * len)
-      }
-    }
-    return idx
-  }
-
-  const cleanupSfxAudio = () => {
-    if (sfxAudio.value) {
-      sfxAudio.value.pause()
-      sfxAudio.value.removeAttribute('src')
-      sfxAudio.value.load()
-      sfxAudio.value.onerror = null
-      sfxAudio.value = null
-    }
-  }
+  // Background music list from store
+  const backgroundMusicList = computed(() => volumeStore.backgroundMusicList)
 
   const cleanupAudio = () => {
     if (audio.value) {
@@ -44,24 +17,6 @@ export function useBackgroundMusic() {
       audio.value = null
     }
   }
-
-  // Fetch list of background music URLs on component mount
-  onMounted(() => {
-    api
-      .getBackgroundMusic()
-      .then((urls) => {
-        backgroundMusicList.value = urls
-        // Set initial music URL if none is set
-        if (urls.length > 0 && volumeStore.musicUrl == null) {
-          const idx = getRandomIndex()
-          currentTrackIndex.value = idx
-          volumeStore.setMusicUrl(urls[idx])
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching background music list:', error)
-      })
-  })
 
   // Watch for changes in playback state (isPlayingMusic) and music URL from the store
   watch(
@@ -75,30 +30,23 @@ export function useBackgroundMusic() {
           if (!audio.value || audio.value.src !== url) {
             cleanupAudio() // Clean up any existing audio instance
             audio.value = new Audio(url)
-            // disable built-in loop; handle repeat or shuffle manually
-            audio.value.loop = false
-            audio.value.onended = () => {
-              if (playBgMusic.value) {
-                // shuffle to a random next track
-                const idx = getRandomIndex()
-                currentTrackIndex.value = idx
-                volumeStore.setMusicUrl(backgroundMusicList.value[idx])
-              } else {
-                // replay the same track
-                audio.value?.play()
+            // Configure loop or shuffle on end based on shuffleMode flag
+            if (volumeStore.shuffleMode) {
+              audio.value.loop = false
+              audio.value.onended = () => {
+                volumeStore.shuffleMusic()
               }
+            } else {
+              audio.value.loop = true
+              audio.value.onended = null
             }
-
-            // Set volume from store (volume watcher will also handle this, but good for initial setup)
-            const currentVolumePercent = volumeStore.musicVolume
-            const volumeNormalized = Math.max(0, Math.min(100, currentVolumePercent)) / 100
+            // Set initial volume
+            const volumeNormalized = Math.max(0, Math.min(100, volumeStore.musicVolume)) / 100
             audio.value.volume = volumeNormalized
-
+            // Error handling
             audio.value.onerror = (e) => {
               console.error('Audio element error:', e, 'URL:', url)
-              if (volumeStore.isPlayingMusic) {
-                volumeStore.togglePlayMusic()
-              }
+              if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
             }
           }
 
@@ -149,76 +97,18 @@ export function useBackgroundMusic() {
     { immediate: true } // Set initial volume when composable is used
   )
 
-  // Watch for SFX playback state and URL, mirror music logic
-  watch(
-    () => ({ isPlaying: volumeStore.isPlayingSfx, url: volumeStore.sfxUrl }),
-    (newState) => {
-      const { isPlaying, url } = newState
-      if (isPlaying) {
-        if (url) {
-          if (!sfxAudio.value || sfxAudio.value.src !== url) {
-            cleanupSfxAudio()
-            sfxAudio.value = new Audio(url)
-            const vol = Math.max(0, Math.min(100, volumeStore.sfxVolume)) / 100
-            sfxAudio.value.volume = vol
-            // When SFX ends, reset playback state
-            sfxAudio.value.onended = () => {
-              volumeStore.stopSfx()
-            }
-          }
-          sfxAudio.value?.play().catch((error) => {
-            console.error('Error playing SFX:', error, 'URL:', url)
-            if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
-          })
-        } else {
-          cleanupSfxAudio()
-          if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
-        }
-      } else {
-        if (sfxAudio.value && !sfxAudio.value.paused) {
-          sfxAudio.value.pause()
-        }
-      }
-    },
-    { deep: true, immediate: true }
-  )
-
-  // Watch for changes in SFX volume
-  watch(
-    () => volumeStore.sfxVolume,
-    (newVol) => {
-      if (sfxAudio.value) {
-        sfxAudio.value.volume = Math.max(0, Math.min(100, newVol)) / 100
-      }
-    },
-    { immediate: true }
-  )
-
   const setVolume = (volumePercent: number) => {
     volumeStore.setMusicVolume(volumePercent)
-  }
-
-  // Shuffle to a random track when called
-  const shuffleMusic = () => {
-    const list = backgroundMusicList.value
-    if (list.length === 0) return
-    const idx = getRandomIndex()
-    currentTrackIndex.value = idx
-    volumeStore.setMusicUrl(list[idx])
   }
 
   onUnmounted(() => {
     cleanupAudio()
     volumeStore.setMusicUrl(null)
     if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
-    cleanupSfxAudio()
-    volumeStore.stopSfx()
   })
 
   return {
     setVolume,
-    backgroundMusicList,
-    playBgMusic,
-    shuffleMusic
+    backgroundMusicList
   }
 }

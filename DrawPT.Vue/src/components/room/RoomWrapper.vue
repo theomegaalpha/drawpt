@@ -26,7 +26,7 @@ import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
 import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 import ShinyButton from '@/components/common/ShinyButton.vue'
 
-const backgroundMusic = useBackgroundMusic()
+useBackgroundMusic()
 const route = useRoute()
 const roomCode = computed(() => route.params.roomCode as string)
 
@@ -71,16 +71,10 @@ onUnmounted(() => {
     notificationStore.addGameNotification('Disconnected from game server.', false)
   }
 })
-
-const shuffleMusicClick = () => {
-  backgroundMusic.shuffleMusic()
-}
 </script>
 
 <template>
   <GameNotifications />
-
-  <ShinyButton @click="shuffleMusicClick">Shuffle</ShinyButton>
   <EditProfile
     v-if="!isUsernameSet"
     @saved="handleSaved"

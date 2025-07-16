@@ -22,7 +22,9 @@ export const useVolumeStore = defineStore('volume', {
     isPlayingMusic: false,
     isPlayingSfx: false,
     backgroundMusicList: [] as string[],
-    currentTrackIndex: -1 as number
+    currentTrackIndex: -1 as number,
+    // Whether shuffle mode has been activated
+    shuffleMode: false as boolean
   }),
   getters: {
     musicVolumePercent: (state) => state.musicVolume / 100,
@@ -33,7 +35,9 @@ export const useVolumeStore = defineStore('volume', {
     getIsPlayingMusic: (state) => state.isPlayingMusic,
     getIsPlayingSfx: (state) => state.isPlayingSfx,
     getBackgroundMusicList: (state) => state.backgroundMusicList,
-    getCurrentTrackIndex: (state) => state.currentTrackIndex
+    getCurrentTrackIndex: (state) => state.currentTrackIndex,
+    // Is shuffle mode active
+    getShuffleMode: (state) => state.shuffleMode
   },
   actions: {
     setMusicVolume(newVolume: number) {
@@ -54,8 +58,8 @@ export const useVolumeStore = defineStore('volume', {
       this.sfxUrl = newUrl
       this.isPlayingSfx = newUrl !== null
     },
-    togglePlayMusic() {
-      this.isPlayingMusic = !this.isPlayingMusic
+    togglePlayMusic(toggle: boolean = false) {
+      this.isPlayingMusic = toggle || !this.isPlayingMusic
     },
     stopMusic() {
       this.isPlayingMusic = false
@@ -72,6 +76,8 @@ export const useVolumeStore = defineStore('volume', {
         this.backgroundMusicList = urls
         // If no URL set yet, pick random initially
         if (urls.length > 0 && this.musicUrl == null) {
+          // initial load, disable shuffle
+          this.shuffleMode = false
           const idx = Math.floor(Math.random() * urls.length)
           this.currentTrackIndex = idx
           this.musicUrl = urls[idx]
@@ -79,6 +85,23 @@ export const useVolumeStore = defineStore('volume', {
       } catch (error) {
         console.error('Failed to load background music', error)
       }
+    },
+    // Pick a random track and update musicUrl
+    shuffleMusic() {
+      const list = this.backgroundMusicList
+      const len = list.length
+      if (len === 0) return
+      let idx = Math.floor(Math.random() * len)
+      if (len > 1) {
+        while (idx === this.currentTrackIndex) {
+          idx = Math.floor(Math.random() * len)
+        }
+      }
+      // enable shuffle for subsequent tracks
+      this.shuffleMode = true
+      this.currentTrackIndex = idx
+      this.musicUrl = list[idx]
+      console.log('Shuffled music to:', this.musicUrl)
     }
   }
 })
