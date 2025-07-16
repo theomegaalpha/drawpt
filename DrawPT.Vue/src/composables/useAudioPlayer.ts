@@ -1,11 +1,20 @@
 // src/composables/useAudioPlayer.ts
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { AudioPlayerService } from '@/services/audioPlayerService'
+import { useAudioStore } from '@/stores/audio'
 
 export function useAudioPlayer(sampleRate = 24000) {
   const player = ref(new AudioPlayerService())
-  // initialize right away (handles non-Vue usage like signal events)
   player.value.init(sampleRate)
+  const audioStore = useAudioStore()
+  player.value.setVolume(audioStore.announcerVolume / 100)
+
+  watch(
+    () => audioStore.announcerVolume,
+    (newVol) => {
+      player.value.setVolume(newVol / 100)
+    }
+  )
 
   onMounted(() => {
     player.value.init(sampleRate)
@@ -23,6 +32,7 @@ export function useAudioPlayer(sampleRate = 24000) {
 
   function stop() {
     player.value.stop()
+    console.log('stopping audio')
   }
 
   function streamCompleted() {
