@@ -52,7 +52,7 @@ public class GameSession : IGameSession
 
         List<RoundResults> allRoundResults = new();
 
-        for (int i = 0; i < gameState.TotalRounds; i++)
+        for (int i = 0; i < gameState.GameConfiguration.TotalRounds; i++)
         {
             gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
@@ -133,7 +133,7 @@ public class GameSession : IGameSession
         {
             PlayerResults = playerScores.Values.ToList(),
             WasCompleted = true,
-            TotalRounds = gameState.TotalRounds
+            TotalRounds = gameState.GameConfiguration.TotalRounds
         };
         await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GameResultsAction, finalScores);
 

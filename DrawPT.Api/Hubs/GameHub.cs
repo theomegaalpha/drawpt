@@ -164,6 +164,27 @@ namespace DrawPT.Api.Hubs
             return true;
         }
 
+        public async Task TriggerNavigateBackToLobby()
+        {
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in claim while starting a game!");
+                return;
+            }
+
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
+            if (player == null)
+            {
+                _logger.LogWarning("The user that started the game can not be found in cache!");
+                return;
+            }
+            _logger.LogInformation($"Player {userId} joined room {player.RoomCode} with connection {Context.ConnectionId}");
+
+
+            await _hubContext.Clients.Group(player.RoomCode).NavigateBackToLobby();
+        }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;

@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, defineProps, withDefaults } from 'vue'
+import { ref, computed, defineProps } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePlayerStore } from '@/stores/player'
 import StandardInput from '@/components/common/StandardInput.vue'
 import api from '@/api/api'
-// Define header prop with default and emit event on save
-const { header } = withDefaults(
-  defineProps<{
-    header?: string
-    buttonText?: string
-  }>(),
-  {
-    header: 'Set Username',
-    buttonText: 'Save Changes'
-  }
-)
+const { header = 'Set Username', buttonText = 'Save Changes' } = defineProps<{
+  header?: string
+  buttonText?: string
+}>()
 const emit = defineEmits(['saved'])
 
 const playerStore = usePlayerStore()

@@ -7,7 +7,6 @@ namespace DrawPT.Common.Models.Game
     {
         public string RoomCode { get; set; } = string.Empty;
         public int CurrentRound { get; set; } = 0;
-        public int TotalRounds { get; set; } = 8;
         public IGameConfiguration GameConfiguration { get; set; } = new GameConfiguration();
         public Guid HostPlayerId { get; set; }
         public GameStatus CurrentStatus { get; set; }

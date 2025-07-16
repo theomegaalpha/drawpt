@@ -160,6 +160,5 @@ const submitGuess = async (valueFromInput: string) => {
     />
     <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themes" />
     <GameCanvas v-if="gameStateStore.showGameCanvas" @guessSubmitted="submitGuess" />
-    <GameResults v-if="false" />
   </div>
 </template>

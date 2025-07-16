@@ -41,7 +41,9 @@ export const useGameStateStore = defineStore('gameState', {
     showGameCanvas: (state) => state.currentImageUrl !== '',
     lastRoundResults: (state) => {
       return state.roundResults[state.roundResults.length - 1]
-    }
+    },
+    gameEnded: (state) =>
+      state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned
   },
   actions: {
     initializeGameState(gameState: GameState) {
@@ -111,7 +113,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.shouldShowResults = true
     },
 
-    handleBroadcastGameResultsEvent(results: GameResults) {
+    handleBroadcastFinalResultsEvent(results: GameResults) {
       this.gameResults =
         results ||
         ({
@@ -181,6 +183,9 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentRound = 0
       this.showImageLoader = false
       this.currentStatus = GameStatus.Completed
+    },
+    handleNavigateBackToLobbyEvent() {
+      this.currentStatus = GameStatus.WaitingForPlayers
     }
   }
 })

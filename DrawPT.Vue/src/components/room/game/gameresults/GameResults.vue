@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
 import { useVolumeStore } from '@/stores/volume'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
+import ShinyButton from '@/components/common/ShinyButton.vue'
+import service from '@/services/signalRService'
 
 const { setSfxUrl, stopMusic, stopSfx } = useVolumeStore()
 const { gameResults } = useGameStateStore()
@@ -12,6 +14,8 @@ const { player: you } = usePlayerStore()
 
 var duration = gameResults.playerResults.length * 2000
 var end = Date.now() + duration
+
+const showBackToLobbyButton = ref(false)
 
 function frame() {
   // launch a few confetti from the left edge
@@ -35,10 +39,18 @@ function frame() {
   }
 }
 
+const handleBackToLobby = () => {
+  service.invoke('TriggerNavigateBackToLobby')
+}
+
 onMounted(() => {
   frame()
   setSfxUrl('/sounds/victory.mp3')
   stopMusic()
+
+  setTimeout(() => {
+    showBackToLobbyButton.value = true
+  }, duration)
 })
 
 onUnmounted(() => {
@@ -62,6 +74,13 @@ onUnmounted(() => {
         />
       </div>
     </transition-group>
+    <ShinyButton
+      v-if="showBackToLobbyButton"
+      class="mt-4 animate-slide-in"
+      @click="handleBackToLobby"
+    >
+      Back to Lobby
+    </ShinyButton>
   </div>
 </template>
 

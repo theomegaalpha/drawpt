@@ -17,7 +17,7 @@ namespace DrawPT.Common.Interfaces.Game
         /// <summary>
         /// Gets or sets the number of questions per game
         /// </summary>
-        int NumberOfQuestions { get; set; }
+        int TotalRounds { get; set; }
 
         /// <summary>
         /// Gets or sets the time limit for each question in seconds
