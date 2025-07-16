@@ -92,23 +92,23 @@ watch(
           />
           <span
             v-if="index === currentIndex && showPrompt"
-            class="absolute left-1/2 top-1/2 w-4/5 -translate-x-1/2 -translate-y-1/2 transform rounded bg-black bg-opacity-50 px-3 py-4 text-sm drop-shadow-lg"
+            class="absolute left-1/2 top-1/2 max-h-full w-4/5 -translate-x-1/2 -translate-y-1/2 transform overflow-auto rounded bg-black bg-opacity-50 px-3 py-4 text-sm text-white drop-shadow-lg max-sm:mt-9"
           >
             {{ daily.originalPrompt }}
           </span>
           <div
             v-if="index === currentIndex"
-            class="absolute left-1/2 top-8 inline-flex -translate-x-1/2 cursor-pointer items-center space-x-1 rounded bg-black bg-opacity-50 px-2 py-1 text-white hover:text-gray-200"
+            class="absolute left-1/2 top-1 inline-flex -translate-x-1/2 cursor-pointer items-center space-x-1 rounded bg-black bg-opacity-50 px-2 py-1 text-white hover:text-gray-200 sm:top-8"
             @click="showPrompt = !showPrompt"
             :title="showPrompt ? 'Hide Answer' : 'Show Answer'"
           >
             <EyeIcon v-if="!showPrompt" class="inline-block" />
             <EyeClosedIcon v-else class="inline-block" />
-            <span>{{ showPrompt ? 'Hide Answer' : 'Show Answer' }}</span>
+            <span class="whitespace-nowrap">{{ showPrompt ? 'Hide Answer' : 'Show Answer' }}</span>
           </div>
           <span
             v-if="index === currentIndex"
-            class="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-black bg-opacity-50 px-2 py-1 text-sm"
+            class="absolute bottom-2 left-1/2 hidden -translate-x-1/2 transform rounded bg-black bg-opacity-50 px-2 py-1 text-sm sm:block"
           >
             {{ daily.date.split('T')[0] }}
           </span>
