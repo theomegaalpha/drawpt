@@ -36,7 +36,6 @@ export const useAudioStore = defineStore('audio', {
     getIsPlayingSfx: (state) => state.isPlayingSfx,
     getBackgroundMusicList: (state) => state.backgroundMusicList,
     getCurrentTrackIndex: (state) => state.currentTrackIndex,
-    // Is shuffle mode active
     getShuffleMode: (state) => state.shuffleMode
   },
   actions: {
