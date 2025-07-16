@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
 import { useVolumeStore } from '@/stores/volume'
@@ -14,6 +14,8 @@ const { player: you } = usePlayerStore()
 
 var duration = gameResults.playerResults.length * 2000
 var end = Date.now() + duration
+
+const showBackToLobbyButton = ref(false)
 
 function frame() {
   // launch a few confetti from the left edge
@@ -45,6 +47,10 @@ onMounted(() => {
   frame()
   setSfxUrl('/sounds/victory.mp3')
   stopMusic()
+
+  setTimeout(() => {
+    showBackToLobbyButton.value = true
+  }, duration)
 })
 
 onUnmounted(() => {
@@ -68,7 +74,13 @@ onUnmounted(() => {
         />
       </div>
     </transition-group>
-    <ShinyButton class="mt-4" @click="handleBackToLobby"> Back to Lobby </ShinyButton>
+    <ShinyButton
+      v-if="showBackToLobbyButton"
+      class="mt-4 animate-float-up-fade"
+      @click="handleBackToLobby"
+    >
+      Back to Lobby
+    </ShinyButton>
   </div>
 </template>
 
