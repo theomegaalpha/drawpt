@@ -5,6 +5,8 @@ import { usePlayerStore } from '@/stores/player'
 import { useVolumeStore } from '@/stores/volume'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
+import ShinyButton from '@/components/common/ShinyButton.vue'
+import service from '@/services/signalRService'
 
 const { setSfxUrl, stopMusic, stopSfx } = useVolumeStore()
 const { gameResults } = useGameStateStore()
@@ -35,6 +37,10 @@ function frame() {
   }
 }
 
+const handleBackToLobby = () => {
+  service.invoke('TriggerNavigateBackToLobby')
+}
+
 onMounted(() => {
   frame()
   setSfxUrl('/sounds/victory.mp3')
@@ -62,6 +68,7 @@ onUnmounted(() => {
         />
       </div>
     </transition-group>
+    <ShinyButton class="mt-4" @click="handleBackToLobby"> Back to Lobby </ShinyButton>
   </div>
 </template>
 

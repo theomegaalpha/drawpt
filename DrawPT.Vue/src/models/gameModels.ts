@@ -2,7 +2,7 @@ import type { Player, PlayerResult } from './player'
 
 export interface IGameConfiguration {
   MaxPlayers: number
-  NumberOfQuestions: number
+  TotalRounds: number
   QuestionTimeout: number
   ThemeTimeout: number
   TransitionDelay: number

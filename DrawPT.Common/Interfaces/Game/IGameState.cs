@@ -9,7 +9,6 @@ namespace DrawPT.Common.Interfaces.Game
         string RoomCode { get; set; }
         int CurrentRound { get; set; }
         IGameConfiguration GameConfiguration { get; set; }
-        int TotalRounds { get; set; }
         Guid HostPlayerId { get; set; }
         GameStatus CurrentStatus { get; set; }
         List<Player> Players { get; set; }
