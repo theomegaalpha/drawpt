@@ -61,23 +61,22 @@ namespace DrawPT.Api.Hubs
             }
 
             var parsedId = Guid.Parse(userId);
-            var player = await _cache.GetPlayerAsync(parsedId);
-            if (player == null)
-            {
-                player = await _cache.CreatePlayerAsync(parsedId);
-            }
-            player.RoomCode = roomCode;
-            player.ConnectionId = Context.ConnectionId;
-            await _cache.UpdatePlayerAsync(player);
 
             // Check if player already exists in the room
-            var playerInRoom = players.FirstOrDefault(p => p.Id == player.Id);
+            var playerInRoom = players.FirstOrDefault(p => p.Id == parsedId);
             if (playerInRoom != null)
             {
-                _logger.LogInformation($"Player {player.Id} already exists in room {roomCode}!");
+                _logger.LogInformation($"Player {parsedId} already exists in room {roomCode}!");
                 await Clients.Caller.AlreadyInRoom();
                 return;
             }
+
+            var player = await _cache.GetPlayerAsync(parsedId);
+            if (player == null)
+                player = await _cache.CreatePlayerAsync(parsedId);
+            player.RoomCode = roomCode;
+            player.ConnectionId = Context.ConnectionId;
+            await _cache.UpdatePlayerAsync(player);
 
             await _cache.SetGameState(gameState);
             await _cache.AddPlayerToRoom(roomCode, player);
@@ -180,6 +179,15 @@ namespace DrawPT.Api.Hubs
             if (player == null)
             {
                 _logger.LogWarning($"Player session not found for connection {Context.ConnectionId}");
+                await base.OnDisconnectedAsync(exception);
+                return;
+            }
+
+            // Handle dupe connections  (e.g. if a player reconnects with a different connection ID)
+            if (player.ConnectionId != Context.ConnectionId)
+            {
+                _logger.LogInformation($"Ignoring disconnect for stale connection {Context.ConnectionId} (current stored: {player.ConnectionId})");
+                await base.OnDisconnectedAsync(exception);
                 return;
             }
 
