@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import Game from '@/components/room/game/Game.vue'
+import type { GameState } from '@/models/gameModels'
 
 import { useGameStateStore } from '@/stores/gameState'
 
 const gameState = useGameStateStore()
 
 onMounted(async () => {
+  gameState.initializeGameState({} as GameState)
   gameState.startRound(1)
   gameState.currentTheme = 'Dickless Vagrant'
   gameState.currentImageUrl =
@@ -41,6 +43,38 @@ onMounted(async () => {
       submittedAt: new Date().toISOString()
     })
   }, 1000)
+  // Simulate round results
+  setTimeout(() => {
+    gameState.handleBroadcastRoundResultsEvent({
+      id: 'round-1',
+      roundNumber: 1,
+      theme: gameState.currentTheme,
+      question: {
+        id: 'question-1',
+        roundNumber: 1,
+        theme: gameState.currentTheme,
+        originalPrompt:
+          'A lone samurai stands on a misty mountain ridge at dawn, clad in intricately detailed armor with etched dragon motifs and crimson silk underlayers; cherry blossom petals swirl around him as golden sunlight breaks through ancient pine trees, casting long shadows on the rugged terrain, the samurai’s katana gleaming with a faint blue aura, embodying both honor and silent strength.',
+        imageUrl: gameState.currentImageUrl,
+        createdAt: new Date().toISOString()
+      },
+      answers: [
+        {
+          id: 'answer-1',
+          playerId: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
+          connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02',
+          username: 'micro david',
+          avatar: '/images/profile-photos/anime-5.png',
+          guess: 'Some answer',
+          score: 10,
+          bonusPoints: 1,
+          reason: '',
+          isGambling: false,
+          submittedAt: new Date().toISOString()
+        }
+      ]
+    })
+  }, 5000)
 })
 </script>
 
