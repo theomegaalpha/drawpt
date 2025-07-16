@@ -2,13 +2,13 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 import ShinyButton from '@/components/common/ShinyButton.vue'
 import service from '@/services/signalRService'
 
-const { setSfxUrl, stopMusic, stopSfx } = useVolumeStore()
+const { setSfxUrl, stopMusic, stopSfx } = useAudioStore()
 const { gameResults } = useGameStateStore()
 const { player: you } = usePlayerStore()
 

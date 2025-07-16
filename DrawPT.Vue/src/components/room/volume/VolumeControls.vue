@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Volume2 } from 'lucide-vue-next'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 
 import { ref } from 'vue'
 
-const { sfxVolume, musicVolume, setSfxVolume, setMusicVolume } = useVolumeStore()
+const { sfxVolume, musicVolume, setSfxVolume, setMusicVolume } = useAudioStore()
 const isModalOpen = ref(false)
 const sfxVolumeRef = ref(sfxVolume)
 const musicVolumeRef = ref(musicVolume)

@@ -1,9 +1,9 @@
 import { ref, onUnmounted, watch, computed } from 'vue'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 
 export function useBackgroundMusic() {
   const audio = ref<HTMLAudioElement | null>(null)
-  const volumeStore = useVolumeStore()
+  const volumeStore = useAudioStore()
 
   // Background music list from store
   const backgroundMusicList = computed(() => volumeStore.backgroundMusicList)

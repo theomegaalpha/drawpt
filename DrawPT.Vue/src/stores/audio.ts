@@ -12,7 +12,7 @@ const getInitialVolume = (key: string, defaultValue: number): number => {
   return defaultValue
 }
 
-export const useVolumeStore = defineStore('volume', {
+export const useAudioStore = defineStore('audio', {
   state: () => ({
     musicVolume: getInitialVolume('musicVolume', 50),
     sfxVolume: getInitialVolume('sfxVolume', 75),

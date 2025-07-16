@@ -3,14 +3,14 @@ import PlayerList from './PlayerList.vue'
 import RoomInfo from './RoomInfo.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 import service from '@/services/signalRService'
 import FlickeringGrid from '../../common/FlickeringGrid.vue'
 import { onMounted } from 'vue'
 
 const playerStore = usePlayerStore()
 const gameStateStore = useGameStateStore()
-const volumeStore = useVolumeStore()
+const volumeStore = useAudioStore()
 const { setMusicUrl, togglePlayMusic } = volumeStore
 
 const startGame = async () => {

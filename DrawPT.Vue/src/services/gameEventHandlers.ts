@@ -4,7 +4,7 @@ import { usePlayerStore } from '@/stores/player'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useGameStateStore } from '@/stores/gameState'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 
 import type { Player } from '@/models/player'
 import type { PlayerAnswer, GameState, RoundResults, GameResults } from '@/models/gameModels'
@@ -15,7 +15,7 @@ const getStores = () => ({
   roomJoinStore: useRoomJoinStore(),
   notificationStore: useNotificationStore(),
   gameStateStore: useGameStateStore(),
-  volumeStore: useVolumeStore()
+  volumeStore: useAudioStore()
 })
 
 export function registerBaseGameHubEvents() {
