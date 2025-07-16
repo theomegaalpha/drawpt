@@ -5,11 +5,11 @@ import type {
   PlayerAnswer,
   PlayerQuestion,
   IGameConfiguration,
-  RoundResults
+  RoundResults,
+  GameResults
 } from '@/models/gameModels'
 import { GameStatus } from '@/models/gameModels'
-import { useScoreboardStore } from './scoreboard'
-import type { Player, PlayerResult } from '@/models/player'
+import type { Player } from '@/models/player'
 
 export const useGameStateStore = defineStore('gameState', {
   state: () => ({
@@ -28,7 +28,7 @@ export const useGameStateStore = defineStore('gameState', {
     successfullyJoined: false,
     playerAnswers: [] as PlayerAnswer[],
     roundResults: [] as RoundResults[],
-    gameResults: [] as PlayerResult[],
+    gameResults: {} as GameResults,
     hasPlayerAction: false,
     showImageLoader: false,
     shouldShowResults: false,
@@ -38,7 +38,10 @@ export const useGameStateStore = defineStore('gameState', {
   getters: {
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
     areThemesVisible: (state) => !state.hasPlayerAction && state.themes.length > 0,
-    showGameCanvas: (state) => state.currentImageUrl !== ''
+    showGameCanvas: (state) => state.currentImageUrl !== '',
+    lastRoundResults: (state) => {
+      return state.roundResults[state.roundResults.length - 1]
+    }
   },
   actions: {
     initializeGameState(gameState: GameState) {
@@ -101,11 +104,22 @@ export const useGameStateStore = defineStore('gameState', {
       }
     },
     handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
-      this.shouldShowResults = true
       this.showImageLoader = false
       this.currentImageUrl = ''
       this.roundResults.push(roundResult)
       this.currentStatus = GameStatus.ShowingRoundResults
+      this.shouldShowResults = true
+    },
+
+    handleBroadcastGameResultsEvent(results: GameResults) {
+      this.gameResults =
+        results ||
+        ({
+          playerResults: [],
+          totalRounds: 8,
+          endedAt: '',
+          wasCompleted: true
+        } as GameResults)
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points
@@ -119,7 +133,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentImageUrl = ''
       this.shouldShowResults = false
       this.showImageLoader = false
-      console.log('Preparing for theme selection with themes:', themes)
       for (const theme of themes) {
         if (this.themes.indexOf(theme) === -1) {
           this.themes.push(theme)
@@ -141,9 +154,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.showImageLoader = false
       this.isGuessLocked = false // Unlock guess input
       this.currentImageUrl = question.imageUrl || ''
-      this.currentRound = question.roundNumber // Keep track of current round
-      const scoreboardStore = useScoreboardStore()
-      scoreboardStore.setRound(question.roundNumber)
+      this.currentRound = question.roundNumber
       this.currentStatus = GameStatus.AskingQuestion
     },
 

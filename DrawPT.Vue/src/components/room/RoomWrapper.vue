@@ -12,7 +12,6 @@ import { useRoute } from 'vue-router'
 
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/player'
-import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useVolumeStore } from '@/stores/volume'
@@ -31,7 +30,6 @@ const route = useRoute()
 const roomCode = computed(() => route.params.roomCode as string)
 
 const playerStore = usePlayerStore()
-const scoreboardStore = useScoreboardStore()
 const notificationStore = useNotificationStore()
 const roomJoinStore = useRoomJoinStore()
 const { isModalOpen, toggleModal } = useVolumeStore()
@@ -56,7 +54,6 @@ const handleSaved = async () => {
 
 onMounted(async () => {
   roomJoinStore.reset()
-  scoreboardStore.clearScoreboard()
   gameState.successfullyJoined = false
   gameState.updateRoomCode(roomCode.value)
 
@@ -66,7 +63,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  scoreboardStore.clearScoreboard()
   unregisterBaseGameHubEvents()
   unregisterAudioEvents()
   if (service.isConnected) {

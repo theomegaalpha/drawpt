@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import { useScoreboardStore } from '@/stores/scoreboard'
+import { useGameStateStore } from '@/stores/gameState'
 import { usePlayerStore } from '@/stores/player'
 import { useVolumeStore } from '@/stores/volume'
 import PlayerResultCard from './PlayerResultCard.vue'
 import confetti from 'canvas-confetti'
 
-const scoreboardStore = useScoreboardStore()
 const { setSfxUrl, stopMusic, stopSfx } = useVolumeStore()
-const { gameResults } = scoreboardStore
+const { gameResults } = useGameStateStore()
 const { player: you } = usePlayerStore()
 
 var duration = gameResults.playerResults.length * 2000

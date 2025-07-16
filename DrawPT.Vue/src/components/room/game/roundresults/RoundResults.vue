@@ -3,11 +3,9 @@ import { ref, onMounted } from 'vue'
 import PlayerResultCard from './PlayerResultCard.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
-import { useScoreboardStore } from '@/stores/scoreboard'
 
-const { players } = useGameStateStore()
+const { lastRoundResults, players } = useGameStateStore()
 const { player: you } = usePlayerStore()
-const { lastRoundResults } = useScoreboardStore()
 
 const isYou = (playerConnectionId: string) => playerConnectionId === you.connectionId
 

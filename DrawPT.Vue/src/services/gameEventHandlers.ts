@@ -1,7 +1,6 @@
 // src/services/gameEventHandlers.ts
 import service from '@/services/signalRService'
 import { usePlayerStore } from '@/stores/player'
-import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useGameStateStore } from '@/stores/gameState'
@@ -13,7 +12,6 @@ import type { PlayerAnswer, GameState, RoundResults, GameResults } from '@/model
 const getStores = () => ({
   playerStore: usePlayerStore(),
   roomJoinStore: useRoomJoinStore(),
-  scoreboardStore: useScoreboardStore(),
   notificationStore: useNotificationStore(),
   gameStateStore: useGameStateStore()
 })
@@ -54,13 +52,12 @@ export function registerBaseGameHubEvents() {
   service.on('roundResults', (roundResult: RoundResults) => {
     console.log('Round results received:', roundResult)
     stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)
-    stores.scoreboardStore.addRoundResult(roundResult)
     stores.gameStateStore.handleBroadcastRoundResultsEvent(roundResult)
   })
 
   service.on('broadcastFinalResults', (results: GameResults) => {
     stores.notificationStore.addGameNotification('The results are in!!!')
-    stores.scoreboardStore.updateGameResults(results)
+    stores.gameStateStore.handleBroadcastFinalResultsEvent(results)
     stores.gameStateStore.handleEndGameEvent()
   })
 
