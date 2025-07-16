@@ -76,7 +76,7 @@ onUnmounted(() => {
     </transition-group>
     <ShinyButton
       v-if="showBackToLobbyButton"
-      class="mt-4 animate-float-up-fade"
+      class="mt-4 animate-slide-in"
       @click="handleBackToLobby"
     >
       Back to Lobby
