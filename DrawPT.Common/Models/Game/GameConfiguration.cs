@@ -15,7 +15,7 @@ namespace DrawPT.Common.Models.Game
         /// <summary>
         /// Gets or sets the number of questions per game
         /// </summary>
-        public int TotalRounds { get; set; } = 8;
+        public int TotalRounds { get; set; } = 6;
 
         /// <summary>
         /// Gets or sets the time limit for each question in seconds
