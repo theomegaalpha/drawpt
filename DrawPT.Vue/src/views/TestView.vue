@@ -68,7 +68,7 @@ onMounted(async () => {
           guess: 'Some answer',
           score: 10,
           bonusPoints: 1,
-          reason: '',
+          reason: 'You provided a detailed and creative answer that matched the theme well.',
           isGambling: false,
           submittedAt: new Date().toISOString()
         }
