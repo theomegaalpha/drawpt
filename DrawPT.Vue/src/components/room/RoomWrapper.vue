@@ -8,8 +8,9 @@ import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 import VolumeControls from '@/components/room/volume/VolumeControls.vue'
 import EditProfile from '@/components/common/EditProfile.vue'
 import { GameStatus } from '@/models/gameModels'
+import { useRoute } from 'vue-router'
 
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useScoreboardStore } from '@/stores/scoreboard'
 import { useNotificationStore } from '@/stores/notifications'
@@ -26,6 +27,8 @@ import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
 import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 
 useBackgroundMusic()
+const route = useRoute()
+const roomCode = computed(() => route.params.roomCode as string)
 
 const playerStore = usePlayerStore()
 const scoreboardStore = useScoreboardStore()
@@ -55,6 +58,7 @@ onMounted(async () => {
   roomJoinStore.reset()
   scoreboardStore.clearScoreboard()
   gameState.successfullyJoined = false
+  gameState.updateRoomCode(roomCode.value)
 
   api.getPlayer().then((res) => {
     playerStore.updatePlayer(res)
@@ -74,7 +78,7 @@ onUnmounted(() => {
 
 <template>
   <GameNotifications />
-  <EditProfile v-if="!isUsernameSet" @saved="handleSaved" />
+  <EditProfile v-if="!isUsernameSet" @saved="handleSaved" :header="'Joining Room ' + roomCode" />
   <JoiningRoom v-else-if="!gameState.successfullyJoined" />
   <div v-if="gameState.successfullyJoined && playerStore.player?.id" class="h-full">
     <Lobby v-if="gameState.currentStatus === GameStatus.WaitingForPlayers" />

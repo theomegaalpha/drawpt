@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineProps, withDefaults } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePlayerStore } from '@/stores/player'
 import StandardInput from '@/components/common/StandardInput.vue'
 import api from '@/api/api'
-// Emit event on successful save instead of routing here
+// Define header prop with default and emit event on save
+const { header } = withDefaults(
+  defineProps<{
+    header?: string
+  }>(),
+  {
+    header: 'Set Username'
+  }
+)
 const emit = defineEmits(['saved'])
 
 const playerStore = usePlayerStore()
@@ -42,7 +50,7 @@ const toggleShowAvatarOptions = () => {
     <div
       class="w-full max-w-md space-y-8 rounded-lg border border-gray-300 bg-white p-10 shadow-lg dark:border-gray-300/20 dark:bg-slate-500/20"
     >
-      <h1 class="mb-6 text-center text-2xl font-bold">Set Username</h1>
+      <h1 class="mb-6 text-center text-2xl font-bold">{{ header }}</h1>
 
       <!-- Avatar Selection -->
       <div class="mb-6 flex flex-col items-center">
