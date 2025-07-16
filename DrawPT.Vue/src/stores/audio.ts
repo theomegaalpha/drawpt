@@ -14,6 +14,7 @@ const getInitialVolume = (key: string, defaultValue: number): number => {
 
 export const useAudioStore = defineStore('audio', {
   state: () => ({
+    announcerVolume: getInitialVolume('announcerVolume', 100),
     musicVolume: getInitialVolume('musicVolume', 50),
     sfxVolume: getInitialVolume('sfxVolume', 75),
     modalOpen: false,
@@ -39,6 +40,10 @@ export const useAudioStore = defineStore('audio', {
     getShuffleMode: (state) => state.shuffleMode
   },
   actions: {
+    setAnnouncerVolume(newVolume: number) {
+      this.announcerVolume = Math.max(0, Math.min(100, newVolume))
+      localStorage.setItem('announcerVolume', this.announcerVolume.toString())
+    },
     setMusicVolume(newVolume: number) {
       this.musicVolume = Math.max(0, Math.min(100, newVolume))
       localStorage.setItem('musicVolume', this.musicVolume.toString())

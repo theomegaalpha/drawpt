@@ -4,8 +4,10 @@ import { useAudioStore } from '@/stores/audio'
 
 import { ref } from 'vue'
 
-const { sfxVolume, musicVolume, setSfxVolume, setMusicVolume } = useAudioStore()
+// destructure announcerVolume and its setter along with existing volumes
+const { announcerVolume, sfxVolume, musicVolume, setAnnouncerVolume, setSfxVolume, setMusicVolume } = useAudioStore()
 const isModalOpen = ref(false)
+const announcerVolumeRef = ref(announcerVolume)
 const sfxVolumeRef = ref(sfxVolume)
 const musicVolumeRef = ref(musicVolume)
 
@@ -67,6 +69,25 @@ const closeModal = () => {
             />
             <span class="inline-block w-[40px] text-right text-sm text-gray-600"
               >{{ musicVolumeRef }}%</span
+            >
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="announcerVolume" class="mb-1 block text-sm font-medium text-gray-700"
+            >Announcer Volume:</label
+          >
+          <div class="flex items-center">
+            <input
+              type="range"
+              id="announcerVolume"
+              min="0"
+              max="100"
+              v-model="announcerVolumeRef"
+              @input="setAnnouncerVolume(announcerVolumeRef)"
+              class="mr-2.5 h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
+            />
+            <span class="inline-block w-[40px] text-right text-sm text-gray-600"
+              >{{ announcerVolumeRef }}%</span
             >
           </div>
         </div>
