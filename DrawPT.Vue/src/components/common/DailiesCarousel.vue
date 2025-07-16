@@ -92,7 +92,7 @@ watch(
           />
           <span
             v-if="index === currentIndex && showPrompt"
-            class="absolute left-1/2 top-1/2 max-h-full w-4/5 -translate-x-1/2 -translate-y-1/2 transform overflow-auto rounded bg-black bg-opacity-50 px-3 py-4 text-sm text-white drop-shadow-lg max-sm:mt-9"
+            class="absolute left-1/2 top-1/2 max-h-full w-4/5 -translate-x-1/2 -translate-y-1/2 transform overflow-auto rounded bg-black bg-opacity-50 px-3 py-4 text-sm text-white drop-shadow-lg max-sm:mt-4 max-sm:max-h-[calc(100%_-_3rem)]"
           >
             {{ daily.originalPrompt }}
           </span>
@@ -108,7 +108,7 @@ watch(
           </div>
           <span
             v-if="index === currentIndex"
-            class="absolute bottom-2 left-1/2 hidden -translate-x-1/2 transform rounded bg-black bg-opacity-50 px-2 py-1 text-sm sm:block"
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-black bg-opacity-50 px-2 py-1 text-sm text-white max-sm:hidden"
           >
             {{ daily.date.split('T')[0] }}
           </span>
