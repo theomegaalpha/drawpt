@@ -35,10 +35,10 @@ const showReason = ref(props.isYou)
               {{ answer.username }}
             </span>
           </div>
-          <div class="ml-4 flex-grow p-1 px-6 text-left">
+          <div class="ml-4 flex-grow p-1 px-6 text-left max-sm:hidden">
             {{ answer.guess }}
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center max-sm:ml-4">
             <span>{{ answer.score }}</span>
             <span class="-mb-2 ml-1 text-xs">pts</span>
             <span
@@ -53,7 +53,7 @@ const showReason = ref(props.isYou)
           v-if="answer.reason"
           :class="[
             'ml-4 flex w-full rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur dark:bg-white/10',
-            'relative z-0 transition-all duration-300 ease-in-out',
+            'relative z-0 transition-all duration-300 ease-in-out max-sm:hidden',
             showReason ? 'mt-1 opacity-100' : '-mt-10 opacity-40'
           ]"
         >

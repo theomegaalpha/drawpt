@@ -53,7 +53,8 @@ onMounted(async () => {
         id: 'question-1',
         roundNumber: 1,
         theme: gameState.currentTheme,
-        originalPrompt: 'Original dummy prompt',
+        originalPrompt:
+          'A lone samurai stands on a misty mountain ridge at dawn, clad in intricately detailed armor with etched dragon motifs and crimson silk underlayers; cherry blossom petals swirl around him as golden sunlight breaks through ancient pine trees, casting long shadows on the rugged terrain, the samurai’s katana gleaming with a faint blue aura, embodying both honor and silent strength.',
         imageUrl: gameState.currentImageUrl,
         createdAt: new Date().toISOString()
       },

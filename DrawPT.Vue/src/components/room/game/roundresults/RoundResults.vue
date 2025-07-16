@@ -27,7 +27,7 @@ onMounted(() => {
       :src="lastRoundResults.question.imageUrl"
     />
     <div class="relative z-10 flex flex-col items-center justify-center py-8">
-      <div class="mb-12 flex flex-col items-center">
+      <div class="mb-12 flex flex-col items-center max-sm:hidden">
         <h2
           class="rounded-lg border border-black/30 bg-gray-500/10 p-4 px-6 text-lg backdrop-blur dark:border-white/20 dark:bg-white/10"
         >
