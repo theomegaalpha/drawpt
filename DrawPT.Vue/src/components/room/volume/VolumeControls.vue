@@ -5,7 +5,14 @@ import { useAudioStore } from '@/stores/audio'
 import { ref } from 'vue'
 
 // destructure announcerVolume and its setter along with existing volumes
-const { announcerVolume, sfxVolume, musicVolume, setAnnouncerVolume, setSfxVolume, setMusicVolume } = useAudioStore()
+const {
+  announcerVolume,
+  sfxVolume,
+  musicVolume,
+  setAnnouncerVolume,
+  setSfxVolume,
+  setMusicVolume
+} = useAudioStore()
 const isModalOpen = ref(false)
 const announcerVolumeRef = ref(announcerVolume)
 const sfxVolumeRef = ref(sfxVolume)

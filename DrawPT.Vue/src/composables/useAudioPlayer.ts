@@ -32,6 +32,7 @@ export function useAudioPlayer(sampleRate = 24000) {
 
   function stop() {
     player.value.stop()
+    console.log('stopping audio')
   }
 
   function streamCompleted() {

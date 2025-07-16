@@ -5,6 +5,8 @@ export class AudioPlayerService {
   private gainNode: GainNode | null = null
   // buffer list for incoming Opus chunks
   private chunks: Uint8Array[] = []
+  // currently playing buffer source for stopping playback
+  private currentSource: AudioBufferSourceNode | null = null
 
   async init(sampleRate = 24000) {
     this.audioContext = new AudioContext({ sampleRate })
@@ -52,6 +54,8 @@ export class AudioPlayerService {
       const audioBuffer = await this.audioContext.decodeAudioData(merged.buffer)
       console.debug('[AudioPlayer] decodeAudioData success, duration:', audioBuffer.duration)
       const src = this.audioContext.createBufferSource()
+      // store reference to allow stopping
+      this.currentSource = src
       src.buffer = audioBuffer
       // route through gainNode if available
       if (this.gainNode) {
@@ -60,6 +64,9 @@ export class AudioPlayerService {
         src.connect(this.audioContext.destination)
       }
       src.start()
+      src.onended = () => {
+        this.currentSource = null
+      }
       console.debug('[AudioPlayer] playback started')
     } catch (err) {
       console.error('decodeAudioData failed:', err)
@@ -76,6 +83,14 @@ export class AudioPlayerService {
 
   stop() {
     this.node?.port.postMessage(null)
+    if (this.currentSource) {
+      try {
+        this.currentSource.stop()
+      } catch (e) {
+        // ignore if already stopped or error
+      }
+      this.currentSource = null
+    }
   }
 
   async destroy() {

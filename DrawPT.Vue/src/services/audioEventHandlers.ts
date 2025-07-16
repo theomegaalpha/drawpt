@@ -20,4 +20,5 @@ export function registerAudioEvents() {
 export function unregisterAudioEvents() {
   signalRService.off('receiveAudio')
   signalRService.off('audioStreamCompleted')
+  announcer.stop()
 }
