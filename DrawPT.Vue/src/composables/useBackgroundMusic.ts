@@ -1,20 +1,12 @@
-import { ref, onUnmounted, watch } from 'vue'
-import { useVolumeStore } from '@/stores/volume'
+import { ref, onUnmounted, watch, computed } from 'vue'
+import { useAudioStore } from '@/stores/audio'
 
 export function useBackgroundMusic() {
   const audio = ref<HTMLAudioElement | null>(null)
-  const sfxAudio = ref<HTMLAudioElement | null>(null)
-  const volumeStore = useVolumeStore()
+  const volumeStore = useAudioStore()
 
-  const cleanupSfxAudio = () => {
-    if (sfxAudio.value) {
-      sfxAudio.value.pause()
-      sfxAudio.value.removeAttribute('src')
-      sfxAudio.value.load()
-      sfxAudio.value.onerror = null
-      sfxAudio.value = null
-    }
-  }
+  // Background music list from store
+  const backgroundMusicList = computed(() => volumeStore.backgroundMusicList)
 
   const cleanupAudio = () => {
     if (audio.value) {
@@ -38,18 +30,23 @@ export function useBackgroundMusic() {
           if (!audio.value || audio.value.src !== url) {
             cleanupAudio() // Clean up any existing audio instance
             audio.value = new Audio(url)
-            audio.value.loop = true
-
-            // Set volume from store (volume watcher will also handle this, but good for initial setup)
-            const currentVolumePercent = volumeStore.musicVolume
-            const volumeNormalized = Math.max(0, Math.min(100, currentVolumePercent)) / 100
+            // Configure loop or shuffle on end based on shuffleMode flag
+            if (volumeStore.shuffleMode) {
+              audio.value.loop = false
+              audio.value.onended = () => {
+                volumeStore.shuffleMusic()
+              }
+            } else {
+              audio.value.loop = true
+              audio.value.onended = null
+            }
+            // Set initial volume
+            const volumeNormalized = Math.max(0, Math.min(100, volumeStore.musicVolume)) / 100
             audio.value.volume = volumeNormalized
-
+            // Error handling
             audio.value.onerror = (e) => {
               console.error('Audio element error:', e, 'URL:', url)
-              if (volumeStore.isPlayingMusic) {
-                volumeStore.togglePlayMusic() // Set isPlayingMusic to false via action
-              }
+              if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
             }
           }
 
@@ -100,51 +97,6 @@ export function useBackgroundMusic() {
     { immediate: true } // Set initial volume when composable is used
   )
 
-  // Watch for SFX playback state and URL, mirror music logic
-  watch(
-    () => ({ isPlaying: volumeStore.isPlayingSfx, url: volumeStore.sfxUrl }),
-    (newState) => {
-      const { isPlaying, url } = newState
-      if (isPlaying) {
-        if (url) {
-          if (!sfxAudio.value || sfxAudio.value.src !== url) {
-            cleanupSfxAudio()
-            sfxAudio.value = new Audio(url)
-            const vol = Math.max(0, Math.min(100, volumeStore.sfxVolume)) / 100
-            sfxAudio.value.volume = vol
-            // When SFX ends, reset playback state
-            sfxAudio.value.onended = () => {
-              volumeStore.stopSfx()
-            }
-          }
-          sfxAudio.value?.play().catch((error) => {
-            console.error('Error playing SFX:', error, 'URL:', url)
-            if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
-          })
-        } else {
-          cleanupSfxAudio()
-          if (volumeStore.isPlayingSfx) volumeStore.stopSfx()
-        }
-      } else {
-        if (sfxAudio.value && !sfxAudio.value.paused) {
-          sfxAudio.value.pause()
-        }
-      }
-    },
-    { deep: true, immediate: true }
-  )
-
-  // Watch for changes in SFX volume
-  watch(
-    () => volumeStore.sfxVolume,
-    (newVol) => {
-      if (sfxAudio.value) {
-        sfxAudio.value.volume = Math.max(0, Math.min(100, newVol)) / 100
-      }
-    },
-    { immediate: true }
-  )
-
   const setVolume = (volumePercent: number) => {
     volumeStore.setMusicVolume(volumePercent)
   }
@@ -153,11 +105,10 @@ export function useBackgroundMusic() {
     cleanupAudio()
     volumeStore.setMusicUrl(null)
     if (volumeStore.isPlayingMusic) volumeStore.togglePlayMusic()
-    cleanupSfxAudio()
-    volumeStore.stopSfx()
   })
 
   return {
-    setVolume
+    setVolume,
+    backgroundMusicList
   }
 }

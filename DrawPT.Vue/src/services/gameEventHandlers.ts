@@ -4,6 +4,7 @@ import { usePlayerStore } from '@/stores/player'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
 import { useGameStateStore } from '@/stores/gameState'
+import { useAudioStore } from '@/stores/audio'
 
 import type { Player } from '@/models/player'
 import type { PlayerAnswer, GameState, RoundResults, GameResults } from '@/models/gameModels'
@@ -13,7 +14,8 @@ const getStores = () => ({
   playerStore: usePlayerStore(),
   roomJoinStore: useRoomJoinStore(),
   notificationStore: useNotificationStore(),
-  gameStateStore: useGameStateStore()
+  gameStateStore: useGameStateStore(),
+  volumeStore: useAudioStore()
 })
 
 export function registerBaseGameHubEvents() {
@@ -38,10 +40,14 @@ export function registerBaseGameHubEvents() {
     stores.gameStateStore.initializeGameState(gameState)
   })
 
-  service.on('gameStarted', (gameState: GameState) => {
+  service.on('gameStarted', async (gameState: GameState) => {
     stores.notificationStore.addGameNotification('Game has started!')
     stores.gameStateStore.initializeGameState(gameState)
     stores.gameStateStore.startGame()
+    // Load and shuffle background music when game starts
+    await stores.volumeStore.loadBackgroundMusic()
+    stores.volumeStore.shuffleMusic()
+    stores.volumeStore.togglePlayMusic(true)
   })
 
   service.on('roundStarted', (roundNumber: number) => {

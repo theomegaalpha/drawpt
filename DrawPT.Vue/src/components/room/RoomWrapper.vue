@@ -14,7 +14,7 @@ import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useNotificationStore } from '@/stores/notifications'
 import { useRoomJoinStore } from '@/stores/roomJoin'
-import { useVolumeStore } from '@/stores/volume'
+import { useAudioStore } from '@/stores/audio'
 import { useGameStateStore } from '@/stores/gameState'
 import api from '@/api/api'
 import service from '@/services/signalRService'
@@ -32,7 +32,7 @@ const roomCode = computed(() => route.params.roomCode as string)
 const playerStore = usePlayerStore()
 const notificationStore = useNotificationStore()
 const roomJoinStore = useRoomJoinStore()
-const { isModalOpen, toggleModal } = useVolumeStore()
+const { isModalOpen, toggleModal } = useAudioStore()
 const gameState = useGameStateStore()
 
 const isUsernameSet = ref(false)
