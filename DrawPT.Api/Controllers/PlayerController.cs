@@ -57,6 +57,7 @@ namespace DrawPT.Api.Controllers
                 return Unauthorized("You can only edit your own profile.");
 
             await _profileService.UpdatePlayerAsync(player);
+            await _cacheService.UpdatePlayerAsync(player);
             return Ok(player);
         }
     }
