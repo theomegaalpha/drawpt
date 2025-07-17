@@ -41,6 +41,7 @@ services.AddTransient<IGameCommunicationService, GameCommunicationService>();
 services.AddTransient<IGameStateService, GameStateService>();
 services.AddTransient<IGameSession, GameSession>();
 services.AddTransient<ReferenceRepository>();
+services.AddTransient<GameEntitiesRepository>();
 // Register Supabase client for PlayerService dependency
 builder.Services.AddTransient<Supabase.Client>(sp =>
 {
@@ -56,6 +57,7 @@ services.AddTransient<PlayerService>();
 
 builder.Services.AddSingleton<ThemeCache>();
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
+builder.AddSqlServerDbContext<GameEntitiesDbContext>(connectionName: "database");
 
 
 var app = builder.Build();
