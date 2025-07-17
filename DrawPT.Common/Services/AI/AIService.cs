@@ -130,7 +130,7 @@ The response must always be a JSON array, even when evaluating a single contesta
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            var imageUrl = await GenerateImageAsync($"{prompt} {_imageEnhancePrompt}");
+            var imageUrl = await GenerateImageAsync($"{prompt}", theme);
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
@@ -216,9 +216,9 @@ The response must always be a JSON array, even when evaluating a single contesta
         }
 
         // create a GenerateImageAsync method here
-        private async Task<string?> GenerateImageAsync(string prompt)
+        private async Task<string?> GenerateImageAsync(string prompt, string theme)
         {
-            return await GenerateImageRestfullyAsync(prompt);
+            return await GenerateImageRestfullyAsync(prompt, theme);
 
             ClientResult<GeneratedImage> imageResult = await _imageClient.GenerateImageAsync(prompt, new()
             {
@@ -233,9 +233,9 @@ The response must always be a JSON array, even when evaluating a single contesta
             return image.ImageUri.ToString() ?? string.Empty;
         }
 
-        private async Task<string?> GenerateImageRestfullyAsync(string prompt)
+        private async Task<string?> GenerateImageRestfullyAsync(string prompt, string theme)
         {
-            return await _freepikImageService.GenerateAndSaveImageAsync(prompt);
+            return await _freepikImageService.GenerateAndSaveImageAsync(prompt, theme);
         }
     }
 }
