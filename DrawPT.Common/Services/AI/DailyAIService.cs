@@ -5,7 +5,6 @@ using DrawPT.Common.Util;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DrawPT.Common.Services.AI
 {

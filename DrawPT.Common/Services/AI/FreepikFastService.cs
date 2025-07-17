@@ -1,4 +1,4 @@
-﻿using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -25,7 +25,7 @@ namespace DrawPT.Common.Services.AI
             _logger = logger;
         }
 
-        public async Task<string?> GenerateAndSaveImageAsync(string prompt)
+        public async Task<string?> GenerateAndSaveImageAsync(string prompt, string theme)
         {
             if (string.IsNullOrEmpty(prompt))
             {
@@ -97,7 +97,7 @@ namespace DrawPT.Common.Services.AI
                 }
 
                 byte[] imageBytes = Convert.FromBase64String(base64Image);
-                string blobName = $"freepik-image-{Guid.NewGuid()}.png";
+                string blobName = $"archive/{theme}/{Guid.NewGuid()}.png";
                 string? imageUrl = await _storageService.SaveImageAsync(imageBytes, blobName);
 
                 if (imageUrl != null)
