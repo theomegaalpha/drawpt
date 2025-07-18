@@ -36,8 +36,10 @@ const { isModalOpen, toggleModal } = useAudioStore()
 const gameState = useGameStateStore()
 
 const isUsernameSet = ref(false)
+const isLoadingProfileSave = ref(false)
 
 const handleSaved = async () => {
+  isLoadingProfileSave.value = true
   try {
     if (!service.isConnected) {
       await service.startConnection('/gamehub')
@@ -49,6 +51,8 @@ const handleSaved = async () => {
   } catch (err) {
     console.error('SignalR connection failed in RoomWrapper:', err)
     notificationStore.addGameNotification('Failed to connect to the game server.', true)
+  } finally {
+    isLoadingProfileSave.value = false
   }
 }
 
@@ -77,6 +81,7 @@ onUnmounted(() => {
   <EditProfile
     v-if="!isUsernameSet"
     @saved="handleSaved"
+    :isLoadingOverride="isLoadingProfileSave"
     :header="'Joining Room ' + roomCode"
     buttonText="Join Game"
   />

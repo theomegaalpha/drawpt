@@ -3,10 +3,16 @@ import { ref, computed, defineProps } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePlayerStore } from '@/stores/player'
 import StandardInput from '@/components/common/StandardInput.vue'
+import { Loader2Icon } from 'lucide-vue-next'
 import api from '@/api/api'
-const { header = 'Set Username', buttonText = 'Save Changes' } = defineProps<{
+const {
+  header = 'Set Username',
+  buttonText = 'Save Changes',
+  isLoadingOverride = false
+} = defineProps<{
   header?: string
   buttonText?: string
+  isLoadingOverride: boolean
 }>()
 const emit = defineEmits(['saved'])
 
@@ -89,7 +95,7 @@ const toggleShowAvatarOptions = () => {
           v-model="player.username"
           type="text"
           placeholder="Enter your username"
-          :isLoading="isLoading"
+          :isLoading="isLoading || isLoadingOverride"
         />
         <p v-if="usernameError" class="mt-1 text-sm text-red-500">{{ usernameError }}</p>
       </div>
@@ -97,16 +103,22 @@ const toggleShowAvatarOptions = () => {
       <!-- Birthday Field -->
       <div class="mb-6 hidden">
         <label for="birthday" class="mb-1 block text-sm font-medium">Birthday</label>
-        <StandardInput id="birthday" v-model="birthday" type="date" :isLoading="isLoading" />
+        <StandardInput
+          id="birthday"
+          v-model="birthday"
+          type="date"
+          :isLoading="isLoading || isLoadingOverride"
+        />
       </div>
 
       <!-- Submit Button -->
       <button
         @click="updateProfile"
-        class="btn-default w-full"
-        :class="{ 'cursor-wait': isLoading }"
+        class="btn-default flex w-full items-center justify-center space-x-2"
+        :class="{ 'cursor-wait': isLoading || isLoadingOverride }"
       >
-        {{ buttonText }}
+        <Loader2Icon v-if="isLoading || isLoadingOverride" class="h-5 w-5 animate-spin" />
+        <span>{{ buttonText }}</span>
       </button>
     </div>
   </div>
