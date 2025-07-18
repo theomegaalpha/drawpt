@@ -22,19 +22,18 @@ const startGame = async () => {
 }
 
 const copyRoomCodeToClipboard = () => {
-  if (roomCode) {
-    navigator.clipboard
-      .writeText(roomCode)
-      .then(() => {
-        isCopied.value = true
-        setTimeout(() => {
-          isCopied.value = false
-        }, 3000)
-      })
-      .catch((err) => {
-        console.error('Failed to copy room code: ', err)
-      })
-  }
+  const url = window.location.href
+  navigator.clipboard
+    .writeText(url)
+    .then(() => {
+      isCopied.value = true
+      setTimeout(() => {
+        isCopied.value = false
+      }, 3000)
+    })
+    .catch((err) => {
+      console.error('Failed to copy URL: ', err)
+    })
 }
 </script>
 
