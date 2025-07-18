@@ -12,7 +12,7 @@ const {
 } = defineProps<{
   header?: string
   buttonText?: string
-  isLoadingOverride: boolean
+  isLoadingOverride?: boolean
 }>()
 const emit = defineEmits(['saved'])
 
