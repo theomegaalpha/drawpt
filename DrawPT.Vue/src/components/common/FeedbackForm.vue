@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Loader2Icon } from 'lucide-vue-next'
+import api from '@/api/api'
 
 // Feedback form state
 const feedbackTypes = ['Bug report', 'Feature request', 'General comment']
@@ -9,20 +10,22 @@ const message = ref<string>('')
 const isSubmitting = ref<boolean>(false)
 const isSuccess = ref<boolean>(false)
 
-const submitFeedback = async () => {
+const submitFeedback = () => {
   if (isSubmitting.value || message.value.trim() === '' || isSuccess.value) return
   isSubmitting.value = true
-  try {
-    console.log('Feedback submitted', { type: selectedType.value, message: message.value })
-
-    message.value = ''
-    isSuccess.value = true
-    setTimeout(() => (isSuccess.value = false), 6000)
-  } catch (error) {
-    console.error('Failed to submit feedback:', error)
-  } finally {
-    isSubmitting.value = false
-  }
+  api
+    .submitFeedback(selectedType.value, message.value)
+    .then(() => {
+      message.value = ''
+      isSuccess.value = true
+      setTimeout(() => (isSuccess.value = false), 6000)
+    })
+    .catch((error) => {
+      console.error('Failed to submit feedback:', error)
+    })
+    .finally(() => {
+      isSubmitting.value = false
+    })
 }
 </script>
 

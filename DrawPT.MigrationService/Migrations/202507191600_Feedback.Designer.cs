@@ -36,6 +36,9 @@ namespace DrawPT.MigrationService.Migrations
                     .IsRequired()
                     .HasColumnType("nvarchar(max)");
 
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
                 b.HasKey("Id");
 
                 b.ToTable("Feedback", "misc");

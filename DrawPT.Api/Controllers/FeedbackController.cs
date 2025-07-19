@@ -33,9 +33,10 @@ namespace DrawPT.Api.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<FeedbackEntity>> GetFeedback()
+        public ActionResult<IEnumerable<FeedbackEntity>> GetFeedback(int page = 1)
         {
-            var feedbacks = _miscRepo.GetAllFeedback();
+            _logger.LogInformation("Fetching all feedback entries.");
+            var feedbacks = _miscRepo.GetAllFeedback().Skip((page - 1) * 50).Take(50).ToList();
             return Ok(feedbacks);
         }
 
