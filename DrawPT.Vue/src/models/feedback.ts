@@ -3,4 +3,5 @@ export interface Feedback {
   type: string
   message: string
   createdAt: string
+  isResolved: boolean
 }

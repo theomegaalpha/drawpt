@@ -36,6 +36,9 @@ namespace DrawPT.MigrationService.Migrations
                     .IsRequired()
                     .HasColumnType("nvarchar(max)");
 
+                b.Property<bool>("IsResolved")
+                    .HasColumnType("bit");
+
                 b.Property<DateTime>("CreatedAt")
                     .HasColumnType("datetime2");
 
