@@ -7,15 +7,17 @@ const feedbackTypes = ['Bug report', 'Feature request', 'General comment']
 const selectedType = ref<string>(feedbackTypes[0])
 const message = ref<string>('')
 const isSubmitting = ref<boolean>(false)
+const isSuccess = ref<boolean>(false)
 
 const submitFeedback = async () => {
-  if (isSubmitting.value) return
+  if (isSubmitting.value || message.value.trim() === '' || isSuccess.value) return
   isSubmitting.value = true
   try {
-    // TODO: send feedback to API
     console.log('Feedback submitted', { type: selectedType.value, message: message.value })
-    // Optionally clear form
+
     message.value = ''
+    isSuccess.value = true
+    setTimeout(() => (isSuccess.value = false), 6000)
   } catch (error) {
     console.error('Failed to submit feedback:', error)
   } finally {
@@ -62,12 +64,16 @@ const submitFeedback = async () => {
         :class="{ 'cursor-not-allowed opacity-50': isSubmitting }"
       >
         <Loader2Icon v-if="isSubmitting" class="h-5 w-5 animate-spin" />
-        <span>{{ isSubmitting ? 'Submitting...' : 'Submit Feedback' }}</span>
+        <span>
+          {{
+            isSuccess
+              ? 'Successfully Sent Feedback'
+              : isSubmitting
+                ? 'Submitting...'
+                : 'Submit Feedback'
+          }}
+        </span>
       </button>
     </div>
   </form>
 </template>
-
-<style scoped>
-/* Add custom styles if needed */
-</style>

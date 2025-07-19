@@ -57,6 +57,7 @@ builder.AddAzureServiceBusClient(connectionName: "service-bus");
 builder.AddSqlServerClient(connectionName: "database");
 builder.AddSqlServerDbContext<ReferenceDbContext>(connectionName: "database");
 builder.AddSqlServerDbContext<DailiesDbContext>(connectionName: "database");
+builder.AddSqlServerDbContext<MiscDbContext>(connectionName: "database");
 builder.AddRedisDistributedCache(connectionName: "cache");
 builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
@@ -76,6 +77,7 @@ builder.Services.AddTransient<PlayerService>();
 
 
 builder.Services.AddTransient<StorageService>();
+builder.Services.AddTransient<MiscRepository>();
 builder.Services.AddTransient<DailiesRepository>();
 builder.Services.AddTransient<ReferenceRepository>();
 builder.Services.AddTransient<RandomService>();
