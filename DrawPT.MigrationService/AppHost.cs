@@ -12,15 +12,34 @@ builder.Services.AddHostedService<MainDbInitializer>();
 builder.AddServiceDefaults();
 
 builder.Services.AddDbContextPool<ReferenceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("database"), sqlOptions =>
-        sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
-    ));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("database"),
+        sqlOptions => sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
+    )
+);
 builder.EnrichSqlServerDbContext<ReferenceDbContext>();
+
 builder.Services.AddDbContextPool<DailiesDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("database"),
+        sqlOptions => sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
+    )
+);
+builder.EnrichSqlServerDbContext<DailiesDbContext>();
+
+builder.Services.AddDbContextPool<GameEntitiesDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("database"),
+        sqlOptions => sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
+    )
+);
+builder.EnrichSqlServerDbContext<GameEntitiesDbContext>();
+
+builder.Services.AddDbContextPool<MiscDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("database"), sqlOptions =>
         sqlOptions.MigrationsAssembly("DrawPT.MigrationService")
     ));
-builder.EnrichSqlServerDbContext<DailiesDbContext>();
+builder.EnrichSqlServerDbContext<MiscDbContext>();
 
 var app = builder.Build();
 

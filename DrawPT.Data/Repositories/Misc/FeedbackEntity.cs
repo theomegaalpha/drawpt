@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DrawPT.Data.Repositories.Misc
@@ -10,5 +10,6 @@ namespace DrawPT.Data.Repositories.Misc
         public Guid Id { get; set; }
         public required string Type { get; set; }
         public required string Message { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
