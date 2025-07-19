@@ -33,3 +33,19 @@ export async function submitFeedback(type: string, message: string): Promise<voi
     throw new Error('Failed to submit feedback')
   }
 }
+
+export async function updateFeedback(feedback: Feedback): Promise<void> {
+  const token = await getAccessToken()
+  const response = await fetch(`/api/feedback/${feedback.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(feedback)
+  })
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to resolve feedback')
+  }
+}

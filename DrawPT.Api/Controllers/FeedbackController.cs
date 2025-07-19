@@ -41,6 +41,23 @@ namespace DrawPT.Api.Controllers
             return Ok(feedbacks);
         }
 
+        [Authorize]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> ResolveFeedback(Guid id)
+        {
+            var feedback = _miscRepo.GetFeedback(id);
+            if (feedback == null)
+            {
+                return NotFound("Feedback not found.");
+            }
+
+            feedback.IsResolved = true;
+            await _miscRepo.SaveFeedbackAsync(feedback);
+
+            _logger.LogInformation($"Feedback {id} marked as resolved.");
+            return Ok(new { success = true });
+        }
+
         // POST: /Feedback
         [HttpPost]
         public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackEntity entity)

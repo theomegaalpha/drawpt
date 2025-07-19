@@ -20,6 +20,7 @@ namespace DrawPT.MigrationService.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsResolved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

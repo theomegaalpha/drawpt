@@ -29,7 +29,20 @@ async function loadFeedback(page = 1) {
 }
 
 onMounted(() => loadFeedback(currentPage.value))
-// Pagination handlers
+function toggleResolved(fb: Feedback) {
+  fb.isResolved = !fb.isResolved
+
+  api.updateFeedback({ ...fb, isResolved: fb.isResolved }).catch((err) => {
+    console.error('Failed to resolve feedback:', err)
+    fb.isResolved = !fb.isResolved
+  })
+}
+
+function formatLocalDate(utcString: string): string {
+  const d = new Date(utcString.endsWith('Z') ? utcString : utcString + 'Z')
+  return d.toLocaleString()
+}
+
 function prevPage() {
   if (currentPage.value > 1) {
     currentPage.value--
@@ -67,6 +80,11 @@ function nextPage() {
             >
               Created At
             </th>
+            <th
+              class="px-6 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400"
+            >
+              Resolved
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
@@ -74,7 +92,16 @@ function nextPage() {
             <td class="whitespace-nowrap px-6 py-4">{{ fb.type }}</td>
             <td class="break-words px-6 py-4">{{ fb.message }}</td>
             <td class="whitespace-nowrap px-6 py-4">
-              {{ new Date(fb.createdAt).toLocaleString() }}
+              {{ formatLocalDate(fb.createdAt) }}
+            </td>
+            <td class="px-6 py-4 text-center">
+              <input
+                type="checkbox"
+                :checked="fb.isResolved"
+                @change="toggleResolved(fb)"
+                :disabled="fb.isResolved"
+                class="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500"
+              />
             </td>
           </tr>
         </tbody>
