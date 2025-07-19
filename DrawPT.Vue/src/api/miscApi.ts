@@ -1,6 +1,7 @@
 import { getAccessToken, isAuthenticated } from '@/lib/auth'
+import type { Feedback } from '@/models/feedback'
 
-export async function getFeedback(page: number = 1): Promise<string[]> {
+export async function getFeedback(page: number = 1): Promise<Feedback[]> {
   const token = await getAccessToken()
   const response = await fetch(`/api/feedback?page=${page}`, {
     headers: {
@@ -13,7 +14,7 @@ export async function getFeedback(page: number = 1): Promise<string[]> {
     throw new Error('Failed to fetch feedback data')
   }
 
-  return (await response.json()) as string[]
+  return (await response.json()) as Feedback[]
 }
 
 export async function submitFeedback(type: string, message: string): Promise<void> {

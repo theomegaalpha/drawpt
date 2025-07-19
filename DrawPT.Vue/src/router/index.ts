@@ -76,6 +76,12 @@ const router = createRouter({
           name: 'admin-dailies',
           meta: { requiresAuth: true, requiresRole: 'admin' },
           component: () => import('@/views/admin/DailiesView.vue')
+        },
+        {
+          path: 'feedback',
+          name: 'admin-feedback',
+          meta: { requiresAuth: true, requiresRole: 'admin' },
+          component: () => import('@/views/admin/FeedbackView.vue')
         }
       ]
     },
