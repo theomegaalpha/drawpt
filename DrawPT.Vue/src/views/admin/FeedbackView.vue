@@ -6,14 +6,18 @@ import type { Feedback } from '@/models/feedback'
 const feedbacks = ref<Feedback[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+// Pagination state
+const currentPage = ref(1)
+const hasMore = ref(false)
 
-async function loadFeedback() {
+async function loadFeedback(page = 1) {
   loading.value = true
   error.value = null
   api
-    .getFeedback()
+    .getFeedback(page)
     .then((response) => {
       feedbacks.value = response
+      hasMore.value = response.length === 50
     })
     .catch((err) => {
       console.error('Failed to load feedback:', err)
@@ -24,7 +28,20 @@ async function loadFeedback() {
     })
 }
 
-onMounted(loadFeedback)
+onMounted(() => loadFeedback(currentPage.value))
+// Pagination handlers
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--
+    loadFeedback(currentPage.value)
+  }
+}
+function nextPage() {
+  if (hasMore.value) {
+    currentPage.value++
+    loadFeedback(currentPage.value)
+  }
+}
 </script>
 
 <template>
@@ -63,6 +80,26 @@ onMounted(loadFeedback)
         </tbody>
       </table>
       <p v-if="error" class="mt-4 text-red-500">{{ error }}</p>
+      <!-- Pagination Controls -->
+      <div class="mt-4 flex items-center justify-between">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="btn-default px-4 py-2"
+          :class="{ 'cursor-not-allowed opacity-50': currentPage === 1 }"
+        >
+          Previous
+        </button>
+        <span>Page {{ currentPage }}</span>
+        <button
+          @click="nextPage"
+          :disabled="!hasMore"
+          class="btn-default px-4 py-2"
+          :class="{ 'cursor-not-allowed opacity-50': !hasMore }"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </template>
