@@ -9,6 +9,7 @@ type ContactItem = { label: string; info: string; url: string }
 const contacts: ContactItem[] = [
   { label: 'Email', info: 'david@drawpt.ai', url: 'mailto:david@drawpt.ai' },
   { label: 'Instagram', info: '@drawpt.ai', url: 'https://instagram.com/drawpt.ai' },
+  { label: 'Youtube', info: 'DrawPT', url: 'https://www.youtube.com/@DrawPT-ai' },
   { label: 'Feedback Form', info: 'Fill out the feedback form below.', url: '' }
 ]
 </script>
