@@ -57,6 +57,11 @@ const router = createRouter({
       component: () => import('@/views/FAQView.vue')
     },
     {
+      path: '/contact',
+      name: 'contact',
+      component: () => import('@/views/ContactView.vue')
+    },
+    {
       path: '/admin',
       meta: { requiresAuth: true, requiresRole: 'admin' },
       children: [
