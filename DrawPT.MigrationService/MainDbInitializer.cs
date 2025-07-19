@@ -26,11 +26,16 @@ public class MainDbInitializer(
             using var scope = serviceProvider.CreateScope();
             var refDbContext = scope.ServiceProvider.GetRequiredService<ReferenceDbContext>();
             var imageDbContext = scope.ServiceProvider.GetRequiredService<DailiesDbContext>();
+            var miscDbContext = scope.ServiceProvider.GetRequiredService<MiscDbContext>();
 
+            // Ensure and migrate Reference, Dailies, and Misc contexts
             await EnsureDatabaseAsync(refDbContext, cancellationToken);
             await EnsureDatabaseAsync(imageDbContext, cancellationToken);
+            await EnsureDatabaseAsync(miscDbContext, cancellationToken);
+
             await RunMigrationAsync(refDbContext, cancellationToken);
             await RunMigrationAsync(imageDbContext, cancellationToken);
+            await RunMigrationAsync(miscDbContext, cancellationToken);
         }
         catch (Exception ex)
         {

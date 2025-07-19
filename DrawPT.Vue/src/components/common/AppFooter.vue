@@ -17,7 +17,7 @@ defineOptions({ name: 'AppFooter' })
           <a href="/faq" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400">
             FAQ
           </a>
-          <a href="/about" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400">
+          <a href="/contact" class="text-white hover:text-indigo-200 dark:hover:text-indigo-400">
             Contact
           </a>
         </div>

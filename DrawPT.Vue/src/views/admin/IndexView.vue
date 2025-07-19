@@ -11,6 +11,13 @@
         <h2 class="mb-2 text-xl font-semibold">Dailies</h2>
         <p class="text-gray-600">Manage daily tasks</p>
       </router-link>
+      <router-link
+        to="/admin/feedback"
+        class="block rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
+      >
+        <h2 class="mb-2 text-xl font-semibold">Feedback</h2>
+        <p class="text-gray-600">View user feedback</p>
+      </router-link>
     </div>
   </div>
 </template>

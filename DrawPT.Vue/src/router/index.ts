@@ -57,6 +57,11 @@ const router = createRouter({
       component: () => import('@/views/FAQView.vue')
     },
     {
+      path: '/contact',
+      name: 'contact',
+      component: () => import('@/views/ContactView.vue')
+    },
+    {
       path: '/admin',
       meta: { requiresAuth: true, requiresRole: 'admin' },
       children: [
@@ -71,6 +76,12 @@ const router = createRouter({
           name: 'admin-dailies',
           meta: { requiresAuth: true, requiresRole: 'admin' },
           component: () => import('@/views/admin/DailiesView.vue')
+        },
+        {
+          path: 'feedback',
+          name: 'admin-feedback',
+          meta: { requiresAuth: true, requiresRole: 'admin' },
+          component: () => import('@/views/admin/FeedbackView.vue')
         }
       ]
     },
