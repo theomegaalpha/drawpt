@@ -1,9 +1,17 @@
 import { getAccessToken, isAuthenticated } from '@/lib/auth'
 import type { Feedback } from '@/models/feedback'
 
-export async function getFeedback(page: number = 1): Promise<Feedback[]> {
+export async function getFeedback(
+  page: number = 1,
+  includeResolved: boolean = false
+): Promise<Feedback[]> {
   const token = await getAccessToken()
-  const response = await fetch(`/api/feedback?page=${page}`, {
+  // add includeResolved flag to query
+  const params = new URLSearchParams({
+    page: page.toString(),
+    includeResolved: includeResolved.toString()
+  })
+  const response = await fetch(`/api/feedback?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }

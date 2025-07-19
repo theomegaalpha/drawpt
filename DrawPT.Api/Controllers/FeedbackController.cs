@@ -34,11 +34,19 @@ namespace DrawPT.Api.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<FeedbackEntity>> GetFeedback(int page = 1)
+        public ActionResult<IEnumerable<FeedbackEntity>> GetFeedback(int page = 1, bool includeResolved = false)
         {
-            _logger.LogInformation("Fetching all feedback entries.");
-            var feedbacks = _miscRepo.GetAllFeedback().Skip((page - 1) * 50).Take(50).ToList();
-            return Ok(feedbacks);
+            _logger.LogInformation("Fetching feedback entries. Page: {Page}, IncludeResolved: {IncludeResolved}", page, includeResolved);
+            // Get all feedback
+            var list = _miscRepo.GetAllFeedback();
+            // Apply resolved filter
+            if (!includeResolved)
+            {
+                list = list.Where(f => !f.IsResolved).ToList();
+            }
+            // Apply pagination
+            var paged = list.Skip((page - 1) * 50).Take(50).ToList();
+            return Ok(paged);
         }
 
         [Authorize]
