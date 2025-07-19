@@ -2,6 +2,7 @@
 // No script needed for static content
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import FeedbackForm from '@/components/common/FeedbackForm.vue'
 
 // Stubbed contact methods
 type ContactItem = { label: string; info: string; url: string }
@@ -27,12 +28,12 @@ const contacts: ContactItem[] = [
             <span v-else>{{ item.info }}</span>
           </div>
         </div>
+        <div class="mt-12">
+          <h2 class="mb-4 text-2xl font-semibold">Send Us Feedback</h2>
+          <FeedbackForm />
+        </div>
       </section>
     </main>
     <AppFooter />
   </div>
 </template>
-
-<style scoped>
-/* Add Contact-specific styles here */
-</style>
