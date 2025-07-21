@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using DrawPT.Api.Hubs;
+using DrawPT.Api.Services;
 
 namespace DrawPT.Api.Controllers
 {
@@ -18,19 +19,22 @@ namespace DrawPT.Api.Controllers
     {
         private readonly DailiesRepository _dailiesRepository;
         private readonly DailyAIService _dailyAIService;
-        private readonly PlayerService _profileService; // Added ProfileService
+        private readonly PlayerService _profileService;
+        private readonly RandomService _randomService;
         private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
 
         public DailyAnswerController(
             DailiesRepository dailiesRepository,
             DailyAIService dailyAIService,
             PlayerService profileService,
-            IHubContext<NotificationHub, INotificationClient> hubContext) // Added hubContext parameter
+            RandomService randomService,
+            IHubContext<NotificationHub, INotificationClient> hubContext)
         {
             _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "DailyAIService cannot be null.");
-            _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "ProfileService cannot be null."); // Initialize ProfileService
+            _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "ProfileService cannot be null.");
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext), "HubContext cannot be null.");
+            _randomService = randomService ?? throw new ArgumentNullException(nameof(randomService), "RandomService cannot be null.");
         }
 
 
@@ -81,7 +85,7 @@ namespace DrawPT.Api.Controllers
                 result.Add(new DailyAnswerPublic
                 {
                     PlayerId = answer.PlayerId,
-                    Username = profile?.Username ?? "Unknown",
+                    Username = profile?.Username ?? "Username not found.",
                     Avatar = profile?.Avatar,
                     Date = answer.Date,
                     Guess = answer.Guess,
@@ -106,7 +110,7 @@ namespace DrawPT.Api.Controllers
                 var top20Answers = todaysAnswers
                     .OrderByDescending(a => a.Score)
                     .Take(20)
-                    .ToList(); // Convert to List to iterate multiple times if needed or to modify
+                    .ToList();
 
                 var result = new List<DailyAnswerPublic>();
                 foreach (var answer in top20Answers)
@@ -115,7 +119,7 @@ namespace DrawPT.Api.Controllers
                     result.Add(new DailyAnswerPublic
                     {
                         PlayerId = answer.PlayerId,
-                        Username = profile?.Username ?? "Unknown", // Use profile username, default to "Unknown"
+                        Username = profile?.Username ?? "Guest User",
                         Avatar = profile?.Avatar,
                         Date = answer.Date,
                         Guess = answer.Guess,
@@ -154,17 +158,16 @@ namespace DrawPT.Api.Controllers
                     return NotFound("No daily question found for today.");
                 }
 
-                var saveToDb = false;
+                var anonymousUser = true;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
-                Guid parsedUserId = Guid.Empty;
-                if (userId != null && Guid.TryParse(userId, out parsedUserId))
-                    saveToDb = true;
+                Guid.TryParse(userId, out Guid parsedUserId);
 
+                // no need to check anonymousUser,  just work off missing profile
                 var profile = await _profileService.GetPlayerAsync(parsedUserId);
                 var playerAnswer = new DailyAnswerPublic
                 {
                     PlayerId = Guid.NewGuid(),
-                    Username = profile?.Username ?? "Unknown",
+                    Username = profile?.Username ?? "Guest User",
                     Avatar = profile?.Avatar,
                     Guess = answer,
                     Date = todaysQuestion.Date,
@@ -176,27 +179,23 @@ namespace DrawPT.Api.Controllers
                 if (assessment == null)
                     return BadRequest("Failed to assess the answer.");
 
-
-                if (saveToDb)
+                var answerToSave = new DailyAnswerEntity
                 {
-                    var answerToSave = new DailyAnswerEntity
-                    {
-                        Date = todaysQuestion.Date,
-                        PlayerId = parsedUserId,
-                        QuestionId = todaysQuestion.Id,
-                        Guess = playerAnswer.Guess,
-                        Score = assessment.Score,
-                        ClosenessArray = assessment.ClosenessArray,
-                        Reason = assessment.Reason,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    await _dailiesRepository.SaveDailyAnswer(answerToSave);
-                }
+                    Date = todaysQuestion.Date,
+                    PlayerId = anonymousUser ? Guid.NewGuid() : parsedUserId,
+                    QuestionId = todaysQuestion.Id,
+                    Guess = playerAnswer.Guess,
+                    Score = assessment.Score,
+                    ClosenessArray = assessment.ClosenessArray,
+                    Reason = assessment.Reason,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _dailiesRepository.SaveDailyAnswer(answerToSave);
 
                 var answerPublic = new DailyAnswerPublic()
                 {
                     Date = todaysQuestion.Date,
-                    Username = profile?.Username ?? "Unknown",
+                    Username = profile?.Username ?? "Guest User",
                     Avatar = profile?.Avatar,
                     Guess = playerAnswer.Guess,
                     Score = assessment.Score,
