@@ -68,14 +68,13 @@ namespace DrawPT.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task SaveDailyAnswer(DailyAnswerEntity answer)
+        public async Task<DailyAnswerEntity> SaveDailyAnswerAsync(DailyAnswerEntity answer)
         {
             var existingAnswer = await _context.DailyAnswers
                 .FirstOrDefaultAsync(da => da.PlayerId == answer.PlayerId && da.QuestionId == answer.QuestionId);
 
             if (existingAnswer != null)
             {
-                // Update existing answer
                 existingAnswer.Guess = answer.Guess;
                 existingAnswer.Reason = answer.Reason;
                 existingAnswer.Score = answer.Score;
@@ -83,10 +82,31 @@ namespace DrawPT.Data.Repositories
             }
             else
             {
-                // Add new answer
                 _context.DailyAnswers.Add(answer);
             }
+
             await _context.SaveChangesAsync();
+
+            return existingAnswer ?? answer;
+        }
+
+        public async Task<DailyAnswerEntity> UpdateDailyAnswerAsync(DailyAnswerEntity answer)
+        {
+            var existingAnswer = await _context.DailyAnswers
+                .FirstOrDefaultAsync(da => da.Id == answer.Id);
+
+            // swallow if the answer doesn't exist.  lol
+            if (existingAnswer != null)
+            {
+                existingAnswer.Guess = answer.Guess;
+                existingAnswer.Reason = answer.Reason;
+                existingAnswer.Score = answer.Score;
+                existingAnswer.ClosenessArray = answer.ClosenessArray;
+                _context.DailyAnswers.Update(existingAnswer);
+                await _context.SaveChangesAsync();
+                return existingAnswer;
+            }
+            return answer;
         }
     }
 }

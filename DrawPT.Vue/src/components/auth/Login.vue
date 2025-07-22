@@ -89,6 +89,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { usePlayerStore } from '@/stores/player'
+import { useDailiesStore } from '@/stores/dailies'
+import { useLeaderboardStore } from '@/stores/leaderboard'
 import { storeToRefs } from 'pinia'
 import GoogleLoginButton from '@/components/common/GoogleLoginButton.vue'
 
@@ -102,6 +104,7 @@ const showResendButton = ref(false)
 
 const playerStore = usePlayerStore()
 const { player } = storeToRefs(playerStore)
+const { fetchDailiesTop20 } = useLeaderboardStore()
 
 const handleLogin = async () => {
   try {
@@ -123,6 +126,9 @@ const handleLogin = async () => {
 
     if (data.user) {
       await playerStore.init()
+      const dailiesStore = useDailiesStore()
+      await dailiesStore.migrateLocalAnswerToServer()
+      await fetchDailiesTop20()
       if (!player.value.avatar) {
         router.push('/profile')
       } else {
@@ -160,6 +166,4 @@ const handleResendConfirmation = async () => {
     loading.value = false
   }
 }
-
-// Google login handled by GoogleLoginButton component
 </script>

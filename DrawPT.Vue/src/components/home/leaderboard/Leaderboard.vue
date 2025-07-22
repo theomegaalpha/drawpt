@@ -86,11 +86,11 @@ onMounted(async () => {
 const fetchTabData = async () => {
   if (activeTab.value === 'daily') {
     if (leaderboardStore.dailies.length === 0) {
-      await leaderboardStore.fetchDailies()
+      await leaderboardStore.fetchDailiesTop20()
     }
   } else {
     if (leaderboardStore.dailies.length === 0) {
-      await leaderboardStore.fetchDailies()
+      await leaderboardStore.fetchDailiesTop20()
     }
   }
 }

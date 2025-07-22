@@ -2,6 +2,7 @@ namespace DrawPT.Common.Models.Daily
 {
     public class DailyAnswerPublic
     {
+        public Guid Id { get; set; }
         public Guid PlayerId { get; set; }
         public required string Username { get; set; } = string.Empty;
         public string? Avatar { get; set; }

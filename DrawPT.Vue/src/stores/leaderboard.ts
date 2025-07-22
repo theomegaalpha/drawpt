@@ -21,7 +21,7 @@ export const useLeaderboardStore = defineStore('leaderboard', () => {
     isLoading.value = loading
   }
 
-  function fetchDailies() {
+  function fetchDailiesTop20() {
     setIsLoading(true)
     return fetch('/api/dailyanswer/top20')
       .then((response) => response.json())
@@ -59,7 +59,7 @@ export const useLeaderboardStore = defineStore('leaderboard', () => {
   return {
     setIsLoading,
     clearLeaderboard,
-    fetchDailies,
+    fetchDailiesTop20,
     fetchPlayerResults,
     addDailyAnswer,
     isLoading,

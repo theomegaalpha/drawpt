@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using DrawPT.Api.Hubs;
-using DrawPT.Api.Services;
 
 namespace DrawPT.Api.Controllers
 {
@@ -20,21 +19,18 @@ namespace DrawPT.Api.Controllers
         private readonly DailiesRepository _dailiesRepository;
         private readonly DailyAIService _dailyAIService;
         private readonly PlayerService _profileService;
-        private readonly RandomService _randomService;
         private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
 
         public DailyAnswerController(
             DailiesRepository dailiesRepository,
             DailyAIService dailyAIService,
             PlayerService profileService,
-            RandomService randomService,
             IHubContext<NotificationHub, INotificationClient> hubContext)
         {
             _dailiesRepository = dailiesRepository ?? throw new ArgumentNullException(nameof(dailiesRepository), "DailiesRepository cannot be null.");
             _dailyAIService = dailyAIService ?? throw new ArgumentNullException(nameof(dailyAIService), "DailyAIService cannot be null.");
             _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService), "ProfileService cannot be null.");
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext), "HubContext cannot be null.");
-            _randomService = randomService ?? throw new ArgumentNullException(nameof(randomService), "RandomService cannot be null.");
         }
 
 
@@ -84,6 +80,7 @@ namespace DrawPT.Api.Controllers
             {
                 result.Add(new DailyAnswerPublic
                 {
+                    Id = answer.Id,
                     PlayerId = answer.PlayerId,
                     Username = profile?.Username ?? "Username not found.",
                     Avatar = profile?.Avatar,
@@ -118,6 +115,7 @@ namespace DrawPT.Api.Controllers
                     var profile = await _profileService.GetPlayerAsync(answer.PlayerId);
                     result.Add(new DailyAnswerPublic
                     {
+                        Id = answer.Id,
                         PlayerId = answer.PlayerId,
                         Username = profile?.Username ?? "Guest User",
                         Avatar = profile?.Avatar,
@@ -181,8 +179,9 @@ namespace DrawPT.Api.Controllers
 
                 var answerToSave = new DailyAnswerEntity
                 {
+                    Id = Guid.NewGuid(),
                     Date = todaysQuestion.Date,
-                    PlayerId = anonymousUser ? Guid.NewGuid() : parsedUserId,
+                    PlayerId = anonymousUser ? new Guid() : parsedUserId,
                     QuestionId = todaysQuestion.Id,
                     Guess = playerAnswer.Guess,
                     Score = assessment.Score,
@@ -190,10 +189,11 @@ namespace DrawPT.Api.Controllers
                     Reason = assessment.Reason,
                     CreatedAt = DateTime.UtcNow
                 };
-                await _dailiesRepository.SaveDailyAnswer(answerToSave);
+                var savedAnswer = await _dailiesRepository.SaveDailyAnswerAsync(answerToSave);
 
                 var answerPublic = new DailyAnswerPublic()
                 {
+                    Id = savedAnswer.Id,
                     Date = todaysQuestion.Date,
                     Username = profile?.Username ?? "Guest User",
                     Avatar = profile?.Avatar,
@@ -205,6 +205,47 @@ namespace DrawPT.Api.Controllers
                 // Broadcast to all connected clients via SignalR
                 await _hubContext.Clients.All.NewDailyAnswer(answerPublic);
                 return Ok(answerPublic);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateDailyAnswer(Guid id, [FromBody] DailyAnswerPublic answer)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (answer == null || answer.Id == Guid.Empty)
+            {
+                return BadRequest("Invalid answer data.");
+            }
+            try
+            {
+                var existingAnswer = _dailiesRepository.GetDailyAnswers(answer.Date).FirstOrDefault(da => da.Id == answer.Id);
+                if (existingAnswer == null)
+                    return NotFound("No existing daily answer found for the player on this date.");
+
+                if (existingAnswer.PlayerId != new Guid())
+                    return BadRequest("You cannot update an existing answer that belongs to a player.");
+
+                Guid.TryParse(userId, out Guid parsedUserId);
+
+                if (parsedUserId == Guid.Empty)
+                    return Unauthorized("User ID not found in claims.");
+
+                existingAnswer.PlayerId = parsedUserId;
+                var savedAnswer = await _dailiesRepository.UpdateDailyAnswerAsync(existingAnswer);
+
+                var profile = await _profileService.GetPlayerAsync(parsedUserId);
+                answer.Id = savedAnswer.Id;
+                answer.Username = profile?.Username ?? "Guest User";
+                answer.Avatar = profile?.Avatar;
+
+                // Broadcast updated answer to all clients
+                await _hubContext.Clients.All.NewDailyAnswer(answer);
+                return Ok(answer);
             }
             catch (Exception ex)
             {

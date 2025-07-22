@@ -25,6 +25,7 @@ export const useDailiesStore = defineStore('dailies', {
   },
   actions: {
     async initStore() {
+      console.error('Initializing dailies store')
       if (this.dailyQuestions.length === 0) {
         const questions = await api.getDailyQuestions()
         this.dailyQuestions = questions
@@ -44,6 +45,7 @@ export const useDailiesStore = defineStore('dailies', {
         }
 
         if (await isAuthenticated()) {
+          await this.migrateLocalAnswerToServer()
           if (!this.isDailyAnswerLoaded) {
             const answer = await api.getDailyAnswer()
             if (answer) {
@@ -119,6 +121,24 @@ export const useDailiesStore = defineStore('dailies', {
         Object.assign(existing, answer)
       } else {
         this.dailyAnswerHistory.push(answer)
+      }
+    },
+    async migrateLocalAnswerToServer() {
+      console.log('Migrating local dailyAnswer to server if exists')
+      const stored = localStorage.getItem('dailyAnswer')
+      if (!stored) return
+      try {
+        const { answer, storedDate } = JSON.parse(stored)
+        const today = new Date().toISOString().split('T')[0]
+        if (storedDate === today && answer) {
+          const serverAnswer = await api.updateAnswer(answer)
+          localStorage.removeItem('dailyAnswer')
+          this.dailyAnswer = serverAnswer
+          this.setShowAssessment(!!serverAnswer.guess)
+          this.upsertToAnswerHistory(serverAnswer)
+        }
+      } catch (e) {
+        console.error('Failed to migrate dailyAnswer', e)
       }
     }
   }

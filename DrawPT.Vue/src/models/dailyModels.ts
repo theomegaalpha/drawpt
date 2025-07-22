@@ -1,4 +1,5 @@
 export interface DailyAnswer {
+  id: string
   playerId: string
   username: string
   avatar: string | null

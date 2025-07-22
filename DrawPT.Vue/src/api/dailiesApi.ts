@@ -143,3 +143,23 @@ export async function submitAnswer(answer: string): Promise<DailyAnswer> {
 
   return (await response.json()) as DailyAnswer
 }
+
+export async function updateAnswer(answer: DailyAnswer): Promise<DailyAnswer> {
+  if (!(await isAuthenticated())) throw new Error('User must be authenticated to update answer')
+
+  const response = await fetch(`/api/dailyanswer/${answer.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${await getAccessToken()}`
+    },
+    body: JSON.stringify(answer)
+  })
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText)
+    throw new Error('Failed to update answer on server')
+  }
+
+  return (await response.json()) as DailyAnswer
+}
