@@ -15,6 +15,7 @@ import api from '@/api/api'
 import ClosenessDisplay from '../common/ClosenessDisplay.vue'
 import { useAuthStore } from '@/stores/auth'
 import UnshinyButton from '../common/UnshinyButton.vue'
+import ShinyButton from '../common/ShinyButton.vue'
 
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
@@ -109,7 +110,6 @@ const copyClosenessArrayToClipboard = async () => {
     }, 3000)
   } catch (err) {
     console.error('Failed to copy closeness emoji to clipboard:', err)
-    // Optional: Notify user of failure
   }
 }
 
@@ -226,6 +226,7 @@ onMounted(async () => {
         {{ showAssessment ? 'Show Picture' : 'Show Stats' }}
       </UnshinyButton>
       <UnshinyButton
+        v-if="isAuthenticated"
         class="ml-2 flex h-12 w-full items-center justify-center rounded-full"
         :class="{
           'cursor-wait': isLoading
@@ -236,6 +237,19 @@ onMounted(async () => {
         <Share2Icon v-else class="mr-4 h-4 w-4" />
         {{ shareText }}
       </UnshinyButton>
+      <ShinyButton
+        v-else
+        class="ml-2 flex h-12 w-full items-center justify-center rounded-full"
+        :class="{
+          'cursor-wait': isLoading
+        }"
+      >
+        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
+        <router-link v-else to="/login" @click="toggleLoginCta" class="flex items-center">
+          <LogInIcon class="mr-4 h-4 w-4" />
+          Login/Register to Save Results!
+        </router-link>
+      </ShinyButton>
     </div>
   </div>
 </template>
