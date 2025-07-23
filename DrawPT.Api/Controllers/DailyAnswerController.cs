@@ -164,7 +164,7 @@ namespace DrawPT.Api.Controllers
                 var profile = await _profileService.GetPlayerAsync(parsedUserId);
                 var playerAnswer = new DailyAnswerPublic
                 {
-                    PlayerId = Guid.NewGuid(),
+                    PlayerId = parsedUserId,
                     Username = profile?.Username ?? "Guest User",
                     Avatar = profile?.Avatar,
                     Guess = answer,
