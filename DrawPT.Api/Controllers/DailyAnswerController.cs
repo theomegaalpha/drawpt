@@ -156,7 +156,6 @@ namespace DrawPT.Api.Controllers
                     return NotFound("No daily question found for today.");
                 }
 
-                var anonymousUser = true;
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
                 Guid.TryParse(userId, out Guid parsedUserId);
 
@@ -181,7 +180,7 @@ namespace DrawPT.Api.Controllers
                 {
                     Id = Guid.NewGuid(),
                     Date = todaysQuestion.Date,
-                    PlayerId = anonymousUser ? new Guid() : parsedUserId,
+                    PlayerId = parsedUserId,
                     QuestionId = todaysQuestion.Id,
                     Guess = playerAnswer.Guess,
                     Score = assessment.Score,
