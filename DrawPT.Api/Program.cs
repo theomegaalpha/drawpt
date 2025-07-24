@@ -9,6 +9,7 @@ using Microsoft.Azure.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DrawPT.Common.Services.AI;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +64,8 @@ builder.AddAzureOpenAIClient(connectionName: "openai");
 builder.AddAzureBlobClient("blobs");
 builder.Services.AddTransient<Supabase.Client>(sp =>
 {
-    var url = builder.Configuration["SupabaseUrl"];
-    var secretKey = builder.Configuration["SupabaseApiKey"];
+    var url = builder.Configuration["SupabaseUrl"]!;
+    var secretKey = builder.Configuration["SupabaseApiKey"]!;
     var options = new Supabase.SupabaseOptions
     {
         AutoConnectRealtime = true
@@ -111,6 +112,25 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddHostedService<GameEngineProxyService>();
 
 var app = builder.Build();
+
+// seed background music in development
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var blobServiceClient = scope.ServiceProvider.GetRequiredService<BlobServiceClient>();
+    var container = blobServiceClient.GetBlobContainerClient("music");
+    container.CreateIfNotExists();
+
+    var localDebug = Path.Combine(app.Environment.ContentRootPath, "Debug");
+    if (Directory.Exists(localDebug))
+    {
+        foreach (var file in Directory.GetFiles(localDebug, "*.mp3"))
+        {
+            var blob = container.GetBlobClient($"game-background/{Path.GetFileName(file)}");
+            blob.Upload(file, overwrite: true);
+        }
+    }
+}
 
 // Build ReferenceCache at startup
 using (var scope = app.Services.CreateScope())

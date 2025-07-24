@@ -30,7 +30,7 @@ const themeTimeoutRef = ref<NodeJS.Timeout>()
 
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
 const timeoutPerQuestion = 40000
-const timeoutForTheme = 20000
+const timeoutForTheme = 30000
 
 // --- Method to handle theme selection from the SelectTheme component ---
 function handleThemeSelectedFromUI(newTheme: string) {
@@ -45,7 +45,7 @@ async function askForThemeInternal(): Promise<string> {
 
     themeTimeoutRef.value = setTimeout(() => {
       notificationStore.addGameNotification("Uh oh! Theme selection time's up!", true)
-      gameStateStore.clearThemes() // Clear options in store
+      gameStateStore.clearThemes()
       if (stopEffect) stopEffect()
       reject(new Error('Theme selection timed out'))
     }, timeoutForTheme)
