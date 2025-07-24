@@ -89,7 +89,7 @@ namespace DrawPT.Api.Services
                         case GameEngineRequests.Theme:
                             {
                                 List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
-                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(35));
+                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                                 await _hubContext.Clients.GroupExcept(roomCode, connectionId).ThemeSelection(themes);
                                 response = await client.AskTheme(themes, ctsTheme.Token);
                                 break;
@@ -97,7 +97,7 @@ namespace DrawPT.Api.Services
                         case GameEngineRequests.Question:
                             {
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
-                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(35));
+                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(40));
                                 var answerBase = await client.AskQuestion(question, ctsQuestion.Token);
                                 response = JsonSerializer.Serialize(answerBase);
                                 break;
