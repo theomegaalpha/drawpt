@@ -193,17 +193,21 @@ onMounted(async () => {
         <UserIcon class="mr-4 h-4 w-4" />
         Continue as Guest
       </UnshinyButton>
-      <UnshinyButton
-        class="mr-2 flex h-12 w-full cursor-pointer items-center justify-center rounded-full"
-        :class="{
-          'cursor-wait': isLoading
-        }"
+      <router-link
+        to="/login"
+        @click="toggleLoginCta"
+        class="mr-2 flex w-full cursor-pointer items-center justify-center rounded-full"
       >
-        <router-link to="/login" @click="toggleLoginCta" class="flex items-center">
+        <UnshinyButton
+          class="flex h-12 w-full items-center"
+          :class="{
+            'cursor-wait': isLoading
+          }"
+        >
           <LogInIcon class="mr-4 h-4 w-4" />
-          Login
-        </router-link>
-      </UnshinyButton>
+          Login/Register
+        </UnshinyButton>
+      </router-link>
     </div>
     <GuessInput
       v-else-if="!dailiesStore.hasDailyAnswer"
@@ -237,19 +241,18 @@ onMounted(async () => {
         <Share2Icon v-else class="mr-4 h-4 w-4" />
         {{ shareText }}
       </UnshinyButton>
-      <ShinyButton
-        v-else
-        class="ml-2 flex h-12 w-full items-center justify-center rounded-full"
-        :class="{
-          'cursor-wait': isLoading
-        }"
-      >
-        <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
-        <router-link v-else to="/login" @click="toggleLoginCta" class="flex items-center">
+      <router-link v-else to="/login" @click="toggleLoginCta" class="flex w-full items-center">
+        <ShinyButton
+          class="ml-2 flex h-12 w-full items-center justify-center rounded-full"
+          :class="{
+            'cursor-wait': isLoading
+          }"
+        >
+          <Loader2Icon v-if="isLoading" class="mr-4 h-5 w-5 animate-spin" />
           <LogInIcon class="mr-4 h-4 w-4" />
-          Login/Register to Save Results!
-        </router-link>
-      </ShinyButton>
+          <span v-if="!isLoading">Login/Register to Save Results!</span>
+        </ShinyButton>
+      </router-link>
     </div>
   </div>
 </template>
