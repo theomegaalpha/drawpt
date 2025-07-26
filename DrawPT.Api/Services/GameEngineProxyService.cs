@@ -88,18 +88,34 @@ namespace DrawPT.Api.Services
                     {
                         case GameEngineRequests.Theme:
                             {
+                                _logger.LogError($"Processing theme selection for room {roomCode} with connection {connectionId}");
                                 List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
-                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(35));
+                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                                 await _hubContext.Clients.GroupExcept(roomCode, connectionId).ThemeSelection(themes);
-                                response = await client.AskTheme(themes, ctsTheme.Token);
+                                // Server-side timeout wrapper for AskTheme
+                                var askTask = client.AskTheme(themes, ctsTheme.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(30)));
+                                if (completed == askTask)
+                                    response = askTask.Result;
+                                else
+                                    response = string.Empty;
                                 break;
                             }
                         case GameEngineRequests.Question:
                             {
+                                _logger.LogError($"Processing question for room {roomCode} with connection {connectionId}");
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
-                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(35));
-                                var answerBase = await client.AskQuestion(question, ctsQuestion.Token);
-                                response = JsonSerializer.Serialize(answerBase);
+                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(40));
+                                // Server-side timeout wrapper for AskQuestion
+                                var askTask = client.AskQuestion(question, ctsQuestion.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(40)));
+                                if (completed == askTask)
+                                {
+                                    var answerBase = askTask.Result;
+                                    response = JsonSerializer.Serialize(answerBase);
+                                }
+                                else
+                                    response = string.Empty;
                                 break;
                             }
                         default:
@@ -110,7 +126,7 @@ namespace DrawPT.Api.Services
 
                 string replyTo = args.Message.ReplyTo;
                 string correlationId = args.Message.CorrelationId;
-                if (!string.IsNullOrEmpty(replyTo))
+                if (!string.IsNullOrEmpty(replyTo) && !string.IsNullOrEmpty(response))
                 {
                     ServiceBusSender sender = _sbClient.CreateSender(replyTo);
                     ServiceBusMessage replyMsg = new ServiceBusMessage(response)
@@ -191,7 +207,10 @@ namespace DrawPT.Api.Services
                         break;
                     case GameEngineQueue.PlayerAnsweredAction:
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
-                        await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
+                        if (playerAnswer is not null)
+                            await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
+                        else
+                            _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
                         break;
                     default:
                         _logger.LogWarning($"Unhandled GameEngine action: {action}");
