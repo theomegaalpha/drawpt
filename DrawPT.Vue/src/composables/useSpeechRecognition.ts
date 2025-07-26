@@ -36,7 +36,7 @@ export function useSpeechRecognition() {
   }
 
   recognitionInstance.onend = () => {
-    recognitionInstance.stop()
+    isListening.value = false
   }
 
   const toggleListening = () => {
@@ -55,6 +55,13 @@ export function useSpeechRecognition() {
     }
   }
 
+  try {
+    recognitionInstance.start()
+    isListening.value = true
+  } catch (error) {
+    console.error('Error starting initial speech recognition:', error)
+    isListening.value = false
+  }
   return {
     transcribedText,
     isListening,

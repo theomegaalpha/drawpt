@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch, computed } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
-import { MicIcon, SendIcon, Loader2Icon } from 'lucide-vue-next'
+import { MicIcon, MicOffIcon, SendIcon, Loader2Icon } from 'lucide-vue-next'
 import StandardInput from './StandardInput.vue'
 
 const props = defineProps<{
@@ -23,18 +23,10 @@ const inputValue = computed({
 
 const { transcribedText, isListening, toggleListening } = useSpeechRecognition()
 
-const handleRecordButtonMouseDown = () => {
+// Toggle listening on button click
+const handleToggleListening = () => {
   if (props.disabled) return
-
-  if (!isListening.value) {
-    toggleListening()
-  }
-}
-
-const handleRecordButtonMouseUp = () => {
-  if (isListening.value) {
-    toggleListening()
-  }
+  toggleListening()
 }
 
 watch(transcribedText, (newText) => {
@@ -59,20 +51,19 @@ const localSubmitGuess = () => {
       />
       <button
         type="button"
-        @mousedown="handleRecordButtonMouseDown"
-        @mouseup="handleRecordButtonMouseUp"
-        @mouseleave="handleRecordButtonMouseUp"
+        @click="handleToggleListening"
         :disabled="props.disabled || props.isLoading"
         class="absolute left-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors"
         :class="{
-          'cursor-not-allowed': disabled,
-          'hover:text-white': !disabled,
+          'cursor-not-allowed': props.disabled,
+          'hover:text-white': !props.disabled,
           'cursor-wait': props.isLoading
         }"
-        aria-label="Use microphone"
+        aria-label="Toggle microphone"
       >
         <Loader2Icon v-if="props.isLoading" class="h-5 w-5 animate-spin" />
-        <MicIcon v-else class="h-5 w-5" />
+        <MicIcon v-else-if="isListening" class="h-5 w-5" />
+        <MicOffIcon v-else class="h-5 w-5" />
       </button>
     </div>
     <button
