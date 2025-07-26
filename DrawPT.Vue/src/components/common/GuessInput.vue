@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, computed } from 'vue'
+import { watch, computed, ref } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
 import { MicIcon, MicOffIcon, SendIcon, Loader2Icon } from 'lucide-vue-next'
 import StandardInput from './StandardInput.vue'
@@ -29,10 +29,17 @@ const handleToggleListening = () => {
   toggleListening()
 }
 
+const pulse = ref(false)
+
 watch(transcribedText, (newText) => {
   if (newText !== undefined && newText !== null && newText !== inputValue.value) {
     inputValue.value = newText
   }
+  // trigger pulse glow on new speech
+  pulse.value = true
+  setTimeout(() => {
+    pulse.value = false
+  }, 300)
 })
 
 const localSubmitGuess = () => {
@@ -62,8 +69,11 @@ const localSubmitGuess = () => {
         aria-label="Toggle microphone"
       >
         <Loader2Icon v-if="props.isLoading" class="h-5 w-5 animate-spin" />
-        <MicIcon v-else-if="isListening" class="h-5 w-5" />
-        <MicOffIcon v-else class="h-5 w-5" />
+        <MicIcon
+          v-else-if="isListening"
+          :class="['h-5 w-5 rounded-full text-green-500', { glow: isListening, pulse: pulse }]"
+        />
+        <MicOffIcon v-else class="h-5 w-5 text-red-500" />
       </button>
     </div>
     <button
@@ -81,3 +91,23 @@ const localSubmitGuess = () => {
     </button>
   </form>
 </template>
+
+<style scoped>
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 255, 0, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  }
+}
+.glow {
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+.pulse {
+  animation: pulse 0.3s ease-out;
+}
+</style>
