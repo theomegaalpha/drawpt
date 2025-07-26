@@ -63,7 +63,7 @@ const localSubmitGuess = () => {
         @mouseup="handleRecordButtonMouseUp"
         @mouseleave="handleRecordButtonMouseUp"
         :disabled="props.disabled || props.isLoading"
-        class="absolute right-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors"
+        class="absolute left-4 top-1/2 -translate-y-1/2 transform text-zinc-400 transition-colors"
         :class="{
           'cursor-not-allowed': disabled,
           'hover:text-white': !disabled,
