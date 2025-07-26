@@ -2,7 +2,7 @@
 import { watch, computed, ref, onMounted } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
 import { MicIcon, MicOffIcon, SendIcon, Loader2Icon } from 'lucide-vue-next'
-import StandardInput from './StandardInput.vue'
+import GameTextInput from './GameTextInput.vue'
 
 const props = defineProps<{
   modelValue: string
@@ -57,7 +57,7 @@ onMounted(() => {
 <template>
   <form @submit.prevent="localSubmitGuess" class="relative flex w-full items-center">
     <div class="relative w-full">
-      <StandardInput
+      <GameTextInput
         placeholder="Guess the prompt"
         v-model="inputValue"
         :disabled="props.disabled"
