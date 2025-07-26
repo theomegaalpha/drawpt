@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, computed, ref } from 'vue'
+import { watch, computed, ref, onMounted } from 'vue'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
 import { MicIcon, MicOffIcon, SendIcon, Loader2Icon } from 'lucide-vue-next'
 import StandardInput from './StandardInput.vue'
@@ -7,6 +7,7 @@ import StandardInput from './StandardInput.vue'
 const props = defineProps<{
   modelValue: string
   submitAction: (value: string) => void
+  isListeningAtStart?: boolean
   isLoading?: boolean
   disabled?: boolean
 }>()
@@ -45,6 +46,12 @@ watch(transcribedText, (newText) => {
 const localSubmitGuess = () => {
   props.submitAction(inputValue.value)
 }
+
+onMounted(() => {
+  if (props.isListeningAtStart) {
+    toggleListening()
+  }
+})
 </script>
 
 <template>

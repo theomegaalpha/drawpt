@@ -70,7 +70,11 @@ const submitGuess = async (valueFromInput: string) => {
         </div>
       </div>
       <div v-if="!lockGuess" class="w-full max-w-2xl">
-        <GuessInput v-model="guessInputFromComponent" :submitAction="submitGuess" />
+        <GuessInput
+          v-model="guessInputFromComponent"
+          :submitAction="submitGuess"
+          :isListeningAtStart="true"
+        />
       </div>
     </div>
   </div>
