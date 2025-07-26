@@ -73,7 +73,7 @@ namespace DrawPT.Data.Repositories
             var existingAnswer = await _context.DailyAnswers
                 .FirstOrDefaultAsync(da => da.PlayerId == answer.PlayerId && da.QuestionId == answer.QuestionId);
 
-            if (existingAnswer != null)
+            if (existingAnswer != null && existingAnswer.PlayerId != Guid.Empty)
             {
                 existingAnswer.Guess = answer.Guess;
                 existingAnswer.Reason = answer.Reason;
