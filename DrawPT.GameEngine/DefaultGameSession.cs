@@ -6,7 +6,7 @@ using DrawPT.GameEngine.Interfaces;
 
 namespace DrawPT.GameEngine;
 
-public class GameSession : IGameSession
+public class DefaultGameSession : IGameSession
 {
     private readonly IGameCommunicationService _gameCommunicationService;
     private readonly IGameAnnouncerService _announcerService;
@@ -14,16 +14,16 @@ public class GameSession : IGameSession
     private readonly IGameStateService _gameStateService;
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
-    private readonly ILogger<GameSession> _logger;
+    private readonly ILogger<DefaultGameSession> _logger;
 
-    public GameSession(
+    public DefaultGameSession(
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
         IGameAnnouncerService gameAnnouncerService,
         IGameCommunicationService gameCommunicationService,
-        ILogger<GameSession> logger)
+        ILogger<DefaultGameSession> logger)
     {
         _cacheService = cacheService;
         _gameStateService = gameStateService;
