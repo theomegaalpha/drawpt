@@ -6,11 +6,10 @@ import ViewThemes from './themescreen/ViewThemes.vue'
 import ImageLoader from './loader/ImageLoader.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
-import { useGameStateStore } from '@/stores/gameState' // Import the new store
+import { useGameStateStore } from '@/stores/gameState'
 import service from '@/services/signalRService'
 
 import type { PlayerAnswerBase, PlayerQuestion } from '@/models/gameModels'
-import GameResults from './gameresults/GameResults.vue'
 
 const gameStateStore = useGameStateStore()
 const notificationStore = useNotificationStore()
