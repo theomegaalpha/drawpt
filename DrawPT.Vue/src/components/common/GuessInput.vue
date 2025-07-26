@@ -48,7 +48,7 @@ const localSubmitGuess = () => {
 </script>
 
 <template>
-  <form @submit.prevent="localSubmitGuess" class="relative flex w-full">
+  <form @submit.prevent="localSubmitGuess" class="relative flex w-full items-center">
     <div class="relative w-full">
       <StandardInput
         placeholder="Guess the prompt"
