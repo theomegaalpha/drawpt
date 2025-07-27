@@ -3,6 +3,7 @@ using Azure.Messaging.ServiceBus;
 using DrawPT.Common.ServiceBus;
 using DrawPT.Common.Models.Game;
 using DrawPT.GameEngine.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DrawPT.GameEngine.BackgroundWorkers;
 
@@ -31,13 +32,14 @@ public class GameEventListener : BackgroundService
         {
             var body = args.Message.Body.ToString();
             _logger.LogInformation($"Received Service Bus message: {body}");
-            var gameState = JsonSerializer.Deserialize<GameState>(body);
+            var gameState = JsonSerializer.Deserialize<GameState>(body)!;
             _logger.LogInformation($"Game start event for room: {gameState.RoomCode}");
             // Resolve scoped IGameSession per message
             _ = Task.Run(async () =>
             {
                 using var scope = _scopeFactory.CreateScope();
-                var gameEngine = scope.ServiceProvider.GetRequiredService<IGameSession>();
+                var factory = scope.ServiceProvider.GetRequiredService<IGameSessionFactory>();
+                var gameEngine = factory.Create(gameState.GameConfiguration.PlayerPromptMode);
                 await gameEngine.PlayGameAsync(gameState.RoomCode);
             });
             await args.CompleteMessageAsync(args.Message);

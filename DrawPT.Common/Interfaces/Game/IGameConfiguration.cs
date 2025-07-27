@@ -35,8 +35,8 @@ namespace DrawPT.Common.Interfaces.Game
         int TransitionDelay { get; set; }
 
         /// <summary>
-        /// Whether gambling is enabled in this game
+        /// Whether player prompt mode or AI prompt mode is enabled in this game
         /// </summary>
-        bool GamblingEnabled { get; set; }
+        bool PlayerPromptMode { get; set; }
     }
 }

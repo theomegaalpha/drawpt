@@ -35,6 +35,6 @@ namespace DrawPT.Common.Models.Game
         /// <summary>
         /// Whether gambling is enabled in this game
         /// </summary>
-        public bool GamblingEnabled { get; set; } = false;
+        public bool PlayerPromptMode { get; set; } = false;
     }
 }

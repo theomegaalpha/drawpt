@@ -39,7 +39,11 @@ services.AddTransient<IThemeService, ThemeService>();
 services.AddTransient<IQuestionService, QuestionService>();
 services.AddTransient<IGameCommunicationService, GameCommunicationService>();
 services.AddTransient<IGameStateService, GameStateService>();
-services.AddTransient<IGameSession, DefaultGameSession>();
+
+services.AddTransient<IGameSessionFactory, GameSessionFactory>();
+services.AddTransient<DefaultGameSession>();
+services.AddTransient<DuelGameSession>();
+
 services.AddTransient<ReferenceRepository>();
 services.AddTransient<GameEntitiesRepository>();
 // Register Supabase client for PlayerService dependency
