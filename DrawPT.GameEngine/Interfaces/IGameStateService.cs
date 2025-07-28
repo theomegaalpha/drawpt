@@ -7,6 +7,8 @@ public interface IGameStateService
     Task<IGameState> StartGameAsync(string roomCode);
     Task<IGameState> AskThemeAsync(string roomCode);
     Task<IGameState> ChooseThemeAsync(string roomCode);
+    Task<IGameState> AskImagePromptAsync(string roomCode);
+    Task<IGameState> AnswerImagePromptAsync(string roomCode);
     Task<IGameState> AskQuestionAsync(string roomCode);
 
     Task<IGameState> StartRoundAsync(string roomCode, int roundNumber);

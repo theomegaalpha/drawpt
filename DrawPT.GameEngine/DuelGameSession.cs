@@ -48,8 +48,6 @@ public class DuelGameSession : IGameSession
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
         await Task.Delay(35 * 1000);
 
-        await Task.Delay(100);
-
         List<RoundResults> allRoundResults = new();
 
         for (int i = 0; i < gameState.GameConfiguration.TotalRounds; i++)
@@ -58,7 +56,7 @@ public class DuelGameSession : IGameSession
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
             await Task.Delay(500);
 
-            // ask player for theme
+            // ask players for drawing prompts
             var players = await _cacheService.GetRoomPlayersAsync(roomCode);
 
             // empty game check
@@ -68,14 +66,13 @@ public class DuelGameSession : IGameSession
             // add players that are missing from original list into originalPlayers
             foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
                 originalPlayers.Add(player);
-            gameState = await _gameStateService.AskThemeAsync(roomCode);
-            var selectedTheme = await _gameCommunicationService.AskPlayerThemeAsync(players.ElementAt(i % players.Count), 30);
-            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.PlayerThemeSelectedAction, selectedTheme);
+            gameState = await _gameStateService.AskImagePromptAsync(roomCode);
+            var selectedImagePrompt = await _gameCommunicationService.AskPlayerImagePromptAsync(players.ElementAt(i % players.Count), 30);
+            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.PlayerImagePromptSelectedAction, selectedImagePrompt);
             gameState = await _gameStateService.ChooseThemeAsync(roomCode);
 
             // ask all players for their answers
-            var question = await _questionService.GenerateQuestionAsync(selectedTheme);
-            question.RoundNumber = i + 1;
+            var question = await _questionService.GenerateQuestionFromPromptAsync(selectedImagePrompt);
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
 
             gameState = await _gameStateService.AskQuestionAsync(roomCode);
@@ -99,7 +96,6 @@ public class DuelGameSession : IGameSession
             var roundResults = new RoundResults
             {
                 RoundNumber = i + 1,
-                Theme = selectedTheme,
                 Question = question,
                 Answers = assessedAnswers
             };

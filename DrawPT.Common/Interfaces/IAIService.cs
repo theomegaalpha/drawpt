@@ -11,6 +11,10 @@ namespace DrawPT.Common.Interfaces
         /// Generates a new game question
         /// </summary>
         Task<GameQuestion> GenerateGameQuestionAsync(string theme);
+        /// <summary>
+        /// Generates a new game question
+        /// </summary>
+        Task<GameQuestion> GenerateGameQuestionFromPromptAsync(string theme);
 
         /// <summary>
         /// Assesses player answers for a round

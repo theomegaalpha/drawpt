@@ -101,6 +101,38 @@ public class GameCommunicationService : IGameCommunicationService
         return selectedTheme;
     }
 
+    public async Task<string> AskPlayerImagePromptAsync(Player player, int timeoutInSeconds)
+    {
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Prompt, Payload = "" };
+        var requestPayload = JsonSerializer.Serialize(requestObj);
+
+        // Send via Service Bus and await response
+        var correlationId = Guid.NewGuid().ToString();
+        var tcs = new TaskCompletionSource<string>();
+        _pendingRequests[correlationId] = tcs;
+
+        var sender = _sbClient.CreateSender("gameEngineRequest");
+        var requestMsg = new ServiceBusMessage(requestPayload)
+        {
+            SessionId = player.ConnectionId,
+            CorrelationId = correlationId,
+            ReplyTo = "gameEngineResponse"
+        };
+        await sender.SendMessageAsync(requestMsg);
+
+        // Wait for response or timeout
+        var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
+        var completed = await Task.WhenAny(tcs.Task, delay);
+        _pendingRequests.TryRemove(correlationId, out _);
+
+        string selectedImagePrompt = completed == tcs.Task
+            ? tcs.Task.Result
+            : "";
+
+        _logger.LogDebug($"[{player.RoomCode}] Image prompt selected for player {player.Id}: {selectedImagePrompt}");
+        return selectedImagePrompt;
+    }
+
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
         // Build SB request message

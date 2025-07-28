@@ -130,11 +130,22 @@ The response must always be a JSON array, even when evaluating a single contesta
         public async Task<GameQuestion> GenerateGameQuestionAsync(string theme)
         {
             var prompt = await GenerateImagePromptAsync(theme);
-            var imageUrl = string.IsNullOrEmpty(prompt) ? string.Empty : await GenerateImageAsync($"{prompt}", theme);
+            var imageUrl = string.IsNullOrEmpty(prompt) ? string.Empty : await GenerateImageAsync(prompt, theme);
             return new GameQuestion()
             {
                 OriginalPrompt = prompt.Split(']')[^1],
                 Theme = theme,
+                ImageUrl = imageUrl ?? string.Empty
+            };
+        }
+
+        public async Task<GameQuestion> GenerateGameQuestionFromPromptAsync(string prompt)
+        {
+            var imageUrl = string.IsNullOrEmpty(prompt) ? string.Empty : await GenerateImageAsync(prompt, "Player Generated");
+            return new GameQuestion()
+            {
+                OriginalPrompt = prompt,
+                Theme = "Player Generated",
                 ImageUrl = imageUrl ?? string.Empty
             };
         }

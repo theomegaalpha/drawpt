@@ -48,8 +48,6 @@ public class DefaultGameSession : IGameSession
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
         await Task.Delay(35 * 1000);
 
-        await Task.Delay(100);
-
         List<RoundResults> allRoundResults = new();
 
         for (int i = 0; i < gameState.GameConfiguration.TotalRounds; i++)
@@ -75,7 +73,6 @@ public class DefaultGameSession : IGameSession
 
             // ask all players for their answers
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
-            question.RoundNumber = i + 1;
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
 
             gameState = await _gameStateService.AskQuestionAsync(roomCode);
@@ -99,7 +96,6 @@ public class DefaultGameSession : IGameSession
             var roundResults = new RoundResults
             {
                 RoundNumber = i + 1,
-                Theme = selectedTheme,
                 Question = question,
                 Answers = assessedAnswers
             };

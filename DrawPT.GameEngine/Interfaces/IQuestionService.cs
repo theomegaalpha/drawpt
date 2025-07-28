@@ -5,4 +5,6 @@ namespace DrawPT.GameEngine.Interfaces;
 public interface IQuestionService
 {
     Task<GameQuestion> GenerateQuestionAsync(string theme);
+
+    Task<GameQuestion> GenerateQuestionFromPromptAsync(string prompt);
 }

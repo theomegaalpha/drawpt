@@ -9,6 +9,7 @@ namespace DrawPT.Common.ServiceBus
         public const string PlayerAnsweredAction = "player_answered";
         public const string PlayerScoreUpdateAction = "player_score_update";
         public const string PlayerThemeSelectedAction = "player_theme_selected";
+        public const string PlayerImagePromptSelectedAction = "player_image_prompt_selected";
         public const string PlayerGamblingAction = "player_gambling";
 
         public const string GameStartedAction = "game_started";
