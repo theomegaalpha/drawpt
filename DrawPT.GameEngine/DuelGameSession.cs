@@ -49,10 +49,10 @@ public class DuelGameSession : IGameSession
         await Task.Delay(35 * 1000);
 
         List<RoundResults> allRoundResults = new();
-
-        for (int i = 0; i < gameState.GameConfiguration.TotalRounds; i++)
+        var roundNumber = 1;
+        var totalRounds = Math.Ceiling((double)gameState.GameConfiguration.TotalRounds / originalPlayers.Count);
+        for (int i = 0; i < totalRounds; i++)
         {
-            gameState = await _gameStateService.StartRoundAsync(roomCode, i + 1);
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
             await Task.Delay(500);
 
@@ -63,51 +63,69 @@ public class DuelGameSession : IGameSession
             if (players.Count == 0)
                 break;
 
-            // add players that are missing from original list into originalPlayers
-            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
-                originalPlayers.Add(player);
             gameState = await _gameStateService.AskImagePromptAsync(roomCode);
-            var selectedImagePrompt = await _gameCommunicationService.AskPlayerImagePromptAsync(players.ElementAt(i % players.Count), 30);
-            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.PlayerImagePromptSelectedAction, selectedImagePrompt);
-            gameState = await _gameStateService.ChooseThemeAsync(roomCode);
 
-            // ask all players for their answers
-            var question = await _questionService.GenerateQuestionFromPromptAsync(selectedImagePrompt);
-            List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
-
-            gameState = await _gameStateService.AskQuestionAsync(roomCode);
-            foreach (var player in players)
-                playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
-
-            // empty game check
-            if (playerAnswers.Count == 0)
-                break;
-
-            await Task.WhenAll(playerAnswers);
-
-            var answers = new List<PlayerAnswer>();
-            foreach (var answer in playerAnswers.Select(t => t.Result))
-                answers.Add(answer);
-
-
-            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AssessingAnswersAction);
-
-            var assessedAnswers = await _assessmentService.AssessAnswersAsync(question.OriginalPrompt, answers);
-            var roundResults = new RoundResults
+            /* 
+             * Ask players for their drawing prompts.
+             */
+            List<Task<string>> imagePrompts = new();
+            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
             {
-                RoundNumber = i + 1,
-                Question = question,
-                Answers = assessedAnswers
-            };
-            allRoundResults.Add(roundResults);
+                originalPlayers.Add(player);
+                imagePrompts.Add(_gameCommunicationService.AskPlayerImagePromptAsync(player, 30));
+            }
+            gameState = await _gameStateService.AnswerImagePromptAsync(roomCode);
+
+            // generate all images
+            await Task.WhenAll(imagePrompts);
+            List<Task<GameQuestion>> gameQuestions = new();
+            foreach (var imagePrompt in imagePrompts.Select(t => t.Result))
+                gameQuestions.Add(_questionService.GenerateQuestionFromPromptAsync(imagePrompt));
+            await Task.WhenAll(gameQuestions);
 
 
-            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
-            if (announcerMessage != null)
-                await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
+            /* 
+             * Loop through game rounds
+             */
+            foreach (var question in gameQuestions.Select(t => t.Result))
+            {
+                gameState = await _gameStateService.StartRoundAsync(roomCode, roundNumber);
+                List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
+                gameState = await _gameStateService.AskQuestionAsync(roomCode);
+                foreach (var player in players)
+                    playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
 
-            await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
-            await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+                // empty game check
+                if (playerAnswers.Count == 0)
+                    break;
+
+                await Task.WhenAll(playerAnswers);
+
+                var answers = new List<PlayerAnswer>();
+                foreach (var answer in playerAnswers.Select(t => t.Result))
+                    answers.Add(answer);
+
+
+                await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AssessingAnswersAction);
+
+                var assessedAnswers = await _assessmentService.AssessAnswersAsync(question.OriginalPrompt, answers);
+                var roundResults = new RoundResults
+                {
+                    RoundNumber = i + 1,
+                    Question = question,
+                    Answers = assessedAnswers
+                };
+                allRoundResults.Add(roundResults);
+
+
+                var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
+                if (announcerMessage != null)
+                    await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
+
+                await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
+                await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+                roundNumber++;
+            }
         }
 
         var finalGameState = await _gameStateService.EndGameAsync(roomCode);

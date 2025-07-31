@@ -3,10 +3,15 @@ import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
 import service from '@/services/signalRService'
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import ShinyButton from '@/components/common/ShinyButton.vue'
+import UnshinyButton from '@/components/common/UnshinyButton.vue'
+import { Loader2Icon } from 'lucide-vue-next'
 
-const { player } = usePlayerStore()
-const { players, roomCode } = useGameStateStore()
+const playerStore = usePlayerStore()
+const { player } = storeToRefs(playerStore)
+const gameStore = useGameStateStore()
+const { players, roomCode, playerPromptMode } = storeToRefs(gameStore)
 const isCopied = ref(false)
 const isLoading = ref(false)
 
@@ -42,6 +47,21 @@ const copyRoomCodeToClipboard = () => {
     <h1 class="mb-5 text-4xl font-bold">DrawPT</h1>
     <h2 class="mb-2 text-2xl">Welcome, {{ player.username }}</h2>
     <p class="mb-2 text-lg">Waiting for other players to join...</p>
+    <span>Prompts Generation</span>
+    <div class="mb-4 flex items-center justify-center space-x-2">
+      <UnshinyButton
+        @click="gameStore.setPlayerPromptMode(false)"
+        class="hover:bg-blue-600 dark:hover:bg-indigo-900"
+        :class="{ 'bg-blue-500 dark:bg-indigo-800': !playerPromptMode }"
+        >AI Mode</UnshinyButton
+      >
+      <UnshinyButton
+        @click="gameStore.setPlayerPromptMode(true)"
+        class="hover:bg-blue-600 dark:hover:bg-indigo-900"
+        :class="{ 'bg-blue-500 dark:bg-indigo-800': playerPromptMode }"
+        >Player Mode</UnshinyButton
+      >
+    </div>
     <ShinyButton
       v-if="players.length > 0 && players[0].id === player.id"
       class="my-5 px-10"

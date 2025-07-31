@@ -103,7 +103,7 @@ public class GameCommunicationService : IGameCommunicationService
 
     public async Task<string> AskPlayerImagePromptAsync(Player player, int timeoutInSeconds)
     {
-        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Prompt, Payload = "" };
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Prompt, Payload = string.Empty };
         var requestPayload = JsonSerializer.Serialize(requestObj);
 
         // Send via Service Bus and await response
@@ -127,9 +127,10 @@ public class GameCommunicationService : IGameCommunicationService
 
         string selectedImagePrompt = completed == tcs.Task
             ? tcs.Task.Result
-            : "";
+            : string.Empty;
 
         _logger.LogDebug($"[{player.RoomCode}] Image prompt selected for player {player.Id}: {selectedImagePrompt}");
+        await BroadcastGameEventAsync(player.RoomCode, GameEngineQueue.PlayerImagePromptSelectedAction, player.Id);
         return selectedImagePrompt;
     }
 

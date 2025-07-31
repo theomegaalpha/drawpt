@@ -6,7 +6,7 @@ export interface IGameConfiguration {
   QuestionTimeout: number
   ThemeTimeout: number
   TransitionDelay: number
-  GamblingEnabled: boolean
+  PlayerPromptMode: boolean
 }
 
 export enum GameStatus {

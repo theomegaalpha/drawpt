@@ -1,11 +1,12 @@
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Common.Interfaces;
+using DrawPT.Common.Interfaces.Game;
 using DrawPT.Common.Models.Game;
+using DrawPT.Common.ServiceBus;
+using DrawPT.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using DrawPT.Api.Services;
-using DrawPT.Common.ServiceBus;
 
 namespace DrawPT.Api.Hubs
 {
@@ -135,7 +136,7 @@ namespace DrawPT.Api.Hubs
             await Clients.GroupExcept(player.RoomCode, Context.ConnectionId).PlayerJoined(player);
         }
 
-        public async Task<bool> StartGame()
+        public async Task<bool> StartGame(IGameConfiguration gameConfiguration)
         {
             var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
             if (userId == null)
@@ -154,6 +155,11 @@ namespace DrawPT.Api.Hubs
 
 
             var gameState = await _cache.GetGameState(player.RoomCode);
+            if (gameState == null)
+                return false;
+
+            gameState.GameConfiguration = gameConfiguration;
+            await _cache.SetGameState(gameState);
             var message = JsonSerializer.Serialize(gameState);
 
             // Send start game message to Azure Service Bus queue 'apiGlobal'

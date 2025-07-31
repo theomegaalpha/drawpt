@@ -11,13 +11,23 @@ import type {
 import { GameStatus } from '@/models/gameModels'
 import type { Player } from '@/models/player'
 
+// default game configuration
+const defaultGameConfig: IGameConfiguration = {
+  MaxPlayers: 8,
+  TotalRounds: 6,
+  QuestionTimeout: 40,
+  ThemeTimeout: 30,
+  TransitionDelay: 50,
+  PlayerPromptMode: false
+}
+
 export const useGameStateStore = defineStore('gameState', {
   state: () => ({
     // GameState properties
     roomCode: '' as string,
     currentRound: 0,
     totalRounds: 0,
-    gameConfiguration: {} as IGameConfiguration,
+    gameConfiguration: defaultGameConfig,
     hostPlayerId: '' as string,
     players: [] as Player[],
     themes: [] as string[],
@@ -36,6 +46,7 @@ export const useGameStateStore = defineStore('gameState', {
     isGuessLocked: true
   }),
   getters: {
+    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
     areThemesVisible: (state) => !state.hasPlayerAction && state.themes.length > 0,
     showGameCanvas: (state) => state.currentImageUrl !== '',
@@ -65,6 +76,10 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.successfullyJoined = true
+    },
+
+    setPlayerPromptMode(mode: boolean) {
+      this.gameConfiguration.PlayerPromptMode = mode
     },
 
     updateRoomCode(code: string) {
