@@ -11,7 +11,7 @@ import { Loader2Icon } from 'lucide-vue-next'
 const playerStore = usePlayerStore()
 const { player } = storeToRefs(playerStore)
 const gameStore = useGameStateStore()
-const { players, roomCode, playerPromptMode } = storeToRefs(gameStore)
+const { players, roomCode, playerPromptMode, gameConfiguration } = storeToRefs(gameStore)
 const isCopied = ref(false)
 const isLoading = ref(false)
 
@@ -19,7 +19,8 @@ const startGame = async () => {
   if (isLoading.value) return
 
   isLoading.value = true
-  var gameStarted = await service.invoke('startGame')
+  console.log('Starting game with configuration:', gameConfiguration.value)
+  var gameStarted = await service.invoke('startGame', gameConfiguration.value)
   if (!gameStarted) {
     console.error('Game could not be started')
   }
