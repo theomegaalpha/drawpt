@@ -15,9 +15,10 @@ export enum GameStatus {
   StartingRound = 2,
   AskingTheme = 3,
   AskingQuestion = 4,
-  ShowingRoundResults = 5,
-  Completed = 6,
-  Abandoned = 7
+  AskingImagePrompt = 5,
+  ShowingRoundResults = 6,
+  Completed = 7,
+  Abandoned = 8
 }
 
 export interface GameState {

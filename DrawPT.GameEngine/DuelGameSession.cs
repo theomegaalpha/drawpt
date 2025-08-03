@@ -41,6 +41,9 @@ public class DuelGameSession : IGameSession
         // Broadcast start game message
         var gameState = await _gameStateService.StartGameAsync(roomCode);
 
+        var promptTimeout = gameState.GameConfiguration.PromptTimeout;
+        var questionTimeout = gameState.GameConfiguration.QuestionTimeout;
+
         List<Player> originalPlayers = await _cacheService.GetRoomPlayersAsync(roomCode);
         await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GameStartedAction, gameState);
         var greetingAnnouncement = await _announcerService.GenerateGreetingAnnouncement(originalPlayers);
@@ -49,7 +52,7 @@ public class DuelGameSession : IGameSession
         await Task.Delay(35 * 1000);
 
         List<RoundResults> allRoundResults = new();
-        var roundNumber = 1;
+        var roundNumber = 0;
         var totalRounds = Math.Ceiling((double)gameState.GameConfiguration.TotalRounds / originalPlayers.Count);
         for (int i = 0; i < totalRounds; i++)
         {
@@ -72,7 +75,7 @@ public class DuelGameSession : IGameSession
             foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
             {
                 originalPlayers.Add(player);
-                imagePrompts.Add(_gameCommunicationService.AskPlayerImagePromptAsync(player, 30));
+                imagePrompts.Add(_gameCommunicationService.AskPlayerImagePromptAsync(player, promptTimeout));
             }
             gameState = await _gameStateService.AnswerImagePromptAsync(roomCode);
 
@@ -83,17 +86,17 @@ public class DuelGameSession : IGameSession
                 gameQuestions.Add(_questionService.GenerateQuestionFromPromptAsync(imagePrompt));
             await Task.WhenAll(gameQuestions);
 
-
             /* 
              * Loop through game rounds
              */
             foreach (var question in gameQuestions.Select(t => t.Result))
             {
+                roundNumber++;
                 gameState = await _gameStateService.StartRoundAsync(roomCode, roundNumber);
                 List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
                 gameState = await _gameStateService.AskQuestionAsync(roomCode);
                 foreach (var player in players)
-                    playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, 30));
+                    playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, questionTimeout));
 
                 // empty game check
                 if (playerAnswers.Count == 0)
@@ -105,18 +108,16 @@ public class DuelGameSession : IGameSession
                 foreach (var answer in playerAnswers.Select(t => t.Result))
                     answers.Add(answer);
 
-
                 await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AssessingAnswersAction);
 
                 var assessedAnswers = await _assessmentService.AssessAnswersAsync(question.OriginalPrompt, answers);
                 var roundResults = new RoundResults
                 {
-                    RoundNumber = i + 1,
+                    RoundNumber = roundNumber,
                     Question = question,
                     Answers = assessedAnswers
                 };
                 allRoundResults.Add(roundResults);
-
 
                 var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
                 if (announcerMessage != null)
@@ -124,7 +125,6 @@ public class DuelGameSession : IGameSession
 
                 await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
                 await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
-                roundNumber++;
             }
         }
 

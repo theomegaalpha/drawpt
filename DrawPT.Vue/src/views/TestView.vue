@@ -10,10 +10,6 @@ const gameState = useGameStateStore()
 onMounted(async () => {
   gameState.initializeGameState({} as GameState)
   gameState.startRound(1)
-  gameState.currentTheme = 'Dickless Vagrant'
-  gameState.currentImageUrl =
-    'https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp'
-  gameState.isGuessLocked = false
   gameState.addPlayer({
     id: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
     username: 'micro david',
@@ -26,6 +22,7 @@ onMounted(async () => {
     avatar: '/images/profile-photos/anime-5.png',
     connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
   })
+  gameState.prepareForPlayerImagePrompt()
 
   // Simulate a player answering after 5 seconds
   setTimeout(() => {

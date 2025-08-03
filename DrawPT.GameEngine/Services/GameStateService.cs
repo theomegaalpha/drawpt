@@ -50,7 +50,7 @@ namespace DrawPT.GameEngine.Services
         public async Task<IGameState> AskImagePromptAsync(string roomCode)
         {
             var gameState = await _cacheService.GetGameState(roomCode);
-            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.AskingTheme };
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.AskingImagePrompt };
             await _cacheService.SetGameState(gameState);
             return gameState;
         }

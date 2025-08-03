@@ -18,14 +18,19 @@ namespace DrawPT.Common.Models.Game
         public int TotalRounds { get; set; } = 6;
 
         /// <summary>
-        /// Gets or sets the time limit for each question in seconds
+        /// Gets or sets the time limit for each prompt in seconds
         /// </summary>
-        public int QuestionTimeout { get; set; } = 40;
+        public int PromptTimeout { get; set; } = 50;
 
         /// <summary>
         /// Gets or sets the time limit for theme selection in seconds
         /// </summary>
         public int ThemeTimeout { get; set; } = 30;
+
+        /// <summary>
+        /// Gets or sets the time limit for each question in seconds
+        /// </summary>
+        public int QuestionTimeout { get; set; } = 40;
 
         /// <summary>
         /// Delay between rounds in seconds

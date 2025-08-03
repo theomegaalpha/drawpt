@@ -7,6 +7,7 @@ import GameTextInput from './GameTextInput.vue'
 const props = defineProps<{
   modelValue: string
   submitAction: (value: string) => void
+  placeholder?: string
   isListeningAtStart?: boolean
   isLoading?: boolean
   disabled?: boolean
@@ -47,6 +48,15 @@ const localSubmitGuess = () => {
   props.submitAction(inputValue.value)
 }
 
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    if (!e.shiftKey && !e.ctrlKey) {
+      e.preventDefault()
+      localSubmitGuess()
+    }
+  }
+}
+
 onMounted(() => {
   if (props.isListeningAtStart) {
     toggleListening()
@@ -55,13 +65,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <form @submit.prevent="localSubmitGuess" class="relative flex w-full items-center">
+  <form @submit.prevent="localSubmitGuess" class="relative flex items-center">
     <div class="relative w-full">
       <GameTextInput
-        placeholder="Guess the prompt"
+        :placeholder="props.placeholder || 'Guess the prompt'"
         v-model="inputValue"
         :disabled="props.disabled"
         :isLoading="props.isLoading"
+        @keydown="onKeydown"
       />
       <button
         type="button"

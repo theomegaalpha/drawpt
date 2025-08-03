@@ -3,6 +3,7 @@ import GameCanvas from './canvas/GameCanvas.vue'
 import RoundResults from './roundresults/RoundResults.vue'
 import SelectTheme from './themescreen/SelectTheme.vue'
 import ViewThemes from './themescreen/ViewThemes.vue'
+import PlayerPrompt from './playerPrompt/PlayerPrompt.vue'
 import ImageLoader from './loader/ImageLoader.vue'
 import { computed, onBeforeMount, onUnmounted, ref, watchEffect } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
@@ -93,6 +94,18 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
 
 onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
+  service.on('askPrompt', async () => {
+    themeSelectionInput.value = ''
+    gameStateStore.prepareForPlayerImagePrompt()
+    try {
+      const theme = await askForThemeInternal()
+      return theme
+    } catch (error) {
+      console.error('Error in askForTheme process:', error)
+      return ''
+    }
+  })
+
   service.on('askTheme', async (themes: string[]) => {
     themeSelectionInput.value = ''
     gameStateStore.prepareForThemeSelection(themes)
@@ -126,6 +139,7 @@ onBeforeMount(() => {
 })
 
 onUnmounted(() => {
+  service.off('askImagePrompt')
   service.off('askTheme')
   service.off('askQuestion')
 
@@ -152,6 +166,7 @@ const submitGuess = async (valueFromInput: string) => {
   <ImageLoader v-if="gameStateStore.showImageLoader" />
   <div v-else>
     <RoundResults v-if="gameStateStore.shouldShowResults" />
+    <PlayerPrompt v-if="gameStateStore.askingImagePrompt" />
     <SelectTheme
       v-if="gameStateStore.areThemesSelectable"
       :themes="themes"

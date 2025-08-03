@@ -25,6 +25,11 @@ namespace DrawPT.Common.Interfaces.Game
         int QuestionTimeout { get; set; }
 
         /// <summary>
+        /// Gets or sets the time limit for each prompt in seconds
+        /// </summary>
+        int PromptTimeout { get; set; }
+
+        /// <summary>
         /// Gets or sets the time limit for theme selection in seconds
         /// </summary>
         int ThemeTimeout { get; set; }

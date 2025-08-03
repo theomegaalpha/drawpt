@@ -7,6 +7,7 @@ namespace DrawPT.Common.Constants
         StartingRound,
         AskingTheme,
         AskingQuestion,
+        AskingImagePrompt,
         ShowingRoundResults,
         Completed,
         Abandoned
