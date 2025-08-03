@@ -68,15 +68,17 @@ public class DuelGameSession : IGameSession
 
             gameState = await _gameStateService.AskImagePromptAsync(roomCode);
 
+            // add missing players that joined after the game started
+            // TODO: should we allow players to join during the game?
+            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
+                originalPlayers.Add(player);
+
             /* 
              * Ask players for their drawing prompts.
              */
             List<Task<string>> imagePrompts = new();
-            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
-            {
-                originalPlayers.Add(player);
+            foreach (var player in originalPlayers)
                 imagePrompts.Add(_gameCommunicationService.AskPlayerImagePromptAsync(player, promptTimeout));
-            }
             gameState = await _gameStateService.AnswerImagePromptAsync(roomCode);
 
             // generate all images

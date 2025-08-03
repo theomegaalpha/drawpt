@@ -21,20 +21,52 @@ const lockGuess = computed(() => gameStateStore.isGuessLocked)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
 
 // --- Local state for UI interaction leading to promise resolution for SignalR ---
+const imagePromptInput = ref<string>('')
 const themeSelectionInput = ref<string>('') // User's current theme choice from UI to resolve askForThemeInternal
 const currentGuessForPromise = ref<string>('') // User's current guess for askQuestionInternal promise
 
 // --- Refs for timeout management for interactive promises ---
 const questionTimeoutRef = ref<NodeJS.Timeout>()
 const themeTimeoutRef = ref<NodeJS.Timeout>()
+const promptTimeoutRef = ref<NodeJS.Timeout>()
 
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
 const timeoutPerQuestion = 40000
 const timeoutForTheme = 30000
+const timeoutForPrompt = 50000
 
 // --- Method to handle theme selection from the SelectTheme component ---
 function handleThemeSelectedFromUI(newTheme: string) {
   themeSelectionInput.value = newTheme // This will trigger the watchEffect in askForThemeInternal
+}
+
+function handlePromptSubmitted(prompt: string) {
+  imagePromptInput.value = prompt
+}
+
+// --- Internal promise-based function for prompt selection ---
+async function askForPromptInternal(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (promptTimeoutRef.value) clearTimeout(promptTimeoutRef.value)
+    let stopEffect: (() => void) | null = null
+
+    promptTimeoutRef.value = setTimeout(() => {
+      notificationStore.addGameNotification("Uh oh! Prompt creation time's up!", true)
+      gameStateStore.clearThemes()
+      if (stopEffect) stopEffect()
+      reject(new Error('Prompt creation timed out'))
+    }, timeoutForPrompt)
+
+    stopEffect = watchEffect(() => {
+      const currentPrompt = imagePromptInput.value
+      if (currentPrompt) {
+        gameStateStore.playerSubmittedPrompt()
+        clearTimeout(promptTimeoutRef.value)
+        if (stopEffect) stopEffect() // Stop this effect itself
+        resolve(currentPrompt)
+      }
+    })
+  })
 }
 
 // --- Internal promise-based function for theme selection ---
@@ -95,13 +127,13 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
 onBeforeMount(() => {
   // Interactive SignalR handlers that expect a return value
   service.on('askPrompt', async () => {
-    themeSelectionInput.value = ''
+    imagePromptInput.value = ''
     gameStateStore.prepareForPlayerImagePrompt()
     try {
-      const theme = await askForThemeInternal()
-      return theme
+      const prompt = await askForPromptInternal()
+      return prompt
     } catch (error) {
-      console.error('Error in askForTheme process:', error)
+      console.error('Error in askForPrompt process:', error)
       return ''
     }
   })
@@ -166,7 +198,10 @@ const submitGuess = async (valueFromInput: string) => {
   <ImageLoader v-if="gameStateStore.showImageLoader" />
   <div v-else>
     <RoundResults v-if="gameStateStore.shouldShowResults" />
-    <PlayerPrompt v-if="gameStateStore.askingImagePrompt" />
+    <PlayerPrompt
+      @promptSubmitted="handlePromptSubmitted"
+      v-if="gameStateStore.askingImagePrompt"
+    />
     <SelectTheme
       v-if="gameStateStore.areThemesSelectable"
       :themes="themes"

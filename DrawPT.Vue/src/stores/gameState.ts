@@ -41,11 +41,11 @@ export const useGameStateStore = defineStore('gameState', {
     gameResults: {} as GameResults,
     hasPlayerAction: false,
     showImageLoader: false,
-    shouldShowResults: false,
     currentBonusPoints: 0,
     isGuessLocked: true
   }),
   getters: {
+    shouldShowResults: (state) => state.currentStatus === GameStatus.ShowingRoundResults,
     playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
     askingImagePrompt: (state) => state.currentStatus === GameStatus.AskingImagePrompt,
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
@@ -73,7 +73,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentTheme = ''
       this.currentImageUrl = ''
       this.showImageLoader = false
-      this.shouldShowResults = false
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.successfullyJoined = true
@@ -132,7 +131,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.showImageLoader = false
       this.currentImageUrl = ''
       this.roundResults.push(roundResult)
-      this.shouldShowResults = true
     },
     prepareForPlayerImagePrompt() {
       this.currentStatus = GameStatus.AskingImagePrompt
@@ -143,7 +141,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = GameStatus.AskingTheme
       this.hasPlayerAction = true
       this.currentImageUrl = ''
-      this.shouldShowResults = false
       this.showImageLoader = false
       for (const theme of themes) {
         if (this.themes.indexOf(theme) === -1) {
@@ -157,12 +154,10 @@ export const useGameStateStore = defineStore('gameState', {
       this.hasPlayerAction = false
       this.currentImageUrl = ''
       this.showImageLoader = false
-      this.shouldShowResults = false
       this.themes = themes
     },
     prepareForQuestion(question: PlayerQuestion) {
       this.currentStatus = GameStatus.AskingQuestion
-      this.shouldShowResults = false
       this.showImageLoader = false
       this.isGuessLocked = false // Unlock guess input
       this.currentImageUrl = question.imageUrl || ''
@@ -190,13 +185,15 @@ export const useGameStateStore = defineStore('gameState', {
     clearBonusPointsDisplay() {
       this.currentBonusPoints = 0
     },
+    playerSubmittedPrompt() {
+      this.currentStatus = GameStatus.StartingRound
+    },
     playerSelectedTheme(theme: string) {
       this.currentTheme = theme
       this.themes = []
     },
     handleEndGameEvent() {
-      this.currentStatus = GameStatus.Completed
-      this.shouldShowResults = true
+      this.currentStatus = GameStatus.ShowingRoundResults
       this.currentImageUrl = ''
       this.themes = []
       this.currentBonusPoints = 0
