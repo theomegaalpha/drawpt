@@ -24,47 +24,36 @@ namespace DrawPT.GameEngine.Services
             _logger = logger;
         }
 
-        public async Task<string?> GenerateGreetingAnnouncement(List<Player> players)
+        private async Task<string?> GenerateAnnouncementAsync(string systemPrompt, string userMessage, object logContext)
         {
-            var systemPrompt = players.Count == 1
-                ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingSolo)
-                : players.Count == 2
-                    ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingTwoPlayers)
-                    : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingGroup);
-
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(systemPrompt),
-                new UserChatMessage($"players: {JsonConvert.SerializeObject(players.Select(a => new { a.Username }))}")
+                new UserChatMessage(userMessage)
             };
-
             try
             {
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
                     MaxOutputTokenCount = 800,
-
                     TopP = 1,
                     FrequencyPenalty = 0,
                     PresencePenalty = 0
                 };
-
                 ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
-
-                // Print the response
                 if (completion != null)
                 {
                     if (completion.Content.Count == 0)
                     {
-                        _logger.LogWarning($"No announcer message was produced for {players}.");
+                        _logger.LogWarning($"No announcer message was produced for {logContext}.");
                         return null;
                     }
-                    return completion?.Content[0].Text.ToString() ?? "";
+                    return completion.Content[0].Text.ToString() ?? "";
                 }
                 else
                 {
-                    _logger.LogWarning($"No response received from the announcer for {players}.");
+                    _logger.LogWarning($"No response received from the announcer for {logContext}.");
                 }
             }
             catch (Exception ex)
@@ -72,6 +61,17 @@ namespace DrawPT.GameEngine.Services
                 _logger.LogError($"An error occurred: {ex.Message}");
             }
             return null;
+        }
+
+        public async Task<string?> GenerateGreetingAnnouncement(List<Player> players)
+        {
+            var systemPrompt = players.Count == 1
+                ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingSolo)
+                : players.Count == 2
+                    ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingTwoPlayers)
+                    : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GreetingGroup);
+            var userMessage = $"players: {JsonConvert.SerializeObject(players.Select(a => new { a.Username }))}";
+            return await GenerateAnnouncementAsync(systemPrompt, userMessage, players);
         }
 
         public async Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults)
@@ -81,47 +81,8 @@ namespace DrawPT.GameEngine.Services
                 : roundResults.Answers.Count == 2
                     ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.RoundResultTwoPlayers)
                     : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.RoundResultGroup);
-
-            var messages = new List<ChatMessage>
-            {
-                new SystemChatMessage(systemPrompt),
-                new UserChatMessage($"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score, TimeBonusPoints = a.BonusPoints }))}")
-            };
-
-            try
-            {
-                var options = new ChatCompletionOptions
-                {
-                    Temperature = 1,
-                    MaxOutputTokenCount = 800,
-
-                    TopP = 1,
-                    FrequencyPenalty = 0,
-                    PresencePenalty = 0
-                };
-
-                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
-
-                // Print the response
-                if (completion != null)
-                {
-                    if (completion.Content.Count == 0)
-                    {
-                        _logger.LogWarning($"No announcer message was produced for {roundResults.Answers}.");
-                        return null;
-                    }
-                    return completion?.Content[0].Text.ToString() ?? "";
-                }
-                else
-                {
-                    _logger.LogWarning($"No response received from the announcer for {roundResults.Answers}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error occurred: {ex.Message}");
-            }
-            return null;
+            var userMessage = $"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score, TimeBonusPoints = a.BonusPoints }))}";
+            return await GenerateAnnouncementAsync(systemPrompt, userMessage, roundResults.Answers);
         }
 
         public async Task<string?> GenerateGameResultsAnnouncement(List<PlayerResults> playerResults)
@@ -131,93 +92,15 @@ namespace DrawPT.GameEngine.Services
                 : playerResults.Count == 2
                     ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GameResultTwoPlayers)
                     : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GameResultGroup);
-
-            var messages = new List<ChatMessage>
-            {
-                new SystemChatMessage(systemPrompt),
-                new UserChatMessage($"results: {JsonConvert.SerializeObject(playerResults.Select(a => new { a.Username, a.Score }))}")
-            };
-
-            try
-            {
-                var options = new ChatCompletionOptions
-                {
-                    Temperature = 1,
-                    MaxOutputTokenCount = 800,
-
-                    TopP = 1,
-                    FrequencyPenalty = 0,
-                    PresencePenalty = 0
-                };
-
-                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
-
-                // Print the response
-                if (completion != null)
-                {
-                    if (completion.Content.Count == 0)
-                    {
-                        _logger.LogWarning($"No announcer message was produced for {playerResults}.");
-                        return null;
-                    }
-                    return completion?.Content[0].Text.ToString() ?? "";
-                }
-                else
-                {
-                    _logger.LogWarning($"No response received from the announcer for {playerResults}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error occurred: {ex.Message}");
-            }
-            return null;
+            var userMessage = $"results: {JsonConvert.SerializeObject(playerResults.Select(a => new { a.Username, a.Score }))}";
+            return await GenerateAnnouncementAsync(systemPrompt, userMessage, playerResults);
         }
 
         public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble)
         {
             var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResult);
-
-            var messages = new List<ChatMessage>
-            {
-                new SystemChatMessage(systemPrompt),
-                new UserChatMessage($"results: {JsonConvert.SerializeObject(gamble)}")
-            };
-
-            try
-            {
-                var options = new ChatCompletionOptions
-                {
-                    Temperature = 1,
-                    MaxOutputTokenCount = 800,
-
-                    TopP = 1,
-                    FrequencyPenalty = 0,
-                    PresencePenalty = 0
-                };
-
-                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
-
-                // Print the response
-                if (completion != null)
-                {
-                    if (completion.Content.Count == 0)
-                    {
-                        _logger.LogWarning($"No announcer message was produced for {gamble}.");
-                        return null;
-                    }
-                    return completion?.Content[0].Text.ToString() ?? "";
-                }
-                else
-                {
-                    _logger.LogWarning($"No response received from the announcer for {gamble}.");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error occurred: {ex.Message}");
-            }
-            return null;
+            var userMessage = $"results: {JsonConvert.SerializeObject(gamble)}";
+            return await GenerateAnnouncementAsync(systemPrompt, userMessage, gamble);
         }
     }
 }
