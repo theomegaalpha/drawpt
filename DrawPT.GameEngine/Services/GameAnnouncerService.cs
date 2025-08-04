@@ -98,7 +98,7 @@ namespace DrawPT.GameEngine.Services
 
         public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble)
         {
-            var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResult);
+            var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResultTwoPlayers);
             var userMessage = $"results: {JsonConvert.SerializeObject(gamble)}";
             return await GenerateAnnouncementAsync(systemPrompt, userMessage, gamble);
         }

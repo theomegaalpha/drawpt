@@ -40,6 +40,15 @@ export interface GameResults {
   endedAt: string
 }
 
+export interface GameGamble {
+  gamblerId: string
+  playerId: string
+  isHigh: boolean
+  createdAt: string
+  score: number
+  bonusPoints: number
+}
+
 export interface GameQuestion {
   id: string
   playerGenerated: boolean

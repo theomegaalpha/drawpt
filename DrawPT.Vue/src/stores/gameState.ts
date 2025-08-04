@@ -6,7 +6,9 @@ import type {
   PlayerQuestion,
   IGameConfiguration,
   RoundResults,
-  GameResults
+  GameGamble,
+  GameResults,
+  GameQuestion
 } from '@/models/gameModels'
 import { GameStatus } from '@/models/gameModels'
 import type { Player } from '@/models/player'
@@ -39,23 +41,27 @@ export const useGameStateStore = defineStore('gameState', {
     playerAnswers: [] as PlayerAnswer[],
     roundResults: [] as RoundResults[],
     gameResults: {} as GameResults,
+    gambleResults: {} as GameGamble,
     hasPlayerAction: false,
     showImageLoader: false,
     currentBonusPoints: 0,
     isGuessLocked: true
   }),
   getters: {
+    askingGamble: (state) => state.currentStatus === GameStatus.AskingGamble,
     shouldShowResults: (state) => state.currentStatus === GameStatus.ShowingRoundResults,
-    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
+    shouldShowGambleResults: (state) => state.currentStatus === GameStatus.ShowingGambleResults,
     askingImagePrompt: (state) => state.currentStatus === GameStatus.AskingImagePrompt,
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
     areThemesVisible: (state) => !state.hasPlayerAction && state.themes.length > 0,
-    showGameCanvas: (state) => state.currentImageUrl !== '',
+    showGameCanvas: (state) =>
+      state.currentStatus === GameStatus.AskingQuestion && state.currentImageUrl !== '',
+    gameEnded: (state) =>
+      state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned,
+    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
     lastRoundResults: (state) => {
       return state.roundResults[state.roundResults.length - 1]
-    },
-    gameEnded: (state) =>
-      state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned
+    }
   },
   actions: {
     initializeGameState(gameState: GameState) {
@@ -136,6 +142,11 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = GameStatus.AskingImagePrompt
       this.hasPlayerAction = true
       this.currentImageUrl = ''
+    },
+    prepareForPlayerGamble(question: GameQuestion) {
+      this.currentStatus = GameStatus.AskingGamble
+      this.hasPlayerAction = true
+      this.currentImageUrl = question.imageUrl || ''
     },
     prepareForThemeSelection(themes: string[]) {
       this.currentStatus = GameStatus.AskingTheme

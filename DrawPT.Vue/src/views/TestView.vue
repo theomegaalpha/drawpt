@@ -16,13 +16,13 @@ onMounted(async () => {
     avatar: '/images/profile-photos/anime-5.png',
     connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
   })
-  gameState.addPlayer({
-    id: 'f06514a7-0e9a-4664-bf2c-3464855d12az',
-    username: 'micro david2',
-    avatar: '/images/profile-photos/anime-5.png',
-    connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
-  })
-  gameState.prepareForPlayerImagePrompt()
+  // gameState.addPlayer({
+  //   id: 'f06514a7-0e9a-4664-bf2c-3464855d12az',
+  //   username: 'micro david2',
+  //   avatar: '/images/profile-photos/anime-5.png',
+  //   connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
+  // })
+  gameState.prepareForPlayerGamble()
 
   // Simulate a player answering after 5 seconds
   setTimeout(() => {
