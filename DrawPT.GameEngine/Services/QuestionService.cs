@@ -41,23 +41,18 @@ namespace DrawPT.GameEngine.Services
             return question;
         }
 
-        public async Task<GameQuestion> GenerateQuestionFromPromptAsync(string prompt)
+        public async Task<GameQuestion> GenerateQuestionFromPromptAsync(PlayerPrompt prompt)
         {
-            var question = await _aiService.GenerateGameQuestionFromPromptAsync(prompt);
+            var question = await _aiService.GenerateGameQuestionFromPromptAsync(prompt.Prompt);
+            question.PlayerId = prompt.PlayerId;
 
             if (question.ImageUrl != null)
             {
-                await _gameEntitiesRepository.SaveArchivedQuestion(new ArchivedQuestionEntity
-                {
-                    Id = Guid.NewGuid(),
-                    ImageUrl = question.ImageUrl,
-                    OriginalPrompt = question.OriginalPrompt,
-                    Theme = question.Theme
-                });
+                question.PlayerGenerated = true;
                 return question;
             }
 
-            var archivedQuestion = _gameEntitiesRepository.GetRandomArchivedQuestion(prompt);
+            var archivedQuestion = _gameEntitiesRepository.GetRandomArchivedQuestion(prompt.Prompt);
 
             question.ImageUrl = archivedQuestion?.ImageUrl;
             question.OriginalPrompt = archivedQuestion?.OriginalPrompt;

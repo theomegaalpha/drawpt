@@ -48,6 +48,8 @@ onMounted(async () => {
       theme: gameState.currentTheme,
       question: {
         id: 'question-1',
+        playerGenerated: false,
+        playerId: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
         roundNumber: 1,
         theme: gameState.currentTheme,
         originalPrompt:

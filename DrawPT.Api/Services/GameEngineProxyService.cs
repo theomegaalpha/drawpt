@@ -4,7 +4,6 @@ using DrawPT.Api.Hubs;
 using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
 using DrawPT.Common.ServiceBus;
-using DrawPT.Common.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace DrawPT.Api.Services
@@ -96,7 +95,6 @@ namespace DrawPT.Api.Services
                     {
                         case GameEngineRequests.Prompt:
                             {
-                                _logger.LogError($"Processing image prompt for room {roomCode} with connection {connectionId}");
                                 var timeout = gameConfig?.PromptTimeout ?? 50;
                                 using CancellationTokenSource ctsImage = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
                                 var askTask = client.AskPrompt(ctsImage.Token);
@@ -109,7 +107,6 @@ namespace DrawPT.Api.Services
                             }
                         case GameEngineRequests.Theme:
                             {
-                                _logger.LogError($"Processing theme selection for room {roomCode} with connection {connectionId}");
                                 List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
                                 var timeout = gameConfig?.ThemeTimeout ?? 30;
                                 using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
@@ -123,9 +120,24 @@ namespace DrawPT.Api.Services
                                     response = string.Empty;
                                 break;
                             }
+                        case GameEngineRequests.PlayerGamble:
+                            {
+                                GameQuestion question = payload.Deserialize<GameQuestion>()!;
+                                var timeout = gameConfig?.QuestionTimeout ?? 40;
+                                using CancellationTokenSource ctsImage = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+                                var askTask = client.AskGamble(question, ctsImage.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
+                                if (completed == askTask)
+                                {
+                                    var answerBase = askTask.Result;
+                                    response = JsonSerializer.Serialize(answerBase);
+                                }
+                                else
+                                    response = string.Empty;
+                                break;
+                            }
                         case GameEngineRequests.Question:
                             {
-                                _logger.LogError($"Processing question for room {roomCode} with connection {connectionId}");
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
                                 var timeout = gameConfig?.QuestionTimeout ?? 40;
                                 using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
@@ -232,6 +244,13 @@ namespace DrawPT.Api.Services
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
                         if (playerAnswer is not null)
                             await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
+                        else
+                            _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
+                        break;
+                    case GameEngineQueue.PlayerGambledAction:
+                        var playerGamble = payload.Deserialize<GameGamble>();
+                        if (playerGamble is not null)
+                            await _hubContext.Clients.Group(roomCode).PlayerGambled(playerGamble);
                         else
                             _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
                         break;

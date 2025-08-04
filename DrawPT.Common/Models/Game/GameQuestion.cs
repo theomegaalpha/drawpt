@@ -11,6 +11,7 @@ namespace DrawPT.Common.Models.Game
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public bool PlayerGenerated { get; set; }
+        public Guid PlayerId { get; set; } = Guid.Empty;
 
 
         /// <summary>

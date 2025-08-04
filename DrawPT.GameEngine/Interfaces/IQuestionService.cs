@@ -6,5 +6,5 @@ public interface IQuestionService
 {
     Task<GameQuestion> GenerateQuestionAsync(string theme);
 
-    Task<GameQuestion> GenerateQuestionFromPromptAsync(string prompt);
+    Task<GameQuestion> GenerateQuestionFromPromptAsync(PlayerPrompt prompt);
 }

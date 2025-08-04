@@ -16,9 +16,11 @@ export enum GameStatus {
   AskingTheme = 3,
   AskingQuestion = 4,
   AskingImagePrompt = 5,
-  ShowingRoundResults = 6,
-  Completed = 7,
-  Abandoned = 8
+  AskingGamble = 6,
+  ShowingRoundResults = 7,
+  ShowingGambleResults = 8,
+  Completed = 9,
+  Abandoned = 10
 }
 
 export interface GameState {
@@ -40,6 +42,8 @@ export interface GameResults {
 
 export interface GameQuestion {
   id: string
+  playerGenerated: boolean
+  playerId: string
   roundNumber: number
   theme: string
   originalPrompt: string

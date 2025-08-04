@@ -68,15 +68,10 @@ public class DuelGameSession : IGameSession
 
             gameState = await _gameStateService.AskImagePromptAsync(roomCode);
 
-            // add missing players that joined after the game started
-            // TODO: should we allow players to join during the game?
-            foreach (var player in players.Where(p => !originalPlayers.Any(op => op.Id == p.Id)))
-                originalPlayers.Add(player);
-
             /* 
              * Ask players for their drawing prompts.
              */
-            List<Task<string>> imagePrompts = new();
+            List<Task<PlayerPrompt>> imagePrompts = new();
             foreach (var player in originalPlayers)
                 imagePrompts.Add(_gameCommunicationService.AskPlayerImagePromptAsync(player, promptTimeout));
             gameState = await _gameStateService.AnswerImagePromptAsync(roomCode);
@@ -97,12 +92,23 @@ public class DuelGameSession : IGameSession
                 gameState = await _gameStateService.StartRoundAsync(roomCode, roundNumber);
                 List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
                 gameState = await _gameStateService.AskQuestionAsync(roomCode);
-                foreach (var player in players)
+                foreach (var player in players.Where(p => !question.PlayerGenerated || p.Id != question.PlayerId))
                     playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, questionTimeout));
 
                 // empty game check
                 if (playerAnswers.Count == 0)
                     break;
+
+                /*
+                 * If question generation was successful, ask player for gamble
+                 */
+                // TODO: handle case where question generation fails
+                GameGamble? gamble = null;
+                var gambler = players.FirstOrDefault(p => p.Id == question.PlayerId);
+                if (gambler == null)
+                    _logger.LogError($"Gambler for question {question.Id} not found in room {roomCode}");
+                else
+                    gamble = await _gameCommunicationService.AskPlayerGambleAsync(gambler, question, questionTimeout);
 
                 await Task.WhenAll(playerAnswers);
 
@@ -127,6 +133,14 @@ public class DuelGameSession : IGameSession
 
                 await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundResultsAction, roundResults);
                 await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
+
+                if (gamble != null)
+                {
+                    gamble = ProcessDuelGameGamble(gamble, assessedAnswers);
+                    var gambleMessage = await _announcerService.GenerateGambleResultAnnouncement(gamble);
+                    await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GambleResultsAction, gambleMessage);
+                    await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, gambleMessage);
+                }
             }
         }
 
@@ -159,5 +173,37 @@ public class DuelGameSession : IGameSession
         await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
 
         _logger.LogInformation($"Final scores for room {roomCode}: {string.Join(", ", finalScores.PlayerResults.Select(pr => $"{pr.Username}: {pr.Score}"))}");
+    }
+
+    public GameGamble ProcessDuelGameGamble(GameGamble gamble, List<PlayerAnswer> answers)
+    {
+        PlayerAnswer winningBet;
+        if (gamble.IsHigh && answers.Any(a => a.PlayerId == gamble.PlayerId && (a.Score + a.BonusPoints) >= 60))
+            gamble.Score = 50;
+        else if (!gamble.IsHigh && answers.Any(a => a.PlayerId == gamble.PlayerId && (a.Score + a.BonusPoints) <= 60))
+            gamble.Score = 50;
+
+        gamble.Score = answers.Sum(a => a.Score);
+        return gamble;
+    }
+
+    public GameGamble ProcessGameGamble(GameGamble gamble, List<PlayerAnswer> answers)
+    {
+        PlayerAnswer winningBet;
+        if (gamble.IsHigh)
+        {
+            var highest = answers.OrderByDescending(a => a.Score).First();
+            if (highest.PlayerId == gamble.PlayerId)
+                gamble.Score = 50;
+        }
+        else
+        {
+            var highest = answers.OrderBy(a => a.Score).First();
+            if (highest.PlayerId == gamble.PlayerId)
+                gamble.Score = 50;
+        }
+
+        gamble.Score = answers.Sum(a => a.Score);
+        return gamble;
     }
 }

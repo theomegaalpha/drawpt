@@ -5,5 +5,6 @@ namespace DrawPT.Common.ServiceBus
         public const string Theme = "ask_theme";
         public const string Prompt = "ask_prompt";
         public const string Question = "ask_question";
+        public const string PlayerGamble = "ask_player_gamble";
     }
 }

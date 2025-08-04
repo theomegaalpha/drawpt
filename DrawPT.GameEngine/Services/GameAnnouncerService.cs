@@ -173,5 +173,51 @@ namespace DrawPT.GameEngine.Services
             }
             return null;
         }
+
+        public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble)
+        {
+            var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResult);
+
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage($"results: {JsonConvert.SerializeObject(gamble)}")
+            };
+
+            try
+            {
+                var options = new ChatCompletionOptions
+                {
+                    Temperature = 1,
+                    MaxOutputTokenCount = 800,
+
+                    TopP = 1,
+                    FrequencyPenalty = 0,
+                    PresencePenalty = 0
+                };
+
+                ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
+
+                // Print the response
+                if (completion != null)
+                {
+                    if (completion.Content.Count == 0)
+                    {
+                        _logger.LogWarning($"No announcer message was produced for {gamble}.");
+                        return null;
+                    }
+                    return completion?.Content[0].Text.ToString() ?? "";
+                }
+                else
+                {
+                    _logger.LogWarning($"No response received from the announcer for {gamble}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred: {ex.Message}");
+            }
+            return null;
+        }
     }
 }

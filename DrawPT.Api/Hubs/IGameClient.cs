@@ -25,6 +25,7 @@ namespace DrawPT.Api.Hubs
         Task GameStarted(IGameState? state);
         Task PlayerScoreUpdated(Guid playerId, int newScore);
         Task PlayerAnswered(PlayerAnswer playerAnswer);
+        Task PlayerGambled(GameGamble gameGamble);
 
         Task ThemeSelection(List<string> themes);
         Task ThemeSelected(string theme);
@@ -43,6 +44,7 @@ namespace DrawPT.Api.Hubs
          *  Game interaction events
          */
         Task<string> AskPrompt(CancellationToken ct);
+        Task<string> AskGamble(GameQuestion question, CancellationToken ct);
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
 
