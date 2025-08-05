@@ -45,7 +45,7 @@ namespace DrawPT.Api.Hubs
          *  Game interaction events
          */
         Task<string> AskPrompt(CancellationToken ct);
-        Task<string> AskGamble(GameQuestion question, CancellationToken ct);
+        Task<GameGamble> AskGamble(GameQuestion question, CancellationToken ct);
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
 

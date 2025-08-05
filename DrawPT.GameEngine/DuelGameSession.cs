@@ -138,7 +138,7 @@ public class DuelGameSession : IGameSession
                 {
                     gamble = ProcessDuelGameGamble(gamble, assessedAnswers);
                     var gambleMessage = await _announcerService.GenerateGambleResultAnnouncement(gamble, gambler!, roundResults);
-                    await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GambleResultsAction, gambleMessage);
+                    await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GambleResultsAction, gamble);
                     await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, gambleMessage);
                     await Task.Delay(gameState.GameConfiguration.TransitionDelay * 1000);
                 }

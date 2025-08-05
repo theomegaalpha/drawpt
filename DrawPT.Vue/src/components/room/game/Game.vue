@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GameCanvas from './canvas/GameCanvas.vue'
 import RoundResults from './roundresults/RoundResults.vue'
+import GambleResults from './gambleResults/GambleResults.vue'
 import SelectTheme from './themescreen/SelectTheme.vue'
 import ViewThemes from './themescreen/ViewThemes.vue'
 import AskGamble from './askGamble/AskGamble.vue'
@@ -48,7 +49,7 @@ const promptTimeoutRef = ref<NodeJS.Timeout>()
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
 const timeoutPerQuestion = 40000
 const timeoutForTheme = 30000
-const timeoutForPrompt = 50000
+const timeoutForPrompt = 90000
 
 // --- Method to handle theme selection from the SelectTheme component ---
 function handleThemeSelectedFromUI(newTheme: string) {
@@ -81,7 +82,6 @@ async function askForPromptInternal(): Promise<string> {
 
     promptTimeoutRef.value = setTimeout(() => {
       notificationStore.addGameNotification("Uh oh! Prompt creation time's up!", true)
-      gameStateStore.clearThemes()
       if (stopEffect) stopEffect()
       reject(new Error('Prompt creation timed out'))
     }, timeoutForPrompt)
@@ -161,19 +161,19 @@ async function askForGambleInternal(): Promise<GameGamble> {
     let stopEffect: (() => void) | null = null
 
     questionTimeoutRef.value = setTimeout(() => {
-      gameStateStore.setGuessLock(true) // Lock guess in store
+      gameStateStore.setGuessLock(true)
       notificationStore.addGameNotification("Uh oh! Question time's up!", true)
       if (stopEffect) stopEffect()
       reject(new Error('Question timed out'))
     }, timeoutPerQuestion)
 
     stopEffect = watchEffect(() => {
-      const guess = currentGuessForPromise.value
-      if (guess) {
-        const answer: GameGamble = gambleInput.value
+      if (gambleInput.value.playerId) {
+        console.log('new gambleInput', gambleInput.value)
+        const result: GameGamble = { ...gambleInput.value }
         clearTimeout(questionTimeoutRef.value)
-        if (stopEffect) stopEffect() // Stop this effect itself
-        resolve(answer)
+        if (stopEffect) stopEffect()
+        resolve(result)
       }
     })
   })
@@ -256,7 +256,6 @@ const guessInputFromComponent = ref<string>('')
 <template>
   <ImageLoader v-if="gameStateStore.showImageLoader" />
   <div v-else>
-    <RoundResults v-if="gameStateStore.shouldShowResults" />
     <PlayerPrompt
       v-if="gameStateStore.askingImagePrompt"
       @promptSubmitted="handlePromptSubmitted"
@@ -273,5 +272,7 @@ const guessInputFromComponent = ref<string>('')
     />
     <ViewThemes v-if="gameStateStore.areThemesVisible" :themes="themes" />
     <GameCanvas v-if="gameStateStore.showGameCanvas" @guessSubmitted="handleGuessSubmitted" />
+    <RoundResults v-if="gameStateStore.shouldShowResults" />
+    <GambleResults v-if="gameStateStore.shouldShowGambleResults" />
   </div>
 </template>

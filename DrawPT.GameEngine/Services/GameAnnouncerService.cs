@@ -110,6 +110,13 @@ namespace DrawPT.GameEngine.Services
                 {
                     var verb = gamble.IsHigh ? "above" : "below";
                     userMessage = $"{gambler.Username} gambled on {gambledAnswer.Username}'s getting a score {verb} 60 points.";
+                    var winningBet = gamble.IsHigh
+                        ? results.Answers.Any(a => a.Score + a.BonusPoints >= 60 && a.PlayerId == gamble.PlayerId)
+                        : results.Answers.Any(a => a.Score + a.BonusPoints < 60 && a.PlayerId == gamble.PlayerId);
+                    userMessage += winningBet
+                        ? $" {gambler.Username} won the gamble and received {gamble.Score} points."
+                        : $" {gambler.Username} lost the gamble and received no points.";
+                    userMessage += $" Their gamble was based on {gambledAnswer.Username}'s answer: '{gambledAnswer.Guess}' with a score of {gambledAnswer.Score} and a time bonus of {gambledAnswer.BonusPoints} points.";
                 }
                 else
                 {

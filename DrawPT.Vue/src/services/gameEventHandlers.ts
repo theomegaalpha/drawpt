@@ -62,9 +62,12 @@ export function registerBaseGameHubEvents() {
   })
 
   service.on('roundResults', (roundResult: RoundResults) => {
-    console.log('Round results received:', roundResult)
-    stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)
     stores.gameStateStore.handleBroadcastRoundResultsEvent(roundResult)
+  })
+
+  service.on('gambleResults', (gambleResults: GameGamble) => {
+    console.log('Gamble results received:', gambleResults)
+    stores.gameStateStore.handleBroadcastGambleResultsEvent(gambleResults)
   })
 
   service.on('broadcastFinalResults', (results: GameResults) => {
@@ -94,10 +97,6 @@ export function registerBaseGameHubEvents() {
     stores.gameStateStore.handlePlayerGambledEvent(gamble)
   })
 
-  service.on('broadcastRoundResults', (gameRound: RoundResults) => {
-    stores.gameStateStore.handleBroadcastRoundResultsEvent(gameRound)
-  })
-
   service.on('awardBonusPoints', (points: number) => {
     stores.gameStateStore.handleAwardBonusPointsEvent(points)
   })
@@ -117,6 +116,6 @@ export function unregisterBaseGameHubEvents() {
   service.off('themeSelection')
   service.off('themeSelected')
   service.off('roundResults')
-  service.off('broadcastRoundResults')
+  service.off('gambleResults')
   service.off('awardBonusPoints')
 }

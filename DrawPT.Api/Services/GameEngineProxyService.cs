@@ -95,7 +95,7 @@ namespace DrawPT.Api.Services
                     {
                         case GameEngineRequests.Prompt:
                             {
-                                var timeout = gameConfig?.PromptTimeout ?? 50;
+                                var timeout = gameConfig?.PromptTimeout ?? 90;
                                 using CancellationTokenSource ctsImage = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
                                 var askTask = client.AskPrompt(ctsImage.Token);
                                 var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
