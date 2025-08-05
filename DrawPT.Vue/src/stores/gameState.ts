@@ -117,6 +117,10 @@ export const useGameStateStore = defineStore('gameState', {
         this.playerAnswers.push(playerAnswer)
       }
     },
+    handlePlayerGambledEvent(gamble: GameGamble) {
+      const gambler = this.players.find((p) => p.id === gamble.gamblerId)
+      console.info('received gamble event', gambler?.username)
+    },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points
       setTimeout(() => {
@@ -131,12 +135,6 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = GameStatus.StartingRound
       this.currentRound = roundNumber
       this.playerAnswers.length = 0
-    },
-    handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
-      this.currentStatus = GameStatus.ShowingRoundResults
-      this.showImageLoader = false
-      this.currentImageUrl = ''
-      this.roundResults.push(roundResult)
     },
     prepareForPlayerImagePrompt() {
       this.currentStatus = GameStatus.AskingImagePrompt
@@ -173,6 +171,18 @@ export const useGameStateStore = defineStore('gameState', {
       this.isGuessLocked = false // Unlock guess input
       this.currentImageUrl = question.imageUrl || ''
       this.currentRound = question.roundNumber
+    },
+    handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
+      this.currentStatus = GameStatus.ShowingRoundResults
+      this.showImageLoader = false
+      this.currentImageUrl = ''
+      this.roundResults.push(roundResult)
+    },
+    handleBroadcastGambleResultsEvent(newResults: GameGamble) {
+      this.currentStatus = GameStatus.ShowingGambleResults
+      this.showImageLoader = false
+      this.currentImageUrl = ''
+      Object.assign(this.gambleResults, newResults)
     },
     handleBroadcastFinalResultsEvent(results: GameResults) {
       this.currentStatus = GameStatus.Completed

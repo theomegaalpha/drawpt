@@ -204,7 +204,6 @@ namespace DrawPT.Api.Services
                         await _ttsService.GenerateAudio(accounerMsg, _hubContext.Clients.Group(roomCode));
                         break;
 
-
                     case GameEngineQueue.GameStartedAction:
                         var gameState = payload.Deserialize<GameState>();
                         await _hubContext.Clients.Group(roomCode).GameStarted(gameState!);
@@ -237,22 +236,20 @@ namespace DrawPT.Api.Services
                         var roundResults = payload.Deserialize<RoundResults>();
                         await _hubContext.Clients.Group(roomCode).RoundResults(roundResults!);
                         break;
+                    case GameEngineQueue.GambleResultsAction:
+                        var gambleResults = payload.Deserialize<GameGamble>();
+                        await _hubContext.Clients.Group(roomCode).GambleResults(gambleResults!);
+                        break;
                     case GameEngineQueue.AssessingAnswersAction:
                         await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing answers.");
                         break;
                     case GameEngineQueue.PlayerAnsweredAction:
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
-                        if (playerAnswer is not null)
-                            await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
-                        else
-                            _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
+                        await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer!);
                         break;
                     case GameEngineQueue.PlayerGambledAction:
                         var playerGamble = payload.Deserialize<GameGamble>();
-                        if (playerGamble is not null)
-                            await _hubContext.Clients.Group(roomCode).PlayerGambled(playerGamble);
-                        else
-                            _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
+                        await _hubContext.Clients.Group(roomCode).PlayerGambled(playerGamble!);
                         break;
                     default:
                         _logger.LogWarning($"Unhandled GameEngine action: {action}");

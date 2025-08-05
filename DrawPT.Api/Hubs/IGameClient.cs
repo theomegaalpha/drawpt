@@ -32,6 +32,7 @@ namespace DrawPT.Api.Hubs
 
         Task RoundStarted(int roundNumber);
         Task RoundResults(RoundResults round);
+        Task GambleResults(GameGamble gambleResults);
         Task BroadcastFinalResults(GameResults results);
         Task NavigateBackToLobby();
 
