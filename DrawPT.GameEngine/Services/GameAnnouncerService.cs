@@ -96,10 +96,26 @@ namespace DrawPT.GameEngine.Services
             return await GenerateAnnouncementAsync(systemPrompt, userMessage, playerResults);
         }
 
-        public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble)
+        public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble, Player gambler, RoundResults results)
         {
             var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResultTwoPlayers);
-            var userMessage = $"results: {JsonConvert.SerializeObject(gamble)}";
+
+            string userMessage = $"{gambler.Username} didn't make a choice in time and received no points.";
+
+            if (gamble.PlayerId != Guid.Empty)
+            {
+                var gambledAnswer = results.Answers.FirstOrDefault(a => a.PlayerId == gamble.PlayerId);
+
+                if (gambledAnswer != null)
+                {
+                    var verb = gamble.IsHigh ? "above" : "below";
+                    userMessage = $"{gambler.Username} gambled on {gambledAnswer.Username}'s getting a score {verb} 60 points.";
+                }
+                else
+                {
+                    userMessage = $"{gambler.Username} gambled but their answer was not found in the round results.";
+                }
+            }
             return await GenerateAnnouncementAsync(systemPrompt, userMessage, gamble);
         }
     }

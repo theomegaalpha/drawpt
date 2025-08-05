@@ -7,7 +7,7 @@ namespace DrawPT.GameEngine.Interfaces
     {
         Task<string?> GenerateGreetingAnnouncement(List<Player> players);
         Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults);
-        Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble);
-        Task<string?> GenerateGameResultsAnnouncement(List<PlayerResults> playerResults);
+        Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble, Player gambler, RoundResults results);
+        Task<string?> GenerateGameResultsAnnouncement(List<PlayerResults> results);
     }
 }

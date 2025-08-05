@@ -22,7 +22,17 @@ onMounted(async () => {
   //   avatar: '/images/profile-photos/anime-5.png',
   //   connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02'
   // })
-  gameState.prepareForPlayerGamble()
+  gameState.prepareForPlayerGamble({
+    id: 'test-question-1',
+    playerGenerated: true,
+    playerId: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
+    roundNumber: 1,
+    theme: 'Sample Theme',
+    originalPrompt: 'A bright sunflower field under a blue sky',
+    imageUrl:
+      'https://assets-global.website-files.com/632ac1a36830f75c7e5b16f0/64f112667271fdad06396cdb_QDhk9GJWfYfchRCbp8kTMay1FxyeMGxzHkB7IMd3Cfo.webp',
+    createdAt: new Date().toISOString()
+  })
 
   // Simulate a player answering after 5 seconds
   setTimeout(() => {

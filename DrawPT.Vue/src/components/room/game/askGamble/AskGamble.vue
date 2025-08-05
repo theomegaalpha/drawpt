@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue'
+import { computed, ref, toRefs, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
 import type { GameGamble } from '@/models/gameModels'
@@ -11,7 +11,7 @@ const props = defineProps<{ gamble: GameGamble }>()
 const emit = defineEmits<{ (e: 'gambleSubmitted', gamble: GameGamble): void }>()
 
 const gameStateStore = useGameStateStore()
-const { players } = gameStateStore
+const { currentImageUrl, players } = gameStateStore
 const playerStore = usePlayerStore()
 const { blankAvatar, player: you } = toRefs(playerStore)
 
@@ -36,19 +36,32 @@ function lockAnswer() {
   emit('gambleSubmitted', result)
 }
 
-const gamblePlayer = computed(() => players.find((p) => p.connectionId === props.gamble.playerId))
-
-const otherPlayers = computed(() => players.filter((p) => p.connectionId !== you.value.id))
-
+const gamblePlayer = computed(() => players.find((p) => p.id === props.gamble.playerId))
+const otherPlayers = computed(() => players.filter((p) => p.id !== you.value.id))
 const title = computed(() =>
   otherPlayers.value.length > 1
     ? `Who will score the ${tempGamble.value.isHigh ? 'highest' : 'lowest'}?`
     : `How will ${otherPlayers.value[0].username} score?`
 )
+
+const faded = ref(false)
+onMounted(() => {
+  if (otherPlayers.value.length === 1) tempGamble.value.playerId = otherPlayers.value[0].id
+
+  setTimeout(() => {
+    faded.value = true
+  }, 1000)
+})
 </script>
 
 <template>
   <div class="relative flex h-screen flex-col items-center justify-center overflow-y-auto">
+    <img
+      v-if="currentImageUrl !== ''"
+      class="absolute left-1/2 top-1/2 z-0 max-h-[70vh] max-w-[1048px] -translate-x-1/2 -translate-y-1/2 rounded-lg transition-opacity delay-100 duration-1000"
+      :class="faded ? 'opacity-20' : 'opacity-100'"
+      :src="currentImageUrl"
+    />
     <Avatar
       v-if="gamblePlayer"
       :size="10"
@@ -61,7 +74,7 @@ const title = computed(() =>
       <div
         v-for="(player, index) in otherPlayers"
         :key="player.id"
-        :style="{ transitionDelay: `${otherPlayers.length - 1 - index}s` }"
+        :style="{ transitionDelay: `${otherPlayers.length - index}s` }"
         class="cursor-pointer"
         @click="selectPlayer(player.id)"
       >
@@ -73,7 +86,12 @@ const title = computed(() =>
         />
       </div>
     </transition-group>
-    <ShinyButton class="mt-4" :disabled="!tempGamble.playerId" @click="lockAnswer">
+    <ShinyButton
+      class="mt-4 transition-opacity duration-1000 ease-in-out"
+      :class="faded ? 'opacity-100' : 'opacity-0'"
+      :disabled="!tempGamble.playerId"
+      @click="lockAnswer"
+    >
       Lock Answer
     </ShinyButton>
   </div>
