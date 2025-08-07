@@ -32,6 +32,12 @@ const submitEmpty = () => {
       <ShinyButton class="mb-4 cursor-default" :disabled="true">
         <h2 class="text-lg sm:text-2xl">Create your masterpiece!</h2>
       </ShinyButton>
+
+      <div
+        class="relative z-10 mx-4 mb-4 flex w-fit cursor-pointer flex-col items-center space-y-2 rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur hover:bg-gray-500/20 dark:bg-white/10 dark:hover:bg-white/20"
+      >
+        Add as much detail as possible to create the best picture!
+      </div>
       <GuessInput
         v-model="promptInputFromComponent"
         class="w-full sm:max-w-xl"
