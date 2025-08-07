@@ -4,8 +4,10 @@ import GameTimer from '../GameTimer.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { computed, ref } from 'vue'
 import { useGameStateStore } from '@/stores/gameState'
+import { usePlayerStore } from '@/stores/player'
 import ShinyButton from '@/components/common/ShinyButton.vue'
 import ActivePlayers from '../ActivePlayers.vue'
+import Avatar from '@/components/common/Avatar.vue'
 
 const timeoutPerQuestion = 30000
 const emit = defineEmits<{
@@ -13,10 +15,14 @@ const emit = defineEmits<{
 }>()
 
 const gameStateStore = useGameStateStore()
+const { blankAvatar } = usePlayerStore()
 
 const imageUrl = computed(() => gameStateStore.currentImageUrl)
 const lockGuess = computed(() => gameStateStore.isGuessLocked)
 const bonusPoints = computed(() => gameStateStore.currentBonusPoints)
+const generatedPlayer = computed(() =>
+  gameStateStore.players.find((p) => p.id === gameStateStore.currentQuestion.playerId)
+)
 
 // Split players: first 4 for left, last 4 for right (only if more than 4)
 const leftPlayers = computed(() => gameStateStore.players.slice(0, 4))
@@ -44,7 +50,20 @@ const submitGuess = async (valueFromInput: string) => {
     />
     <GameBonusPoints v-if="bonusPoints > 0" :points="bonusPoints" />
     <div class="flex w-fit max-w-5xl flex-col items-center px-4">
-      <ShinyButton class="-mb-12 cursor-default sm:mb-4" :disabled="true">
+      <ShinyButton
+        v-if="gameStateStore.currentQuestion.playerGenerated"
+        class="-mb-12 cursor-default sm:mb-4"
+        :disabled="true"
+      >
+        <h2 class="inline-flex items-center space-x-2 sm:text-2xl">
+          <Avatar
+            :avatar="generatedPlayer?.avatar || blankAvatar"
+            :username="generatedPlayer?.username || 'not found'"
+          />
+          <span>{{ generatedPlayer?.username }}</span>
+        </h2>
+      </ShinyButton>
+      <ShinyButton v-else class="-mb-12 cursor-default sm:mb-4" :disabled="true">
         <h2 class="sm:text-2xl">Theme: {{ gameStateStore.currentTheme }}</h2>
       </ShinyButton>
       <div class="mb-2 flex items-start justify-center">
