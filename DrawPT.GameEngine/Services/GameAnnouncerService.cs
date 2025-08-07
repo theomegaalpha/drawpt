@@ -6,6 +6,7 @@ using DrawPT.GameEngine.Interfaces;
 using Newtonsoft.Json;
 using OpenAI;
 using OpenAI.Chat;
+using OpenTelemetry.Trace;
 
 namespace DrawPT.GameEngine.Services
 {
@@ -98,10 +99,26 @@ namespace DrawPT.GameEngine.Services
 
         public async Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble, Player gambler, RoundResults results)
         {
-            var systemPrompt = _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResultTwoPlayers);
+            var systemPrompt = results.Answers.Count > 1 ?
+                _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResultGroup) :
+                _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.GambleResultTwoPlayers);
 
             string userMessage = $"{gambler.Username} didn't make a choice in time and received no points.";
 
+            if (results.Answers.Count == 1)
+            {
+                userMessage = getTwoPlayerUserPrompt(gamble, gambler, results);
+            }
+            else if (results.Answers.Count > 1)
+            {
+                userMessage = getMultiplayerUserPrompt(gamble, gambler, results);
+            }
+            return await GenerateAnnouncementAsync(systemPrompt, userMessage, gamble);
+        }
+
+        private string getTwoPlayerUserPrompt(GameGamble gamble, Player gambler, RoundResults results)
+        {
+            string userMessage = "";
             if (gamble.PlayerId != Guid.Empty)
             {
                 var gambledAnswer = results.Answers.FirstOrDefault(a => a.PlayerId == gamble.PlayerId);
@@ -123,7 +140,35 @@ namespace DrawPT.GameEngine.Services
                     userMessage = $"{gambler.Username} gambled but their answer was not found in the round results.";
                 }
             }
-            return await GenerateAnnouncementAsync(systemPrompt, userMessage, gamble);
+            return userMessage;
+        }
+
+        private string getMultiplayerUserPrompt(GameGamble gamble, Player gambler, RoundResults results)
+        {
+            string userMessage = "";
+            if (gamble.PlayerId != Guid.Empty)
+            {
+                var gambledAnswer = results.Answers.FirstOrDefault(a => a.PlayerId == gamble.PlayerId);
+                var highestScore = results.Answers.Max(a => a.Score + a.BonusPoints);
+                var lowestScore = results.Answers.Min(a => a.Score + a.BonusPoints);
+                if (gambledAnswer != null)
+                {
+                    var verb = gamble.IsHigh ? "highest" : "lowest";
+                    userMessage = $"{gambler.Username} gambled on {gambledAnswer.Username}'s getting the {verb} score.";
+                    var winningBet = gamble.IsHigh
+                        ? results.Answers.Any(a => a.Score + a.BonusPoints == highestScore && a.PlayerId == gamble.PlayerId)
+                        : results.Answers.Any(a => a.Score + a.BonusPoints == lowestScore && a.PlayerId == gamble.PlayerId);
+                    userMessage += winningBet
+                        ? $" {gambler.Username} won the gamble and received {gamble.Score} points."
+                        : $" {gambler.Username} lost the gamble and received no points.";
+                    userMessage += $" Their gamble was based on {gambledAnswer.Username}'s answer: '{gambledAnswer.Guess}' with a score of {gambledAnswer.Score} and a time bonus of {gambledAnswer.BonusPoints} points.";
+                }
+                else
+                {
+                    userMessage = $"{gambler.Username} gambled but their answer was not found in the round results.";
+                }
+            }
+            return userMessage;
         }
     }
 }
