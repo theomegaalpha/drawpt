@@ -91,7 +91,6 @@ Weight prioritization: Subject + Scene + Action > Single Noun Identification";
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 800,
 
                     TopP = 1,
                     FrequencyPenalty = 0,
@@ -142,7 +141,6 @@ Weight prioritization: Subject + Scene + Action > Single Noun Identification";
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 800,
 
                     TopP = 1,
                     FrequencyPenalty = 0,

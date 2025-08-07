@@ -37,7 +37,6 @@ namespace DrawPT.GameEngine.Services
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 800,
                     TopP = 1,
                     FrequencyPenalty = 0,
                     PresencePenalty = 0

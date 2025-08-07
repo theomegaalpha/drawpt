@@ -81,7 +81,6 @@ The response must always be a JSON array, even when evaluating a single contesta
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 3000,
 
                     TopP = 1,
                     FrequencyPenalty = 0,
@@ -195,7 +194,6 @@ The response must always be a JSON array, even when evaluating a single contesta
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-                    MaxOutputTokenCount = 800,
 
                     TopP = 1,
                     FrequencyPenalty = 0,
