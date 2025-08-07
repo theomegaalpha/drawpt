@@ -47,9 +47,9 @@ const themeTimeoutRef = ref<NodeJS.Timeout>()
 const promptTimeoutRef = ref<NodeJS.Timeout>()
 
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
-const timeoutPerQuestion = 40000
-const timeoutForTheme = 30000
-const timeoutForPrompt = 90000
+const timeoutPerQuestion = computed(() => gameStateStore.gameConfiguration.QuestionTimeout || 40000)
+const timeoutForTheme = computed(() => gameStateStore.gameConfiguration.ThemeTimeout || 30000)
+const timeoutForPrompt = computed(() => gameStateStore.gameConfiguration.PromptTimeout || 90000)
 
 // --- Method to handle theme selection from the SelectTheme component ---
 function handleThemeSelectedFromUI(newTheme: string) {
@@ -84,7 +84,7 @@ async function askForPromptInternal(): Promise<string> {
       notificationStore.addGameNotification("Uh oh! Prompt creation time's up!", true)
       if (stopEffect) stopEffect()
       reject(new Error('Prompt creation timed out'))
-    }, timeoutForPrompt)
+    }, timeoutForPrompt.value)
 
     stopEffect = watchEffect(() => {
       const currentPrompt = imagePromptInput.value
@@ -109,7 +109,7 @@ async function askForThemeInternal(): Promise<string> {
       gameStateStore.clearThemes()
       if (stopEffect) stopEffect()
       reject(new Error('Theme selection timed out'))
-    }, timeoutForTheme)
+    }, timeoutForTheme.value)
 
     stopEffect = watchEffect(() => {
       const currentTheme = themeSelectionInput.value
@@ -136,7 +136,7 @@ async function askQuestionInternal(): Promise<PlayerAnswerBase> {
       notificationStore.addGameNotification("Uh oh! Question time's up!", true)
       if (stopEffect) stopEffect()
       reject(new Error('Question timed out'))
-    }, timeoutPerQuestion)
+    }, timeoutPerQuestion.value)
 
     stopEffect = watchEffect(() => {
       const guess = currentGuessForPromise.value
@@ -165,7 +165,7 @@ async function askForGambleInternal(): Promise<GameGamble> {
       notificationStore.addGameNotification("Uh oh! Question time's up!", true)
       if (stopEffect) stopEffect()
       reject(new Error('Question timed out'))
-    }, timeoutPerQuestion)
+    }, timeoutPerQuestion.value)
 
     stopEffect = watchEffect(() => {
       if (gambleInput.value.playerId) {

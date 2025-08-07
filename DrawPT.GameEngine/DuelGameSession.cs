@@ -93,7 +93,7 @@ public class DuelGameSession : IGameSession
                 gameState = await _gameStateService.StartRoundAsync(roomCode, roundNumber);
                 List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
                 gameState = await _gameStateService.AskQuestionAsync(roomCode);
-                foreach (var player in players.Where(p => !question.PlayerGenerated || p.Id != question.PlayerId))
+                foreach (var player in players.Where(p => p.Id != question.PlayerId))
                     playerAnswers.Add(_gameCommunicationService.AskPlayerQuestionAsync(player, question, questionTimeout));
 
                 // empty game check

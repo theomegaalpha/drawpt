@@ -18,6 +18,7 @@ const defaultGameConfig: IGameConfiguration = {
   MaxPlayers: 8,
   TotalRounds: 6,
   QuestionTimeout: 40,
+  PromptTimeout: 120,
   ThemeTimeout: 30,
   TransitionDelay: 50,
   PlayerPromptMode: false
@@ -188,7 +189,8 @@ export const useGameStateStore = defineStore('gameState', {
     prepareForQuestion(question: PlayerQuestion) {
       this.currentStatus = GameStatus.AskingQuestion
       this.showImageLoader = false
-      this.isGuessLocked = false // Unlock guess input
+      this.isGuessLocked = false
+      this.currentTheme = question.theme
       this.currentImageUrl = question.imageUrl || ''
       this.currentRound = question.roundNumber
     },
