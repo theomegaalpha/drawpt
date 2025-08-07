@@ -234,7 +234,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.themes = []
     },
     handleEndGameEvent() {
-      this.currentStatus = GameStatus.ShowingRoundResults
+      this.currentStatus = GameStatus.Completed
       this.currentImageUrl = ''
       this.themes = []
       this.currentBonusPoints = 0

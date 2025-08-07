@@ -52,6 +52,7 @@ public class DuelGameSession : IGameSession
         await Task.Delay(35 * 1000);
 
         List<RoundResults> allRoundResults = new();
+        List<GameGamble> allGameGambles = new();
         var roundNumber = 0;
         var totalRounds = Math.Ceiling((double)gameState.GameConfiguration.TotalRounds / originalPlayers.Count);
         for (int i = 0; i < totalRounds; i++)
@@ -137,6 +138,7 @@ public class DuelGameSession : IGameSession
                 if (gamble != null)
                 {
                     gamble = ProcessDuelGameGamble(gamble, assessedAnswers);
+                    allGameGambles.Add(gamble);
                     var gambleMessage = await _announcerService.GenerateGambleResultAnnouncement(gamble, gambler!, roundResults);
                     await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.GambleResultsAction, gamble);
                     await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, gambleMessage);
@@ -160,6 +162,12 @@ public class DuelGameSession : IGameSession
                     Avatar = originalPlayers.FirstOrDefault(p => p.Id == g.Key)?.Avatar
                 }
             );
+        foreach (var gamble in allGameGambles)
+        {
+            if (playerScores.TryGetValue(gamble.PlayerId, out var playerResult))
+                playerResult.Score += gamble.Score + gamble.BonusPoints;
+        }
+
         var finalScores = new GameResults
         {
             PlayerResults = playerScores.Values.ToList(),
