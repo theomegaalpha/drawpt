@@ -2,6 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
+import confetti from 'canvas-confetti'
 
 const { gambler, gamblePlayer, lastRoundResults, gambleResults } = useGameStateStore()
 const { blankAvatar } = usePlayerStore()
@@ -28,6 +29,25 @@ onMounted(() => {
   setTimeout(() => {
     showChoice.value = true
   }, 6000)
+
+  setTimeout(() => {
+    confetti({
+      spread: 60,
+      origin: {
+        x: Math.random(),
+        y: Math.random() - 0.2
+      }
+    })
+  }, 6500)
+  setTimeout(() => {
+    confetti({
+      spread: 80,
+      origin: {
+        x: Math.random(),
+        y: Math.random()
+      }
+    })
+  }, 7000)
 })
 </script>
 

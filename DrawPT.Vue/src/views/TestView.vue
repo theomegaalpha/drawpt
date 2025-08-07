@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import Game from '@/components/room/game/Game.vue'
+import GameResults from '@/components/room/game/gameresults/GameResults.vue'
 import type { GameState } from '@/models/gameModels'
+import { GameStatus } from '@/models/gameModels'
 
 import { useGameStateStore } from '@/stores/gameState'
 
@@ -95,6 +97,32 @@ onMounted(async () => {
     })
   }, 5000)
 
+  // simulate game end
+  setTimeout(() => {
+    gameState.handleBroadcastFinalResultsEvent({
+      playerResults: [
+        {
+          id: 'f06514a7-0e9a-4664-bf2c-3464855d12ad',
+          connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02',
+          username: 'micro david',
+          avatar: '/images/profile-photos/anime-5.png',
+          score: 11
+        },
+        {
+          id: 'f06514a7-0e9a-4664-bf2c-3464855d12az',
+          connectionId: 'cFHPnG4NzRkPI4NqvBck9we1g84AK02',
+          username: 'sean jean',
+          avatar: '/images/profile-photos/anime-2.png',
+          score: 8
+        }
+      ],
+      totalRounds: 2,
+      wasCompleted: true,
+      endedAt: new Date().toISOString()
+    })
+    gameState.handleEndGameEvent()
+  }, 6000)
+
   // Simulate round results
   setTimeout(() => {
     gameState.handleBroadcastRoundResultsEvent({
@@ -136,6 +164,7 @@ onMounted(async () => {
   <main class="h-full">
     <div class="h-full">
       <Game />
+      <GameResults v-if="gameState.currentStatus === GameStatus.Completed" />
     </div>
   </main>
 </template>
