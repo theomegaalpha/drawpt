@@ -28,9 +28,7 @@ namespace DrawPT.Common.Services.AI
         public async Task<string?> GenerateAndSaveImageAsync(string prompt, string theme)
         {
             if (string.IsNullOrEmpty(prompt))
-            {
-                throw new ArgumentNullException(nameof(prompt), "Prompt cannot be null or empty.");
-            }
+                return null;
 
             var requestPayload = new FreepikImageRequestPayload
             {

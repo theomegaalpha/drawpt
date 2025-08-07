@@ -74,14 +74,14 @@ namespace DrawPT.GameEngine.Services
             return await GenerateAnnouncementAsync(systemPrompt, userMessage, players);
         }
 
-        public async Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults)
+        public async Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults, int totalRounds)
         {
             var systemPrompt = roundResults.Answers.Count == 1
                 ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.RoundResultSolo)
                 : roundResults.Answers.Count == 2
                     ? _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.RoundResultTwoPlayers)
                     : _referenceRepository.GetAnnouncerPrompt(AnnouncerPromptKeys.RoundResultGroup);
-            var userMessage = $"original prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score, TimeBonusPoints = a.BonusPoints }))}";
+            var userMessage = $"round: {roundResults.RoundNumber} of {totalRounds} \noriginal prompt: {originalPrompt}\nresults: {JsonConvert.SerializeObject(roundResults.Answers.Select(a => new { a.Username, a.Guess, Points = a.Score, TimeBonusPoints = a.BonusPoints }))}";
             return await GenerateAnnouncementAsync(systemPrompt, userMessage, roundResults.Answers);
         }
 

@@ -21,7 +21,7 @@ namespace DrawPT.GameEngine.Services
         {
             var question = await _aiService.GenerateGameQuestionAsync(theme);
 
-            if (question.ImageUrl != null)
+            if (!string.IsNullOrEmpty(question.ImageUrl))
             {
                 await _gameEntitiesRepository.SaveArchivedQuestion(new ArchivedQuestionEntity
                 {
@@ -46,7 +46,7 @@ namespace DrawPT.GameEngine.Services
             var question = await _aiService.GenerateGameQuestionFromPromptAsync(prompt.Prompt);
             question.PlayerId = prompt.PlayerId;
 
-            if (question.ImageUrl != null)
+            if (!string.IsNullOrEmpty(question.ImageUrl))
             {
                 question.PlayerGenerated = true;
                 return question;

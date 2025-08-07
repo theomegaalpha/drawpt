@@ -102,7 +102,7 @@ public class DefaultGameSession : IGameSession
             allRoundResults.Add(roundResults);
 
 
-            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
+            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults, gameState.GameConfiguration.TotalRounds);
             if (announcerMessage != null)
                 await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
 

@@ -54,7 +54,7 @@ public class DuelGameSession : IGameSession
         List<RoundResults> allRoundResults = new();
         List<GameGamble> allGameGambles = new();
         var roundNumber = 0;
-        var totalRounds = Math.Ceiling((double)gameState.GameConfiguration.TotalRounds / originalPlayers.Count);
+        var totalRounds = (int)Math.Ceiling((double)gameState.GameConfiguration.TotalRounds / originalPlayers.Count);
         for (int i = 0; i < totalRounds; i++)
         {
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.RoundStartedAction, i + 1);
@@ -128,7 +128,7 @@ public class DuelGameSession : IGameSession
                 };
                 allRoundResults.Add(roundResults);
 
-                var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
+                var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults, totalRounds);
                 if (announcerMessage != null)
                     await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
 

@@ -6,7 +6,7 @@ namespace DrawPT.GameEngine.Interfaces
     public interface IGameAnnouncerService
     {
         Task<string?> GenerateGreetingAnnouncement(List<Player> players);
-        Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults);
+        Task<string?> GenerateRoundResultAnnouncement(string originalPrompt, RoundResults roundResults, int totalRounds);
         Task<string?> GenerateGambleResultAnnouncement(GameGamble gamble, Player gambler, RoundResults results);
         Task<string?> GenerateGameResultsAnnouncement(List<PlayerResults> results);
     }
