@@ -4,12 +4,18 @@ import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
 import confetti from 'canvas-confetti'
 
-const { gambler, gamblePlayer, lastRoundResults, gambleResults } = useGameStateStore()
+const { gambler, gamblePlayer, lastRoundResults, gambleResults, players } = useGameStateStore()
 const { blankAvatar } = usePlayerStore()
 
 // derive high/low for styling
 const isHigh = computed(() => gambleResults.isHigh)
-const highLowText = computed(() => (isHigh.value ? 'Above' : 'Below'))
+// Adjust wording when more than two players: 'the highest'/'the lowest'
+const highLowText = computed(() => {
+  if (players.length > 2) {
+    return isHigh.value ? 'the highest' : 'the lowest'
+  }
+  return isHigh.value ? 'Above' : 'Below'
+})
 const highLowClass = computed(() => (isHigh.value ? 'text-green-500' : 'text-red-500'))
 // Animation state for image opacity
 const faded = ref(false)
@@ -99,7 +105,7 @@ onMounted(() => {
             >{{ highLowText }}</span
           >
         </div>
-        <div>60 Points</div>
+        <div v-if="players.length <= 2">60 Points</div>
       </div>
     </div>
   </div>
