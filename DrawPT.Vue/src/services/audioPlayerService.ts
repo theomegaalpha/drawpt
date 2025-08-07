@@ -1,4 +1,6 @@
 // src/services/AudioPlayerService.ts
+import { useAudioStore } from '@/stores/audio'
+
 export class AudioPlayerService {
   private audioContext: AudioContext | null = null
   private node: AudioWorkletNode | null = null
@@ -21,6 +23,16 @@ export class AudioPlayerService {
     this.gainNode = this.audioContext.createGain()
     this.node.connect(this.gainNode)
     this.gainNode.connect(this.audioContext.destination)
+
+    // Initialize volume from Pinia store announcerVolume (0-100 => 0.0-1.0)
+    try {
+      const audioStore = useAudioStore()
+      const vol = Math.max(0, Math.min(100, audioStore.announcerVolume)) / 100
+      this.gainNode.gain.value = vol
+    } catch (e) {
+      // Fallback: leave default gain if store not available
+      console.warn('[AudioPlayerService] Failed to read announcerVolume from store:', e)
+    }
   }
 
   /**
