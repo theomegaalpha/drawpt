@@ -23,8 +23,10 @@ import {
   unregisterBaseGameHubEvents
 } from '@/services/gameEventHandlers'
 import { useBackgroundMusic } from '@/composables/useBackgroundMusic'
+import { useSfxAudio } from '@/composables/useSfxAudio'
 import { registerAudioEvents, unregisterAudioEvents } from '@/services/audioEventHandlers'
 
+useSfxAudio()
 useBackgroundMusic()
 const route = useRoute()
 const roomCode = computed(() => route.params.roomCode as string)

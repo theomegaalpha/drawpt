@@ -7,6 +7,9 @@ import { GameStatus } from '@/models/gameModels'
 
 import { useGameStateStore } from '@/stores/gameState'
 
+import { useSfxAudio } from '@/composables/useSfxAudio'
+useSfxAudio()
+
 const gameState = useGameStateStore()
 
 onMounted(async () => {
