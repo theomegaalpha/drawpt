@@ -13,7 +13,8 @@ export function useAudioPlayer(sampleRate = 24000) {
     () => audioStore.announcerVolume,
     (newVol) => {
       player.value.setVolume(newVol / 100)
-    }
+    },
+    { immediate: true }
   )
 
   onMounted(() => {
