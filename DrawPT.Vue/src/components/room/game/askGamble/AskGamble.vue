@@ -11,7 +11,7 @@ const props = defineProps<{ gamble: GameGamble }>()
 const emit = defineEmits<{ (e: 'gambleSubmitted', gamble: GameGamble): void }>()
 
 const gameStateStore = useGameStateStore()
-const { currentImageUrl, players } = gameStateStore
+const { currentTheme, currentImageUrl, currentPrompt, players } = gameStateStore
 const playerStore = usePlayerStore()
 const { blankAvatar, player: you } = toRefs(playerStore)
 
@@ -70,6 +70,12 @@ onMounted(() => {
       class="mb-4"
     />
     <h1 class="text-xl font-bold">{{ title }}</h1>
+    <div
+      class="relative z-10 ml-4 flex w-full max-w-5xl cursor-pointer items-center rounded-lg bg-gray-500/10 p-4 px-6 backdrop-blur hover:bg-gray-500/20 dark:bg-white/10 dark:hover:bg-white/20"
+    >
+      <div class="font-semibold">[{{ currentTheme }}]</div>
+      <div>{{ currentPrompt }}</div>
+    </div>
     <transition-group tag="div" name="slide-up" class="flex flex-col items-center" appear>
       <div
         v-for="(player, index) in otherPlayers"

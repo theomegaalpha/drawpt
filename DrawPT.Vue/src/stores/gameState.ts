@@ -35,6 +35,7 @@ export const useGameStateStore = defineStore('gameState', {
     players: [] as Player[],
     themes: [] as string[],
     currentTheme: '' as string,
+    currentPrompt: '' as string,
     currentImageUrl: '' as string,
     currentStatus: GameStatus.WaitingForPlayers,
     // UI-specific
@@ -168,8 +169,10 @@ export const useGameStateStore = defineStore('gameState', {
     },
     prepareForPlayerGamble(question: GameQuestion) {
       this.currentStatus = GameStatus.AskingGamble
-      this.hasPlayerAction = true
+      this.currentTheme = question.theme
+      this.currentPrompt = question.originalPrompt
       this.currentImageUrl = question.imageUrl || ''
+      this.hasPlayerAction = true
     },
     prepareForThemeSelection(themes: string[]) {
       this.currentStatus = GameStatus.AskingTheme
@@ -195,6 +198,7 @@ export const useGameStateStore = defineStore('gameState', {
       this.showImageLoader = false
       this.isGuessLocked = false
       this.currentTheme = question.theme
+      this.currentPrompt = question.originalPrompt
       this.currentImageUrl = question.imageUrl || ''
       this.currentRound = question.roundNumber
     },

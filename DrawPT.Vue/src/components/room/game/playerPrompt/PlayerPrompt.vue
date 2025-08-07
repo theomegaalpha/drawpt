@@ -3,6 +3,7 @@ import GameTimer from '../GameTimer.vue'
 import GuessInput from '@/components/common/GuessInput.vue'
 import { ref } from 'vue'
 import ShinyButton from '@/components/common/ShinyButton.vue'
+import UnshinyButton from '@/components/common/UnshinyButton.vue'
 
 const timeoutPerQuestion = 30000
 const emit = defineEmits<{
@@ -11,12 +12,16 @@ const emit = defineEmits<{
 
 const promptInputFromComponent = ref<string>('')
 
-const submitPrompt = async (valueFromInput: string) => {
+const submitPrompt = (valueFromInput: string) => {
   if (valueFromInput === '') {
     return
   }
   emit('promptSubmitted', valueFromInput)
   promptInputFromComponent.value = ''
+}
+
+const submitEmpty = () => {
+  submitPrompt(' ')
 }
 </script>
 
@@ -34,6 +39,7 @@ const submitPrompt = async (valueFromInput: string) => {
         :submitAction="submitPrompt"
         :isListeningAtStart="true"
       />
+      <UnshinyButton class="mt-2" @click="submitEmpty">Create one for me!</UnshinyButton>
     </div>
   </div>
 </template>
