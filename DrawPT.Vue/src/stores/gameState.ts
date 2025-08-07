@@ -48,6 +48,26 @@ export const useGameStateStore = defineStore('gameState', {
     isGuessLocked: true
   }),
   getters: {
+    gambler: (state) => {
+      const gambler = state.players.find((p) => p.id === state.gambleResults?.gamblerId)
+      if (gambler) return gambler
+      return {
+        id: '',
+        connectionId: '',
+        username: 'Player Left',
+        avatar: ''
+      } as Player
+    },
+    gamblePlayer: (state) => {
+      const player = state.players.find((p) => p.id === state.gambleResults?.playerId)
+      if (player) return player
+      return {
+        id: '',
+        connectionId: '',
+        username: 'Player Left',
+        avatar: ''
+      } as Player
+    },
     askingGamble: (state) => state.currentStatus === GameStatus.AskingGamble,
     shouldShowResults: (state) => state.currentStatus === GameStatus.ShowingRoundResults,
     shouldShowGambleResults: (state) => state.currentStatus === GameStatus.ShowingGambleResults,

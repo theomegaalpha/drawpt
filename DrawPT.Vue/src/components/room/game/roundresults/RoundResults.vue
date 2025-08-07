@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import PlayerResultCard from '../../../common/PlayerResultCard.vue'
+import PlayerResultCard from './PlayerResultCard.vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
 

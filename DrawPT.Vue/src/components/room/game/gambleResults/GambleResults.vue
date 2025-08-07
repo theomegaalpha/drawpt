@@ -2,43 +2,85 @@
 import { computed, ref, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useGameStateStore } from '@/stores/gameState'
-import PlayerResultCard from '@/components/common/PlayerResultCard.vue'
 
-const { lastRoundResults, players } = useGameStateStore()
-const { player: you } = usePlayerStore()
+const { gambler, gamblePlayer, lastRoundResults, gambleResults } = useGameStateStore()
+const { blankAvatar } = usePlayerStore()
 
-const isYou = (playerConnectionId: string) => playerConnectionId === you.connectionId
-
-const winningAnswer = computed(() => {
-  return lastRoundResults.answers
-    .slice()
-    .sort((a, b) => b.score + b.bonusPoints - (a.score + a.bonusPoints))[0]
-})
-
+// derive high/low for styling
+const isHigh = computed(() => gambleResults.isHigh)
+const highLowText = computed(() => (isHigh.value ? 'Above' : 'Below'))
+const highLowClass = computed(() => (isHigh.value ? 'text-green-500' : 'text-red-500'))
 // Animation state for image opacity
 const faded = ref(false)
+const showGambler = ref(false)
+const showPlayer = ref(false)
+const showChoice = ref(false)
 onMounted(() => {
   setTimeout(() => {
     faded.value = true
   }, 100)
+  setTimeout(() => {
+    showGambler.value = true
+  }, 2000)
+  setTimeout(() => {
+    showPlayer.value = true
+  }, 4000)
+  setTimeout(() => {
+    showChoice.value = true
+  }, 6000)
 })
 </script>
 
 <template>
-  <div class="fixed inset-4 overflow-hidden">
+  <div class="relative flex h-screen flex-col items-center justify-center overflow-y-auto">
     <img
       v-if="lastRoundResults.question.imageUrl !== ''"
-      class="absolute left-1/2 top-1/2 z-0 max-h-[70vh] max-w-[1048px] -translate-x-1/2 -translate-y-1/2 rounded-lg transition-opacity delay-100 duration-1000"
-      :class="faded ? 'opacity-30' : 'opacity-100'"
+      class="absolute left-1/2 top-1/2 z-0 max-h-[70vh] max-w-[1048px] -translate-x-1/2 -translate-y-1/2 rounded-lg transition-opacity duration-1000"
+      :class="faded ? 'opacity-10' : 'opacity-100'"
       :src="lastRoundResults.question.imageUrl"
     />
-    <div class="relative z-10 flex flex-col items-center justify-center py-8">
-      <PlayerResultCard
-        :answer="winningAnswer"
-        :username="players.find((p) => p.connectionId === winningAnswer.connectionId)?.username"
-        :isYou="isYou(winningAnswer.connectionId)"
-        :key="winningAnswer.id"
-      />
+    <div class="relative z-10 flex flex-col items-center justify-center py-8 text-center">
+      <h1 class="text-2xl font-bold">Gamble Results</h1>
+      <div class="mt-8 space-y-2 text-lg font-medium">
+        <div class="flex items-center space-x-2 rounded-lg bg-black/10 p-4 dark:bg-white/10">
+          <img
+            class="h-8 w-8 rounded-full transition-opacity duration-1000"
+            :class="showGambler ? 'opacity-100' : 'opacity-0'"
+            :src="gambler.avatar || blankAvatar"
+            :alt="gambler.username"
+          />
+          <span
+            class="transition-opacity duration-1000"
+            :class="showGambler ? 'opacity-100' : 'opacity-0'"
+            >{{ gambler.username }}</span
+          >
+        </div>
+        <div>gambled that</div>
+        <div class="flex items-center space-x-2 rounded-lg bg-black/10 p-4 dark:bg-white/10">
+          <img
+            class="h-8 w-8 rounded-full transition-opacity duration-1000"
+            :class="showPlayer ? 'opacity-100' : 'opacity-0'"
+            :src="gamblePlayer.avatar || blankAvatar"
+            :alt="gamblePlayer.username"
+          />
+          <span
+            class="transition-opacity duration-1000"
+            :class="showPlayer ? 'opacity-100' : 'opacity-0'"
+            >{{ gamblePlayer.username }}</span
+          >
+        </div>
+        <div>would score</div>
+        <div
+          class="flex items-center justify-center space-x-2 rounded-lg bg-black/10 p-4 dark:bg-white/10"
+        >
+          <span
+            class="transition-opacity duration-1000"
+            :class="['font-bold', highLowClass, showChoice ? 'opacity-100' : 'opacity-0']"
+            >{{ highLowText }}</span
+          >
+        </div>
+        <div>60 Points</div>
+      </div>
     </div>
   </div>
 </template>

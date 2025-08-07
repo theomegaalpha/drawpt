@@ -88,9 +88,12 @@ export interface PlayerAnswer {
 }
 
 export interface PlayerQuestion {
-  Id: string
+  id: string
   theme: string
+  playerId: string
+  playerGenerated: boolean
   roundNumber: number
   originalPrompt: string
   imageUrl: string
+  createdAt: string
 }
