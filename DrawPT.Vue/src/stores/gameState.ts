@@ -15,13 +15,13 @@ import type { Player } from '@/models/player'
 
 // default game configuration
 const defaultGameConfig: IGameConfiguration = {
-  MaxPlayers: 8,
-  TotalRounds: 6,
-  QuestionTimeout: 40,
-  PromptTimeout: 120,
-  ThemeTimeout: 30,
-  TransitionDelay: 50,
-  PlayerPromptMode: false
+  maxPlayers: 8,
+  totalRounds: 6,
+  questionTimeout: 40,
+  promptTimeout: 120,
+  themeTimeout: 30,
+  transitionDelay: 50,
+  playerPromptMode: false
 }
 
 export const useGameStateStore = defineStore('gameState', {
@@ -34,8 +34,7 @@ export const useGameStateStore = defineStore('gameState', {
     hostPlayerId: '' as string,
     players: [] as Player[],
     themes: [] as string[],
-    currentTheme: '' as string,
-    currentImageUrl: '' as string,
+    currentQuestion: {} as GameQuestion,
     currentStatus: GameStatus.WaitingForPlayers,
     // UI-specific
     successfullyJoined: false,
@@ -69,6 +68,9 @@ export const useGameStateStore = defineStore('gameState', {
         avatar: ''
       } as Player
     },
+    currentTheme: (state) => state.currentQuestion.theme,
+    currentImageUrl: (state) => state.currentQuestion.imageUrl,
+    currentPrompt: (state) => state.currentQuestion.originalPrompt,
     askingGamble: (state) => state.currentStatus === GameStatus.AskingGamble,
     shouldShowResults: (state) => state.currentStatus === GameStatus.ShowingRoundResults,
     shouldShowGambleResults: (state) => state.currentStatus === GameStatus.ShowingGambleResults,
@@ -76,10 +78,10 @@ export const useGameStateStore = defineStore('gameState', {
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
     areThemesVisible: (state) => !state.hasPlayerAction && state.themes.length > 0,
     showGameCanvas: (state) =>
-      state.currentStatus === GameStatus.AskingQuestion && state.currentImageUrl !== '',
+      state.currentStatus === GameStatus.AskingQuestion && state.currentQuestion.imageUrl !== '',
     gameEnded: (state) =>
       state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned,
-    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
+    playerPromptMode: (state) => state.gameConfiguration.playerPromptMode,
     lastRoundResults: (state) => {
       return state.roundResults[state.roundResults.length - 1]
     }
@@ -97,16 +99,19 @@ export const useGameStateStore = defineStore('gameState', {
       // UI defaults
       this.themes = []
       this.playerAnswers.length = 0
-      this.currentTheme = ''
-      this.currentImageUrl = ''
+      this.clearQuestion()
       this.showImageLoader = false
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.successfullyJoined = true
     },
 
+    changeGameConfiguration(config: IGameConfiguration) {
+      Object.assign(this.gameConfiguration, config)
+    },
+
     setPlayerPromptMode(mode: boolean) {
-      this.gameConfiguration.PlayerPromptMode = mode
+      this.gameConfiguration.playerPromptMode = mode
     },
 
     updateRoomCode(code: string) {
@@ -131,7 +136,7 @@ export const useGameStateStore = defineStore('gameState', {
     handleThemeSelectedEvent(theme: string) {
       this.themes = []
       this.showImageLoader = true
-      this.currentTheme = theme
+      console.log('theme selected', theme)
     },
     handlePlayerAnsweredEvent(playerAnswer: PlayerAnswer) {
       if (!this.playerAnswers.includes(playerAnswer)) {
@@ -160,17 +165,15 @@ export const useGameStateStore = defineStore('gameState', {
     prepareForPlayerImagePrompt() {
       this.currentStatus = GameStatus.AskingImagePrompt
       this.hasPlayerAction = true
-      this.currentImageUrl = ''
     },
     prepareForPlayerGamble(question: GameQuestion) {
       this.currentStatus = GameStatus.AskingGamble
+      Object.assign(this.currentQuestion, question)
       this.hasPlayerAction = true
-      this.currentImageUrl = question.imageUrl || ''
     },
     prepareForThemeSelection(themes: string[]) {
       this.currentStatus = GameStatus.AskingTheme
       this.hasPlayerAction = true
-      this.currentImageUrl = ''
       this.showImageLoader = false
       for (const theme of themes) {
         if (this.themes.indexOf(theme) === -1) {
@@ -182,7 +185,6 @@ export const useGameStateStore = defineStore('gameState', {
     handleThemeSelectionEvent(themes: string[]) {
       this.currentStatus = GameStatus.AskingTheme
       this.hasPlayerAction = false
-      this.currentImageUrl = ''
       this.showImageLoader = false
       this.themes = themes
     },
@@ -190,20 +192,17 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = GameStatus.AskingQuestion
       this.showImageLoader = false
       this.isGuessLocked = false
-      this.currentTheme = question.theme
-      this.currentImageUrl = question.imageUrl || ''
+      Object.assign(this.currentQuestion, question)
       this.currentRound = question.roundNumber
     },
     handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
       this.currentStatus = GameStatus.ShowingRoundResults
       this.showImageLoader = false
-      this.currentImageUrl = ''
       this.roundResults.push(roundResult)
     },
     handleBroadcastGambleResultsEvent(newResults: GameGamble) {
       this.currentStatus = GameStatus.ShowingGambleResults
       this.showImageLoader = false
-      this.currentImageUrl = ''
       Object.assign(this.gambleResults, newResults)
     },
     handleBroadcastFinalResultsEvent(results: GameResults) {
@@ -222,6 +221,18 @@ export const useGameStateStore = defineStore('gameState', {
     clearThemes() {
       this.themes = []
     },
+    clearQuestion() {
+      this.currentQuestion = {
+        id: '',
+        playerGenerated: false,
+        playerId: '',
+        roundNumber: 0,
+        theme: '',
+        originalPrompt: '',
+        imageUrl: '',
+        createdAt: ''
+      }
+    },
     setGuessLock(locked: boolean) {
       this.isGuessLocked = locked
     },
@@ -232,12 +243,13 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentStatus = GameStatus.StartingRound
     },
     playerSelectedTheme(theme: string) {
-      this.currentTheme = theme
+      // Apply selected theme to currentQuestion and clear theme options
+      this.currentQuestion.theme = theme
       this.themes = []
     },
     handleEndGameEvent() {
       this.currentStatus = GameStatus.Completed
-      this.currentImageUrl = ''
+      this.clearQuestion()
       this.themes = []
       this.currentBonusPoints = 0
       this.isGuessLocked = true

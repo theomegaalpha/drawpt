@@ -191,6 +191,32 @@ namespace DrawPT.Api.Hubs
             await _hubContext.Clients.Group(player.RoomCode).NavigateBackToLobby();
         }
 
+        public async Task GameConfigurationChanged(IGameConfiguration configuration)
+        {
+            var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;
+            if (userId == null)
+            {
+                _logger.LogWarning("user_id not found in claim while changing game configuration!");
+                return;
+            }
+            var player = await _cache.GetPlayerAsync(Guid.Parse(userId));
+            if (player == null)
+            {
+                _logger.LogWarning("The user that changed the game configuration can not be found in cache!");
+                return;
+            }
+            _logger.LogInformation($"Player {userId} changed game configuration in room {player.RoomCode} with connection {Context.ConnectionId}");
+            var gameState = await _cache.GetGameState(player.RoomCode);
+            if (gameState == null)
+            {
+                _logger.LogWarning($"Game state for room {player.RoomCode} not found!");
+                return;
+            }
+            gameState.GameConfiguration = configuration;
+            await _cache.SetGameState(gameState);
+            await _hubContext.Clients.Group(player.RoomCode).BroadcastGameConfigurationChange(configuration);
+        }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.User?.Claims.FirstOrDefault(c => c.Type == "user_id")?.Value;

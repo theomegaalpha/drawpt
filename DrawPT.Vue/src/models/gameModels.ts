@@ -1,13 +1,13 @@
 import type { Player, PlayerResult } from './player'
 
 export interface IGameConfiguration {
-  MaxPlayers: number
-  TotalRounds: number
-  ThemeTimeout: number
-  QuestionTimeout: number
-  PromptTimeout: number
-  TransitionDelay: number
-  PlayerPromptMode: boolean
+  maxPlayers: number
+  totalRounds: number
+  themeTimeout: number
+  questionTimeout: number
+  promptTimeout: number
+  transitionDelay: number
+  playerPromptMode: boolean
 }
 
 export enum GameStatus {

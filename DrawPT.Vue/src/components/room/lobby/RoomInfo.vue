@@ -41,6 +41,16 @@ const copyRoomCodeToClipboard = () => {
       console.error('Failed to copy URL: ', err)
     })
 }
+
+const handleAiModeClick = async () => {
+  gameStore.setPlayerPromptMode(false)
+  await service.invoke('gameConfigurationChanged', gameConfiguration.value)
+}
+
+const handlePlayerModeClick = async () => {
+  gameStore.setPlayerPromptMode(true)
+  await service.invoke('gameConfigurationChanged', gameConfiguration.value)
+}
 </script>
 
 <template>
@@ -51,17 +61,27 @@ const copyRoomCodeToClipboard = () => {
     <span>Prompts Generation</span>
     <div class="mb-4 flex items-center justify-center space-x-2">
       <UnshinyButton
-        @click="gameStore.setPlayerPromptMode(false)"
-        class="hover:bg-blue-600 dark:hover:bg-indigo-900"
-        :class="{ 'bg-blue-500 dark:bg-indigo-800': !playerPromptMode }"
-        >AI Mode</UnshinyButton
+        @click="handleAiModeClick"
+        class="!hover:bg-blue-600 dark:!hover:bg-indigo-900"
+        :class="{
+          'bg-blue-500 disabled:bg-blue-500/70 dark:bg-indigo-800 disabled:dark:bg-indigo-800/70':
+            !playerPromptMode
+        }"
+        :disabled="players[0].id !== player.id"
       >
+        AI Mode
+      </UnshinyButton>
       <UnshinyButton
-        @click="gameStore.setPlayerPromptMode(true)"
-        class="hover:bg-blue-600 dark:hover:bg-indigo-900"
-        :class="{ 'bg-blue-500 dark:bg-indigo-800': playerPromptMode }"
-        >Player Mode</UnshinyButton
+        @click="handlePlayerModeClick"
+        class="!hover:bg-blue-600 dark:!hover:bg-indigo-900"
+        :class="{
+          'bg-blue-500 disabled:bg-blue-500/70 dark:bg-indigo-800 disabled:dark:bg-indigo-800/70':
+            playerPromptMode
+        }"
+        :disabled="players[0].id !== player.id"
       >
+        Player Mode
+      </UnshinyButton>
     </div>
     <ShinyButton
       v-if="players.length > 0 && players[0].id === player.id"

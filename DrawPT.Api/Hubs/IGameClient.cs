@@ -36,6 +36,8 @@ namespace DrawPT.Api.Hubs
         Task BroadcastFinalResults(GameResults results);
         Task NavigateBackToLobby();
 
+        Task BroadcastGameConfigurationChange(IGameConfiguration gameConfiguration);
+
 
         Task WriteMessage(string message);
         Task WriteError(string message);
