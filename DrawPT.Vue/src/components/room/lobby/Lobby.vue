@@ -14,7 +14,7 @@ const volumeStore = useAudioStore()
 const { setMusicUrl, togglePlayMusic } = volumeStore
 
 const startGame = async () => {
-  var gameStarted = await service.invoke('startGame')
+  var gameStarted = await service.invoke('startGame', gameStateStore.gameConfiguration)
   if (!gameStarted) {
     console.error('Game could not be started')
   }

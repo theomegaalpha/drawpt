@@ -3,10 +3,11 @@ import type { Player, PlayerResult } from './player'
 export interface IGameConfiguration {
   MaxPlayers: number
   TotalRounds: number
-  QuestionTimeout: number
   ThemeTimeout: number
+  QuestionTimeout: number
+  PromptTimeout: number
   TransitionDelay: number
-  GamblingEnabled: boolean
+  PlayerPromptMode: boolean
 }
 
 export enum GameStatus {
@@ -15,9 +16,12 @@ export enum GameStatus {
   StartingRound = 2,
   AskingTheme = 3,
   AskingQuestion = 4,
-  ShowingRoundResults = 5,
-  Completed = 6,
-  Abandoned = 7
+  AskingImagePrompt = 5,
+  AskingGamble = 6,
+  ShowingRoundResults = 7,
+  ShowingGambleResults = 8,
+  Completed = 9,
+  Abandoned = 10
 }
 
 export interface GameState {
@@ -37,8 +41,19 @@ export interface GameResults {
   endedAt: string
 }
 
+export interface GameGamble {
+  gamblerId: string
+  playerId: string
+  isHigh: boolean
+  createdAt: string
+  score: number
+  bonusPoints: number
+}
+
 export interface GameQuestion {
   id: string
+  playerGenerated: boolean
+  playerId: string
   roundNumber: number
   theme: string
   originalPrompt: string
@@ -74,9 +89,12 @@ export interface PlayerAnswer {
 }
 
 export interface PlayerQuestion {
-  Id: string
+  id: string
   theme: string
+  playerId: string
+  playerGenerated: boolean
   roundNumber: number
   originalPrompt: string
   imageUrl: string
+  createdAt: string
 }

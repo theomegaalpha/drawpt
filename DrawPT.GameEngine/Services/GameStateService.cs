@@ -47,6 +47,22 @@ namespace DrawPT.GameEngine.Services
             return gameState;
         }
 
+        public async Task<IGameState> AskImagePromptAsync(string roomCode)
+        {
+            var gameState = await _cacheService.GetGameState(roomCode);
+            gameState ??= new GameState() { RoomCode = roomCode, CurrentStatus = GameStatus.AskingImagePrompt };
+            await _cacheService.SetGameState(gameState);
+            return gameState;
+        }
+
+        public async Task<IGameState> AnswerImagePromptAsync(string roomCode)
+        {
+            var gameState = await _cacheService.GetGameState(roomCode);
+            gameState ??= new GameState() { RoomCode = roomCode };
+            await _cacheService.SetGameState(gameState);
+            return gameState;
+        }
+
         public async Task<IGameState> AskQuestionAsync(string roomCode)
         {
             var gameState = await _cacheService.GetGameState(roomCode);

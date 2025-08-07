@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { motion } from 'motion-v'
-const { isPrimary } = defineProps({ isPrimary: { type: Boolean, default: false } })
+const { isPrimary, disabled } = defineProps({
+  isPrimary: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false }
+})
 </script>
 
 <template>
@@ -23,6 +26,7 @@ const { isPrimary } = defineProps({ isPrimary: { type: Boolean, default: false }
         mass: 0.1
       }
     }"
+    :disabled="disabled"
     :class="[
       'radial-gradient',
       { 'shiny-btn-primary': isPrimary },

@@ -6,10 +6,23 @@ import type {
   PlayerQuestion,
   IGameConfiguration,
   RoundResults,
-  GameResults
+  GameGamble,
+  GameResults,
+  GameQuestion
 } from '@/models/gameModels'
 import { GameStatus } from '@/models/gameModels'
 import type { Player } from '@/models/player'
+
+// default game configuration
+const defaultGameConfig: IGameConfiguration = {
+  MaxPlayers: 8,
+  TotalRounds: 6,
+  QuestionTimeout: 40,
+  PromptTimeout: 120,
+  ThemeTimeout: 30,
+  TransitionDelay: 50,
+  PlayerPromptMode: false
+}
 
 export const useGameStateStore = defineStore('gameState', {
   state: () => ({
@@ -17,7 +30,7 @@ export const useGameStateStore = defineStore('gameState', {
     roomCode: '' as string,
     currentRound: 0,
     totalRounds: 0,
-    gameConfiguration: {} as IGameConfiguration,
+    gameConfiguration: defaultGameConfig,
     hostPlayerId: '' as string,
     players: [] as Player[],
     themes: [] as string[],
@@ -29,21 +42,47 @@ export const useGameStateStore = defineStore('gameState', {
     playerAnswers: [] as PlayerAnswer[],
     roundResults: [] as RoundResults[],
     gameResults: {} as GameResults,
+    gambleResults: {} as GameGamble,
     hasPlayerAction: false,
     showImageLoader: false,
-    shouldShowResults: false,
     currentBonusPoints: 0,
     isGuessLocked: true
   }),
   getters: {
+    gambler: (state) => {
+      const gambler = state.players.find((p) => p.id === state.gambleResults?.gamblerId)
+      if (gambler) return gambler
+      return {
+        id: '',
+        connectionId: '',
+        username: 'Player Left',
+        avatar: ''
+      } as Player
+    },
+    gamblePlayer: (state) => {
+      const player = state.players.find((p) => p.id === state.gambleResults?.playerId)
+      if (player) return player
+      return {
+        id: '',
+        connectionId: '',
+        username: 'Player Left',
+        avatar: ''
+      } as Player
+    },
+    askingGamble: (state) => state.currentStatus === GameStatus.AskingGamble,
+    shouldShowResults: (state) => state.currentStatus === GameStatus.ShowingRoundResults,
+    shouldShowGambleResults: (state) => state.currentStatus === GameStatus.ShowingGambleResults,
+    askingImagePrompt: (state) => state.currentStatus === GameStatus.AskingImagePrompt,
     areThemesSelectable: (state) => state.hasPlayerAction && state.themes.length > 0,
     areThemesVisible: (state) => !state.hasPlayerAction && state.themes.length > 0,
-    showGameCanvas: (state) => state.currentImageUrl !== '',
+    showGameCanvas: (state) =>
+      state.currentStatus === GameStatus.AskingQuestion && state.currentImageUrl !== '',
+    gameEnded: (state) =>
+      state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned,
+    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
     lastRoundResults: (state) => {
       return state.roundResults[state.roundResults.length - 1]
-    },
-    gameEnded: (state) =>
-      state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned
+    }
   },
   actions: {
     initializeGameState(gameState: GameState) {
@@ -61,10 +100,13 @@ export const useGameStateStore = defineStore('gameState', {
       this.currentTheme = ''
       this.currentImageUrl = ''
       this.showImageLoader = false
-      this.shouldShowResults = false
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.successfullyJoined = true
+    },
+
+    setPlayerPromptMode(mode: boolean) {
+      this.gameConfiguration.PlayerPromptMode = mode
     },
 
     updateRoomCode(code: string) {
@@ -86,15 +128,6 @@ export const useGameStateStore = defineStore('gameState', {
       }
     },
 
-    startGame() {
-      this.currentStatus = GameStatus.JustStarted
-    },
-    startRound(roundNumber: number) {
-      this.currentRound = roundNumber
-      this.currentStatus = GameStatus.StartingRound
-      this.playerAnswers.length = 0
-    },
-
     handleThemeSelectedEvent(theme: string) {
       this.themes = []
       this.showImageLoader = true
@@ -105,23 +138,9 @@ export const useGameStateStore = defineStore('gameState', {
         this.playerAnswers.push(playerAnswer)
       }
     },
-    handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
-      this.showImageLoader = false
-      this.currentImageUrl = ''
-      this.roundResults.push(roundResult)
-      this.currentStatus = GameStatus.ShowingRoundResults
-      this.shouldShowResults = true
-    },
-
-    handleBroadcastFinalResultsEvent(results: GameResults) {
-      this.gameResults =
-        results ||
-        ({
-          playerResults: [],
-          totalRounds: 8,
-          endedAt: '',
-          wasCompleted: true
-        } as GameResults)
+    handlePlayerGambledEvent(gamble: GameGamble) {
+      const gambler = this.players.find((p) => p.id === gamble.gamblerId)
+      console.info('received gamble event', gambler?.username)
     },
     handleAwardBonusPointsEvent(points: number) {
       this.currentBonusPoints = points
@@ -130,10 +149,28 @@ export const useGameStateStore = defineStore('gameState', {
       }, 5000)
     },
 
-    prepareForThemeSelection(themes: string[]) {
+    startGame() {
+      this.currentStatus = GameStatus.JustStarted
+    },
+    startRound(roundNumber: number) {
+      this.currentStatus = GameStatus.StartingRound
+      this.currentRound = roundNumber
+      this.playerAnswers.length = 0
+    },
+    prepareForPlayerImagePrompt() {
+      this.currentStatus = GameStatus.AskingImagePrompt
       this.hasPlayerAction = true
       this.currentImageUrl = ''
-      this.shouldShowResults = false
+    },
+    prepareForPlayerGamble(question: GameQuestion) {
+      this.currentStatus = GameStatus.AskingGamble
+      this.hasPlayerAction = true
+      this.currentImageUrl = question.imageUrl || ''
+    },
+    prepareForThemeSelection(themes: string[]) {
+      this.currentStatus = GameStatus.AskingTheme
+      this.hasPlayerAction = true
+      this.currentImageUrl = ''
       this.showImageLoader = false
       for (const theme of themes) {
         if (this.themes.indexOf(theme) === -1) {
@@ -141,23 +178,44 @@ export const useGameStateStore = defineStore('gameState', {
         }
       }
       this.isGuessLocked = true
-      this.currentStatus = GameStatus.AskingTheme
     },
     handleThemeSelectionEvent(themes: string[]) {
+      this.currentStatus = GameStatus.AskingTheme
       this.hasPlayerAction = false
       this.currentImageUrl = ''
       this.showImageLoader = false
-      this.shouldShowResults = false
       this.themes = themes
-      this.currentStatus = GameStatus.AskingTheme
     },
     prepareForQuestion(question: PlayerQuestion) {
-      this.shouldShowResults = false
+      this.currentStatus = GameStatus.AskingQuestion
       this.showImageLoader = false
-      this.isGuessLocked = false // Unlock guess input
+      this.isGuessLocked = false
+      this.currentTheme = question.theme
       this.currentImageUrl = question.imageUrl || ''
       this.currentRound = question.roundNumber
-      this.currentStatus = GameStatus.AskingQuestion
+    },
+    handleBroadcastRoundResultsEvent(roundResult: RoundResults) {
+      this.currentStatus = GameStatus.ShowingRoundResults
+      this.showImageLoader = false
+      this.currentImageUrl = ''
+      this.roundResults.push(roundResult)
+    },
+    handleBroadcastGambleResultsEvent(newResults: GameGamble) {
+      this.currentStatus = GameStatus.ShowingGambleResults
+      this.showImageLoader = false
+      this.currentImageUrl = ''
+      Object.assign(this.gambleResults, newResults)
+    },
+    handleBroadcastFinalResultsEvent(results: GameResults) {
+      this.currentStatus = GameStatus.Completed
+      this.gameResults =
+        results ||
+        ({
+          playerResults: [],
+          totalRounds: 8,
+          endedAt: '',
+          wasCompleted: true
+        } as GameResults)
     },
 
     // Actions called from Game.vue UI interactions or internal logic
@@ -170,19 +228,21 @@ export const useGameStateStore = defineStore('gameState', {
     clearBonusPointsDisplay() {
       this.currentBonusPoints = 0
     },
+    playerSubmittedPrompt() {
+      this.currentStatus = GameStatus.StartingRound
+    },
     playerSelectedTheme(theme: string) {
       this.currentTheme = theme
       this.themes = []
     },
     handleEndGameEvent() {
-      this.shouldShowResults = true
+      this.currentStatus = GameStatus.Completed
       this.currentImageUrl = ''
       this.themes = []
       this.currentBonusPoints = 0
       this.isGuessLocked = true
       this.currentRound = 0
       this.showImageLoader = false
-      this.currentStatus = GameStatus.Completed
     },
     handleNavigateBackToLobbyEvent() {
       this.currentStatus = GameStatus.WaitingForPlayers

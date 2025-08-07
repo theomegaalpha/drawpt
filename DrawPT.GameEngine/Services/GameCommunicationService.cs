@@ -101,6 +101,91 @@ public class GameCommunicationService : IGameCommunicationService
         return selectedTheme;
     }
 
+    public async Task<PlayerPrompt> AskPlayerImagePromptAsync(Player player, int timeoutInSeconds)
+    {
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.Prompt, Payload = string.Empty };
+        var requestPayload = JsonSerializer.Serialize(requestObj);
+
+        // Send via Service Bus and await response
+        var correlationId = Guid.NewGuid().ToString();
+        var tcs = new TaskCompletionSource<string>();
+        _pendingRequests[correlationId] = tcs;
+
+        var sender = _sbClient.CreateSender("gameEngineRequest");
+        var requestMsg = new ServiceBusMessage(requestPayload)
+        {
+            SessionId = player.ConnectionId,
+            CorrelationId = correlationId,
+            ReplyTo = "gameEngineResponse"
+        };
+        await sender.SendMessageAsync(requestMsg);
+
+        // Wait for response or timeout
+        var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
+        var completed = await Task.WhenAny(tcs.Task, delay);
+        _pendingRequests.TryRemove(correlationId, out _);
+
+        string selectedImagePrompt = completed == tcs.Task
+            ? tcs.Task.Result
+            : string.Empty;
+
+        var prompt = new PlayerPrompt
+        {
+            PlayerId = player.Id,
+            Username = player.Username,
+            Avatar = player.Avatar,
+            Prompt = selectedImagePrompt
+        };
+
+        _logger.LogDebug($"[{player.RoomCode}] Image prompt selected for player {player.Id}: {selectedImagePrompt}");
+        await BroadcastGameEventAsync(player.RoomCode, GameEngineQueue.PlayerImagePromptSelectedAction, player.Id);
+        return prompt;
+    }
+
+    public async Task<GameGamble> AskPlayerGambleAsync(Player player, GameQuestion question, int timeoutInSeconds)
+    {
+        var requestObj = new { player.RoomCode, Action = GameEngineRequests.PlayerGamble, Payload = question };
+        var requestPayload = JsonSerializer.Serialize(requestObj);
+        var correlationId = Guid.NewGuid().ToString();
+        var tcs = new TaskCompletionSource<string>();
+        _pendingRequests[correlationId] = tcs;
+        var sender = _sbClient.CreateSender("gameEngineRequest");
+        var requestMsg = new ServiceBusMessage(requestPayload)
+        {
+            SessionId = player.ConnectionId,
+            CorrelationId = correlationId,
+            ReplyTo = "gameEngineResponse"
+        };
+        await sender.SendMessageAsync(requestMsg);
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        // Wait for response or timeout
+        var delay = Task.Delay(TimeSpan.FromSeconds(timeoutInSeconds + 5));
+        var completed = await Task.WhenAny(tcs.Task, delay);
+        _pendingRequests.TryRemove(correlationId, out _);
+
+        string gambleString = completed == tcs.Task ? tcs.Task.Result : string.Empty;
+
+        // Deserialize and build GameGamble
+        GameGamble? gamble = null;
+        try { gamble = JsonSerializer.Deserialize<GameGamble>(gambleString); } catch { }
+
+        if (gamble == null)
+        {
+            _logger.LogDebug($"[{player.RoomCode}] No gamble provided by player {player.Id} within the timeout period.");
+            return new GameGamble { GamblerId = player.Id, BonusPoints = 0, Score = 0 };
+        }
+
+        stopwatch.Stop();
+        gamble.GamblerId = player.Id;
+        gamble.BonusPoints = CalculateBonusPoints(stopwatch.Elapsed.TotalSeconds);
+        gamble.CreatedAt = DateTime.UtcNow;
+
+        await BroadcastGameEventAsync(player.RoomCode, GameEngineQueue.PlayerGambledAction, gamble);
+        return gamble;
+    }
+
     public async Task<PlayerAnswer> AskPlayerQuestionAsync(Player player, GameQuestion question, int timeoutInSeconds)
     {
         // Build SB request message

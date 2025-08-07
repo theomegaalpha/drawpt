@@ -25,12 +25,14 @@ namespace DrawPT.Api.Hubs
         Task GameStarted(IGameState? state);
         Task PlayerScoreUpdated(Guid playerId, int newScore);
         Task PlayerAnswered(PlayerAnswer playerAnswer);
+        Task PlayerGambled(GameGamble gameGamble);
 
         Task ThemeSelection(List<string> themes);
         Task ThemeSelected(string theme);
 
         Task RoundStarted(int roundNumber);
         Task RoundResults(RoundResults round);
+        Task GambleResults(GameGamble gambleResults);
         Task BroadcastFinalResults(GameResults results);
         Task NavigateBackToLobby();
 
@@ -42,6 +44,8 @@ namespace DrawPT.Api.Hubs
         /*
          *  Game interaction events
          */
+        Task<string> AskPrompt(CancellationToken ct);
+        Task<GameGamble> AskGamble(GameQuestion question, CancellationToken ct);
         Task<string> AskTheme(List<string> themes, CancellationToken ct);
         Task<PlayerAnswerBase> AskQuestion(GameQuestion question, CancellationToken ct);
 

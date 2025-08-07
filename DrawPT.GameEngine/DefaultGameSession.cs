@@ -6,7 +6,7 @@ using DrawPT.GameEngine.Interfaces;
 
 namespace DrawPT.GameEngine;
 
-public class GameSession : IGameSession
+public class DefaultGameSession : IGameSession
 {
     private readonly IGameCommunicationService _gameCommunicationService;
     private readonly IGameAnnouncerService _announcerService;
@@ -14,16 +14,16 @@ public class GameSession : IGameSession
     private readonly IGameStateService _gameStateService;
     private readonly IQuestionService _questionService;
     private readonly ICacheService _cacheService;
-    private readonly ILogger<GameSession> _logger;
+    private readonly ILogger<DefaultGameSession> _logger;
 
-    public GameSession(
+    public DefaultGameSession(
         ICacheService cacheService,
         IQuestionService questionService,
         IGameStateService gameStateService,
         IAssessmentService assessmentService,
         IGameAnnouncerService gameAnnouncerService,
         IGameCommunicationService gameCommunicationService,
-        ILogger<GameSession> logger)
+        ILogger<DefaultGameSession> logger)
     {
         _cacheService = cacheService;
         _gameStateService = gameStateService;
@@ -47,8 +47,6 @@ public class GameSession : IGameSession
         if (greetingAnnouncement != null)
             await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, greetingAnnouncement);
         await Task.Delay(35 * 1000);
-
-        await Task.Delay(100);
 
         List<RoundResults> allRoundResults = new();
 
@@ -75,7 +73,6 @@ public class GameSession : IGameSession
 
             // ask all players for their answers
             var question = await _questionService.GenerateQuestionAsync(selectedTheme);
-            question.RoundNumber = i + 1;
             List<Task<PlayerAnswer>> playerAnswers = new(players.Count);
 
             gameState = await _gameStateService.AskQuestionAsync(roomCode);
@@ -99,14 +96,13 @@ public class GameSession : IGameSession
             var roundResults = new RoundResults
             {
                 RoundNumber = i + 1,
-                Theme = selectedTheme,
                 Question = question,
                 Answers = assessedAnswers
             };
             allRoundResults.Add(roundResults);
 
 
-            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults);
+            var announcerMessage = await _announcerService.GenerateRoundResultAnnouncement(question.OriginalPrompt, roundResults, gameState.GameConfiguration.TotalRounds);
             if (announcerMessage != null)
                 await _gameCommunicationService.BroadcastGameEventAsync(roomCode, GameEngineQueue.AnnouncerAction, announcerMessage);
 

@@ -7,7 +7,13 @@ import { useGameStateStore } from '@/stores/gameState'
 import { useAudioStore } from '@/stores/audio'
 
 import type { Player } from '@/models/player'
-import type { PlayerAnswer, GameState, RoundResults, GameResults } from '@/models/gameModels'
+import type {
+  PlayerAnswer,
+  GameState,
+  RoundResults,
+  GameResults,
+  GameGamble
+} from '@/models/gameModels'
 
 // Helper to easily access stores within handlers
 const getStores = () => ({
@@ -56,9 +62,12 @@ export function registerBaseGameHubEvents() {
   })
 
   service.on('roundResults', (roundResult: RoundResults) => {
-    console.log('Round results received:', roundResult)
-    stores.notificationStore.addGameNotification(`Round ${roundResult.roundNumber} has ended!`)
     stores.gameStateStore.handleBroadcastRoundResultsEvent(roundResult)
+  })
+
+  service.on('gambleResults', (gambleResults: GameGamble) => {
+    console.log('Gamble results received:', gambleResults)
+    stores.gameStateStore.handleBroadcastGambleResultsEvent(gambleResults)
   })
 
   service.on('broadcastFinalResults', (results: GameResults) => {
@@ -71,24 +80,21 @@ export function registerBaseGameHubEvents() {
     stores.notificationStore.addGameNotification(message)
   })
 
-  // Non-interactive events that update gameStateStore
   service.on('themeSelection', (themes: string[]) => {
     stores.gameStateStore.handleThemeSelectionEvent(themes)
   })
 
   service.on('themeSelected', (theme: string) => {
-    // Server confirms a theme was selected by someone
     stores.gameStateStore.handleThemeSelectedEvent(theme)
     stores.notificationStore.addGameNotification('Selected theme: ' + theme)
   })
 
   service.on('playerAnswered', (playerAnswer: PlayerAnswer) => {
-    console.log('Player answered:', playerAnswer)
     stores.gameStateStore.handlePlayerAnsweredEvent(playerAnswer)
   })
 
-  service.on('broadcastRoundResults', (gameRound: RoundResults) => {
-    stores.gameStateStore.handleBroadcastRoundResultsEvent(gameRound)
+  service.on('playerGambled', (gamble: GameGamble) => {
+    stores.gameStateStore.handlePlayerGambledEvent(gamble)
   })
 
   service.on('awardBonusPoints', (points: number) => {
@@ -110,6 +116,6 @@ export function unregisterBaseGameHubEvents() {
   service.off('themeSelection')
   service.off('themeSelected')
   service.off('roundResults')
-  service.off('broadcastRoundResults')
+  service.off('gambleResults')
   service.off('awardBonusPoints')
 }

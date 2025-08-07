@@ -1,8 +1,9 @@
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DrawPT.Api.Hubs;
-using DrawPT.Common.ServiceBus;
+using DrawPT.Common.Interfaces;
 using DrawPT.Common.Models.Game;
+using DrawPT.Common.ServiceBus;
 using Microsoft.AspNetCore.SignalR;
 
 namespace DrawPT.Api.Services
@@ -15,6 +16,7 @@ namespace DrawPT.Api.Services
         private readonly ServiceBusClient _sbClient;
         private readonly IHubContext<GameHub, IGameClient> _hubContext;
         private readonly ILogger<GameEngineProxyService> _logger;
+        private readonly ICacheService _cacheService;
         private ServiceBusProcessor? _broadcastProcessor;
         private ServiceBusProcessor? _interactionProcessor;
         private readonly TtsService _ttsService;
@@ -22,9 +24,11 @@ namespace DrawPT.Api.Services
         public GameEngineProxyService(
             TtsService ttsService,
             ServiceBusClient sbClient,
+            ICacheService cacheService,
             IHubContext<GameHub, IGameClient> hubContext,
             ILogger<GameEngineProxyService> logger)
         {
+            _cacheService = cacheService;
             _ttsService = ttsService;
             _sbClient = sbClient;
             _hubContext = hubContext;
@@ -77,6 +81,9 @@ namespace DrawPT.Api.Services
                 string roomCode = root.GetProperty("RoomCode").GetString()!;
                 JsonElement payload = root.GetProperty("Payload");
 
+                var gameState = await _cacheService.GetGameState(roomCode);
+                var gameConfig = gameState?.GameConfiguration;
+
                 var client = _hubContext.Clients.Client(connectionId);
                 if (client == null)
                 {
@@ -86,29 +93,57 @@ namespace DrawPT.Api.Services
                 {
                     switch (action)
                     {
-                        case GameEngineRequests.Theme:
+                        case GameEngineRequests.Prompt:
                             {
-                                _logger.LogError($"Processing theme selection for room {roomCode} with connection {connectionId}");
-                                List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
-                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                                await _hubContext.Clients.GroupExcept(roomCode, connectionId).ThemeSelection(themes);
-                                // Server-side timeout wrapper for AskTheme
-                                var askTask = client.AskTheme(themes, ctsTheme.Token);
-                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(30)));
+                                var timeout = gameConfig?.PromptTimeout ?? 90;
+                                using CancellationTokenSource ctsImage = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+                                var askTask = client.AskPrompt(ctsImage.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
                                 if (completed == askTask)
                                     response = askTask.Result;
                                 else
                                     response = string.Empty;
                                 break;
                             }
+                        case GameEngineRequests.Theme:
+                            {
+                                List<string> themes = payload.Deserialize<List<string>>() ?? new List<string>();
+                                var timeout = gameConfig?.ThemeTimeout ?? 30;
+                                using CancellationTokenSource ctsTheme = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+                                await _hubContext.Clients.GroupExcept(roomCode, connectionId).ThemeSelection(themes);
+                                // Server-side timeout wrapper for AskTheme
+                                var askTask = client.AskTheme(themes, ctsTheme.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
+                                if (completed == askTask)
+                                    response = askTask.Result;
+                                else
+                                    response = string.Empty;
+                                break;
+                            }
+                        case GameEngineRequests.PlayerGamble:
+                            {
+                                GameQuestion question = payload.Deserialize<GameQuestion>()!;
+                                var timeout = gameConfig?.QuestionTimeout ?? 40;
+                                using CancellationTokenSource ctsImage = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+                                var askTask = client.AskGamble(question, ctsImage.Token);
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
+                                if (completed == askTask)
+                                {
+                                    var answerBase = askTask.Result;
+                                    response = JsonSerializer.Serialize(answerBase);
+                                }
+                                else
+                                    response = string.Empty;
+                                break;
+                            }
                         case GameEngineRequests.Question:
                             {
-                                _logger.LogError($"Processing question for room {roomCode} with connection {connectionId}");
                                 GameQuestion question = payload.Deserialize<GameQuestion>()!;
-                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(40));
+                                var timeout = gameConfig?.QuestionTimeout ?? 40;
+                                using CancellationTokenSource ctsQuestion = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
                                 // Server-side timeout wrapper for AskQuestion
                                 var askTask = client.AskQuestion(question, ctsQuestion.Token);
-                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(40)));
+                                var completed = await Task.WhenAny(askTask, Task.Delay(TimeSpan.FromSeconds(timeout)));
                                 if (completed == askTask)
                                 {
                                     var answerBase = askTask.Result;
@@ -169,7 +204,6 @@ namespace DrawPT.Api.Services
                         await _ttsService.GenerateAudio(accounerMsg, _hubContext.Clients.Group(roomCode));
                         break;
 
-
                     case GameEngineQueue.GameStartedAction:
                         var gameState = payload.Deserialize<GameState>();
                         await _hubContext.Clients.Group(roomCode).GameStarted(gameState!);
@@ -202,15 +236,20 @@ namespace DrawPT.Api.Services
                         var roundResults = payload.Deserialize<RoundResults>();
                         await _hubContext.Clients.Group(roomCode).RoundResults(roundResults!);
                         break;
+                    case GameEngineQueue.GambleResultsAction:
+                        var gambleResults = payload.Deserialize<GameGamble>();
+                        await _hubContext.Clients.Group(roomCode).GambleResults(gambleResults!);
+                        break;
                     case GameEngineQueue.AssessingAnswersAction:
                         await _hubContext.Clients.Group(roomCode).WriteMessage("Assessing answers.");
                         break;
                     case GameEngineQueue.PlayerAnsweredAction:
                         var playerAnswer = payload.Deserialize<PlayerAnswer>();
-                        if (playerAnswer is not null)
-                            await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer);
-                        else
-                            _logger.LogWarning($"Received null PlayerAnswer in room: {roomCode}");
+                        await _hubContext.Clients.Group(roomCode).PlayerAnswered(playerAnswer!);
+                        break;
+                    case GameEngineQueue.PlayerGambledAction:
+                        var playerGamble = payload.Deserialize<GameGamble>();
+                        await _hubContext.Clients.Group(roomCode).PlayerGambled(playerGamble!);
                         break;
                     default:
                         _logger.LogWarning($"Unhandled GameEngine action: {action}");

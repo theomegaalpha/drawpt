@@ -25,6 +25,11 @@ namespace DrawPT.Common.Interfaces.Game
         int QuestionTimeout { get; set; }
 
         /// <summary>
+        /// Gets or sets the time limit for each prompt in seconds
+        /// </summary>
+        int PromptTimeout { get; set; }
+
+        /// <summary>
         /// Gets or sets the time limit for theme selection in seconds
         /// </summary>
         int ThemeTimeout { get; set; }
@@ -35,8 +40,8 @@ namespace DrawPT.Common.Interfaces.Game
         int TransitionDelay { get; set; }
 
         /// <summary>
-        /// Whether gambling is enabled in this game
+        /// Whether player prompt mode or AI prompt mode is enabled in this game
         /// </summary>
-        bool GamblingEnabled { get; set; }
+        bool PlayerPromptMode { get; set; }
     }
 }

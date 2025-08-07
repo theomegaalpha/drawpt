@@ -16,11 +16,6 @@ namespace DrawPT.Common.Models.Game
         public int RoundNumber { get; set; }
 
         /// <summary>
-        /// The theme for this round
-        /// </summary>
-        public string Theme { get; set; } = string.Empty;
-
-        /// <summary>
         /// The question for this round
         /// </summary>
         public GameQuestion Question { get; set; } = null!;
