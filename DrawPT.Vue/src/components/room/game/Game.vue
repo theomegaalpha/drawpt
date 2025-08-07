@@ -47,9 +47,9 @@ const themeTimeoutRef = ref<NodeJS.Timeout>()
 const promptTimeoutRef = ref<NodeJS.Timeout>()
 
 // --- Constants for timeouts (consider moving to a config or gameStateStore if they vary) ---
-const timeoutPerQuestion = computed(() => gameStateStore.gameConfiguration.QuestionTimeout || 40000)
-const timeoutForTheme = computed(() => gameStateStore.gameConfiguration.ThemeTimeout || 30000)
-const timeoutForPrompt = computed(() => gameStateStore.gameConfiguration.PromptTimeout || 90000)
+const timeoutPerQuestion = computed(() => gameStateStore.gameConfiguration.questionTimeout || 40000)
+const timeoutForTheme = computed(() => gameStateStore.gameConfiguration.themeTimeout || 30000)
+const timeoutForPrompt = computed(() => gameStateStore.gameConfiguration.promptTimeout || 90000)
 
 // --- Method to handle theme selection from the SelectTheme component ---
 function handleThemeSelectedFromUI(newTheme: string) {

@@ -12,7 +12,8 @@ import type {
   GameState,
   RoundResults,
   GameResults,
-  GameGamble
+  GameGamble,
+  IGameConfiguration
 } from '@/models/gameModels'
 
 // Helper to easily access stores within handlers
@@ -44,6 +45,10 @@ export function registerBaseGameHubEvents() {
     stores.notificationStore.addGameNotification('Welcome to the party!')
     stores.playerStore.updateConnectionId(connectionId)
     stores.gameStateStore.initializeGameState(gameState)
+  })
+
+  service.on('broadcastGameConfigurationChange', (config: IGameConfiguration) => {
+    stores.gameStateStore.changeGameConfiguration(config)
   })
 
   service.on('gameStarted', async (gameState: GameState) => {

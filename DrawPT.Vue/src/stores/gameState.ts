@@ -15,13 +15,13 @@ import type { Player } from '@/models/player'
 
 // default game configuration
 const defaultGameConfig: IGameConfiguration = {
-  MaxPlayers: 8,
-  TotalRounds: 6,
-  QuestionTimeout: 40,
-  PromptTimeout: 120,
-  ThemeTimeout: 30,
-  TransitionDelay: 50,
-  PlayerPromptMode: false
+  maxPlayers: 8,
+  totalRounds: 6,
+  questionTimeout: 40,
+  promptTimeout: 120,
+  themeTimeout: 30,
+  transitionDelay: 50,
+  playerPromptMode: false
 }
 
 export const useGameStateStore = defineStore('gameState', {
@@ -79,7 +79,7 @@ export const useGameStateStore = defineStore('gameState', {
       state.currentStatus === GameStatus.AskingQuestion && state.currentImageUrl !== '',
     gameEnded: (state) =>
       state.currentStatus === GameStatus.Completed || state.currentStatus === GameStatus.Abandoned,
-    playerPromptMode: (state) => state.gameConfiguration.PlayerPromptMode,
+    playerPromptMode: (state) => state.gameConfiguration.playerPromptMode,
     lastRoundResults: (state) => {
       return state.roundResults[state.roundResults.length - 1]
     }
@@ -105,8 +105,12 @@ export const useGameStateStore = defineStore('gameState', {
       this.successfullyJoined = true
     },
 
+    changeGameConfiguration(config: IGameConfiguration) {
+      Object.assign(this.gameConfiguration, config)
+    },
+
     setPlayerPromptMode(mode: boolean) {
-      this.gameConfiguration.PlayerPromptMode = mode
+      this.gameConfiguration.playerPromptMode = mode
     },
 
     updateRoomCode(code: string) {
