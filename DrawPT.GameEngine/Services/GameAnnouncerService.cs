@@ -6,7 +6,6 @@ using DrawPT.GameEngine.Interfaces;
 using Newtonsoft.Json;
 using OpenAI;
 using OpenAI.Chat;
-using OpenTelemetry.Trace;
 
 namespace DrawPT.GameEngine.Services
 {
