@@ -97,7 +97,7 @@ public class DefaultGameSession : IGameSession
             {
                 RoundNumber = i + 1,
                 Question = question,
-                Answers = assessedAnswers
+                Answers = assessedAnswers.OrderByDescending(a => a.Score + a.BonusPoints).ToList()
             };
             allRoundResults.Add(roundResults);
 

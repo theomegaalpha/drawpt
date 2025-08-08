@@ -53,7 +53,7 @@ onMounted(() => {
         :answer="answer"
         :username="players.find((p) => p.connectionId === answer.connectionId)?.username"
         :isYou="isYou(answer.connectionId)"
-        :key="index"
+        :key="answer.connectionId ?? index"
       />
     </div>
   </div>

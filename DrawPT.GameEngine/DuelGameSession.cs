@@ -124,7 +124,7 @@ public class DuelGameSession : IGameSession
                 {
                     RoundNumber = roundNumber,
                     Question = question,
-                    Answers = assessedAnswers
+                    Answers = assessedAnswers.OrderByDescending(a => a.Score + a.BonusPoints).ToList()
                 };
                 allRoundResults.Add(roundResults);
 
