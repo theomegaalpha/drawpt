@@ -81,10 +81,12 @@ The response must always be a JSON array, even when evaluating a single contesta
                 var options = new ChatCompletionOptions
                 {
                     Temperature = 1,
-
                     TopP = 1,
                     FrequencyPenalty = 0,
-                    PresencePenalty = 0
+                    PresencePenalty = 0,
+#pragma warning disable
+                    ReasoningEffortLevel = ChatReasoningEffortLevel.Low
+#pragma warning enable
                 };
 
                 ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);

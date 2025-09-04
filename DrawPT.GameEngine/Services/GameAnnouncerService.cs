@@ -38,7 +38,10 @@ namespace DrawPT.GameEngine.Services
                     Temperature = 1,
                     TopP = 1,
                     FrequencyPenalty = 0,
-                    PresencePenalty = 0
+                    PresencePenalty = 0,
+#pragma warning disable
+                    ReasoningEffortLevel = ChatReasoningEffortLevel.Low
+#pragma warning enable
                 };
                 ChatCompletion completion = await _chatClient.CompleteChatAsync(messages, options);
                 if (completion != null)
