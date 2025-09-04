@@ -16,7 +16,7 @@ import type { Player } from '@/models/player'
 // default game configuration
 const defaultGameConfig: IGameConfiguration = {
   maxPlayers: 8,
-  totalRounds: 6,
+  totalRounds: 3,
   questionTimeout: 40,
   promptTimeout: 120,
   themeTimeout: 30,
